@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-10T14:14:19+00:00",
+ "generated_at": "2026-09-10T14:50:46+00:00",
  "coverage": {
   "symbol": "NVDAx",
   "start": "2026-03-01T00:00:00+00:00",
@@ -1199,6 +1199,69 @@
    "regime": "WEEKNIGHT"
   }
  ],
+ "events": [
+  {
+   "ts": 1789581600,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1793210400,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1796842800,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1801076400,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1805306400,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1808935200,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1812564000,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1816797600,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1821031200,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1824660000,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  },
+  {
+   "ts": 1828292400,
+   "label": "FOMC rate decision",
+   "importance": "high"
+  }
+ ],
+ "calendar_stats": {
+  "windows": 134,
+  "events": 22,
+  "events_considered": 22,
+  "overlaps": 0
+ },
  "demo": {
   "exposure_usd": 250000,
   "symbol": "NVDAx",

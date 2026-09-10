@@ -130,6 +130,16 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   color:var(--muted)}
 .expo-key span{display:inline-flex;align-items:center;gap:7px}
 
+.cal-strip{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.cal-item dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+.cal-item dd{margin:0;font-size:14px;line-height:1.5}
+.cal-item dd strong{font-weight:600}
+.cal-item .when{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+  display:block;margin-top:3px}
+.cal-none{color:var(--muted)}
+
 .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:20px 28px;padding-bottom:20px;margin-bottom:20px;
   border-bottom:1px solid var(--rule)}
@@ -288,6 +298,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   <div class="panel">
     <div class="expo" id="expo-bar"></div>
     <div class="expo-key" id="expo-key"></div>
+    <div class="cal-strip" id="cal-strip"></div>
   </div>
 </section>
 
@@ -689,6 +700,55 @@ function drawExposure(){
     D.demo.horizon_h + " hours. " + blackoutHours + " of those hours have no reference price.";
 }
 
+/* ---- scheduled events -------------------------------------------------- */
+/* Computed against the live clock rather than baked at build time, so the
+   window described is the one the trader is actually facing. */
+function drawCalendar(){
+  var strip = document.getElementById("cal-strip");
+  var stats = D.calendar_stats || {};
+  var events = D.events || [];
+  var now = Math.floor(Date.now()/1000);
+
+  var window_ = null;
+  for (var i = 0; i < D.blackout_windows.length; i++){
+    if (D.blackout_windows[i].end > now){ window_ = D.blackout_windows[i]; break; }
+  }
+  if (!window_){ strip.innerHTML = ""; return; }
+
+  var inside = events.filter(function(e){
+    return e.ts >= window_.start && e.ts < window_.end;
+  });
+  var after = events.filter(function(e){
+    return e.ts >= window_.end && e.ts < window_.end + 72*3600;
+  });
+
+  function when(ts){
+    return new Date(ts*1000).toUTCString().slice(0, 22) + " UTC";
+  }
+  function listOr(items, empty){
+    if (!items.length) return '<span class="cal-none">' + empty + '</span>';
+    return items.map(function(e){
+      return '<strong>' + e.label + '</strong><span class="when">' + when(e.ts) + '</span>';
+    }).join("<br>");
+  }
+
+  var claim = (stats.windows && stats.events_considered)
+    ? "Across " + stats.windows + " weekend blackouts, " +
+      (stats.overlaps === 0 ? "none of the " + stats.events_considered +
+        " scheduled rate decisions has ever fallen inside one."
+       : stats.overlaps + " scheduled events fell inside one.") +
+      " Weekend risk is unscheduled risk."
+    : "No event calendar loaded.";
+
+  strip.innerHTML =
+    '<div class="cal-item"><dt>Scheduled inside the window</dt><dd>' +
+      listOr(inside, "Nothing.") + '</dd></div>' +
+    '<div class="cal-item"><dt>Waiting at the reopen</dt><dd>' +
+      listOr(after, "Nothing in the following 72 hours.") + '</dd></div>' +
+    '<div class="cal-item"><dt>Why that is normal</dt><dd class="cal-none">' +
+      claim + '</dd></div>';
+}
+
 /* ---- hedges ----------------------------------------------------------- */
 function drawHedges(){
   document.getElementById("hedge-body").innerHTML = D.hedges.map(function(h){
@@ -749,7 +809,8 @@ function initAsk(){
       var context = {
         coverage: D.coverage, summary: D.summary, verdict: D.verdict,
         dispersion: D.dispersion, drift: D.drift, hedges: D.hedges, demo: D.demo,
-        analogues: D.analogue_features
+        analogues: D.analogue_features,
+        events: D.events, calendar_stats: D.calendar_stats
       };
       var prompt = [
         "You are Blackout Desk, a closure-window risk desk for tokenized US stocks.",
@@ -790,6 +851,7 @@ drawEvidence();
 drawDrift();
 drawAnalogues();
 drawExposure();
+drawCalendar();
 drawHedges();
 drawFooter();
 tick();

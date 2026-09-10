@@ -31,6 +31,7 @@ REQUIRED_KEYS = {
     "generated_at", "coverage", "summary", "regime_shares", "dispersion", "drift",
     "terminal_gaps", "hedges", "blackout_windows", "regime_runs", "demo", "verdict",
     "analogue_features", "analogue_feature_names", "analogue_defaults",
+    "events", "calendar_stats",
 }
 
 
@@ -128,6 +129,22 @@ def test_sample_size_travels_with_every_distribution(payload):
         assert row["n_windows"] >= 5, "a bucket thin enough to mislead is being shipped"
         assert row["n_windows"] <= row["n"]
     assert payload["summary"]["n_windows"] == payload["verdict"]["n_weekends"]
+
+
+def test_shipped_events_are_all_still_ahead(payload):
+    """Past events on a forward-looking panel would be noise at best."""
+    generated = pd.Timestamp(payload["generated_at"]).timestamp()
+    for e in payload["events"]:
+        assert e["ts"] > generated, f"{e['label']} had already happened at build time"
+
+
+def test_the_unscheduled_risk_claim_is_backed_by_the_shipped_numbers(payload):
+    """The page asserts weekend risk is unscheduled. These are its receipts."""
+    stats = payload["calendar_stats"]
+    assert stats["windows"] > 50, "too few windows to support the claim"
+    assert stats["events_considered"] > 0, "claim rendered with no events behind it"
+    assert stats["overlaps"] == 0, \
+        "a scheduled event now falls inside a blackout - the page's copy is wrong"
 
 
 def test_analogue_rows_expose_outcomes_only_alongside_features(payload):

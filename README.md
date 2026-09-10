@@ -25,7 +25,7 @@ costs. See [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest -q                     # 61 tests
+python -m pytest -q                     # 74 tests
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 ```
@@ -36,6 +36,7 @@ Claude Code web sandbox):
 ```bash
 python scripts/probe_sources.py         # rToken hourly, rate-limited, resumable
 python scripts/fetch_reference.py       # native equity, futures, crypto proxies
+python scripts/fetch_events.py          # FOMC decisions from federalreserve.gov
 ```
 
 **Deadline: 21 September 2026 (UTC+8).**

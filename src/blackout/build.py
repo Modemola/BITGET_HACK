@@ -23,6 +23,7 @@ import pandas as pd
 
 from .analogues import FEATURES, build_feature_table
 from .basis import add_premium, decompose_closure, hourly_frame
+from .calendar_events import historical_overlap, load_events
 from .clock import ClosureClock, Regime
 from .distributions import drift_by_elapsed_hour, summarise, terminal_gap, window_paths
 from .exposure import Position, horizon_breakdown, unhedgeable_exposure
@@ -129,6 +130,12 @@ def build() -> dict:
         and w["start"] >= d.index.min() and w["end"] <= d.index.max()
     ])
 
+    # Scheduled events. Only what is still ahead ships, since the page matches
+    # them against its own live clock rather than a frozen build-time answer.
+    events = load_events()
+    upcoming_events = events[events["ts_utc"] > now] if not events.empty else events
+    calendar_stats = historical_overlap(clock, events)
+
     horizons = {1: "1h", 6: "6h", 12: "12h"}
     verdict = {"n_weekends": int(paths["window_start"].nunique())}
     for hours, label in horizons.items():
@@ -176,6 +183,10 @@ def build() -> dict:
         "hedges": _records(menu) if not menu.empty else [],
         "blackout_windows": windows,
         "regime_runs": runs,
+        "events": [{"ts": int(r["ts_utc"].timestamp()), "label": r["label"],
+                    "importance": r["importance"]}
+                   for _, r in upcoming_events.iterrows()],
+        "calendar_stats": calendar_stats,
         "demo": {
             "exposure_usd": DEMO_EXPOSURE,
             "symbol": DEMO_SYMBOL,
@@ -205,6 +216,10 @@ def main() -> int:
     print(f"  timeline : {len(payload['regime_runs'])} regime runs over 21 days")
     print(f"  analogues: {len(payload['analogue_features'])} windows, "
           f"features {', '.join(payload['analogue_feature_names'])}")
+    cs = payload["calendar_stats"]
+    print(f"  events   : {len(payload['events'])} ahead; "
+          f"{cs['overlaps']} of {cs['events_considered']} ever fell inside "
+          f"{cs['windows']} blackouts")
     return 0
 
 
