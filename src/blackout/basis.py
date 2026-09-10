@@ -74,7 +74,11 @@ def decompose_closure(df: pd.DataFrame, entries: pd.DatetimeIndex, token: str,
     d_fair = df["fair"].reindex(later).values / df.loc[entries, "fair"].values - 1
     keep = ~(np.isnan(d_token) | np.isnan(d_fair))
 
-    from_token = float((-sign[keep] * d_token[keep]).mean())
+    # Fading the premium means shorting a rich token and buying a cheap one, so
+    # the trade's return is the token move against the sign of the premium.
+    trade = -sign[keep] * d_token[keep]
+
+    from_token = float(trade.mean())
     from_fair = float((sign[keep] * d_fair[keep]).mean())
     total = from_token + from_fair
     return {
@@ -82,7 +86,8 @@ def decompose_closure(df: pd.DataFrame, entries: pd.DatetimeIndex, token: str,
         "from_token": from_token,
         "from_fair": from_fair,
         "token_share": from_token / total if total else float("nan"),
-        "token_leg_pnl": float((-sign[keep] * d_token[keep]).mean()),
+        "token_leg_pnl": from_token,
+        "hit_rate": float((trade > 0).mean()),
     }
 
 

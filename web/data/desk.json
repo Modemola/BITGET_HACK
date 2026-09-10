@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-10T13:47:11+00:00",
+ "generated_at": "2026-09-10T14:14:19+00:00",
  "coverage": {
   "symbol": "NVDAx",
   "start": "2026-03-01T00:00:00+00:00",
@@ -1019,11 +1019,6 @@
  ],
  "regime_runs": [
   {
-   "start": 1789045200,
-   "end": 1789048800,
-   "regime": "WEEKNIGHT"
-  },
-  {
    "start": 1789048800,
    "end": 1789070400,
    "regime": "US_CASH"
@@ -1200,7 +1195,7 @@
   },
   {
    "start": 1790798400,
-   "end": 1790859600,
+   "end": 1790863200,
    "regime": "WEEKNIGHT"
   }
  ],
@@ -1210,11 +1205,14 @@
   "horizon_h": 72
  },
  "verdict": {
-  "token_share_1h": 0.06,
-  "token_share_6h": 0.27,
-  "token_share_12h": 0.13,
-  "hit_rate": 0.5,
   "n_weekends": 27,
-  "net_at_10bp": -9e-05
+  "token_share_1h": 0.06372968180795266,
+  "token_pnl_1h": 0.00023417754732186276,
+  "token_share_6h": 0.26972306547485536,
+  "token_pnl_6h": 0.001527967934007672,
+  "token_share_12h": 0.126907408744097,
+  "token_pnl_12h": 0.000908530994188717,
+  "hit_rate": 0.48148148148148145,
+  "net_at_10bp": -9.146900581128304e-05
  }
 }

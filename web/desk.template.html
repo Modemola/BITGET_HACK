@@ -11,7 +11,7 @@
   --accent:#0F5E6B; --accent-soft:#DCEDF0;
   --blackout:#1C2230; --blackout-soft:#DDE1E8;
   --risk:#B4453A; --risk-soft:#F6E4E2;
-  --ok:#2F6B4F;
+  --ok:#2F6B4F; --ok-soft:#DFEDE6;
   --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -16px rgba(20,24,31,.25);
   --display:"Newsreader",Georgia,"Times New Roman",serif;
   --body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -25,7 +25,7 @@
     --accent:#4FB3C4; --accent-soft:#14313A;
     --blackout:#070A0F; --blackout-soft:#232B37;
     --risk:#E0796C; --risk-soft:#3A211E;
-    --ok:#6FBF95;
+    --ok:#6FBF95; --ok-soft:#163023;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
   }
 }
@@ -36,7 +36,7 @@
   --accent:#4FB3C4; --accent-soft:#14313A;
   --blackout:#070A0F; --blackout-soft:#232B37;
   --risk:#E0796C; --risk-soft:#3A211E;
-  --ok:#6FBF95;
+  --ok:#6FBF95; --ok-soft:#163023;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
 }
 
@@ -118,7 +118,7 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
 .pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
   font-family:var(--mono);font-weight:500;white-space:nowrap}
 .pill.bad{background:var(--risk-soft);color:var(--risk)}
-.pill.good{background:var(--accent-soft);color:var(--accent)}
+.pill.good{background:var(--ok-soft);color:var(--ok)}
 .note{font-size:12.5px;color:var(--faint);margin-top:14px;max-width:70ch}
 
 .expo{display:flex;height:38px;border-radius:6px;overflow:hidden;
@@ -339,9 +339,15 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 "use strict";
 var D = JSON.parse(document.getElementById("desk-data").textContent);
 
-function pct(v, d){ return (v*100).toFixed(d === undefined ? 2 : d) + "%"; }
-function sgn(v, d){ return (v >= 0 ? "+" : "") + (v*100).toFixed(d === undefined ? 2 : d) + "%"; }
-function usd(v){ return "$" + Math.round(v).toLocaleString("en-US"); }
+/* A value the build could not compute arrives as null (see _json_safe in
+   blackout/build.py). Every formatter renders that as an em dash rather than
+   throwing, because one bad cell must not take a whole table down with it. */
+function has(v){ return typeof v === "number" && isFinite(v); }
+function pct(v, d){ return has(v) ? (v*100).toFixed(d === undefined ? 2 : d) + "%" : "—"; }
+function sgn(v, d){ return has(v)
+  ? (v >= 0 ? "+" : "") + (v*100).toFixed(d === undefined ? 2 : d) + "%" : "—"; }
+function usd(v){ return has(v) ? "$" + Math.round(v).toLocaleString("en-US") : "—"; }
+function fix(v, d){ return has(v) ? v.toFixed(d) : "—"; }
 function isBlackout(regime){ return regime.indexOf("BLACKOUT") >= 0; }
 
 var FILL = {
@@ -602,12 +608,17 @@ function drawAnalogues(){
         '<td class="n">' + pct(m.max_abs_drift) + '</td>' +
         '<td><span class="match-bar" style="width:' + strength + 'px"></span>' +
           '<span class="num" style="color:var(--faint);font-size:11.5px;margin-left:8px">' +
-          m.distance.toFixed(2) + '</span></td>' +
+          fix(m.distance, 2) + '</span></td>' +
         '</tr>';
     }).join("");
 
-    var ends = matches.map(function(m){ return m.terminal_drift; });
-    var worst = matches.map(function(m){ return m.max_abs_drift; });
+    var ends = matches.map(function(m){ return m.terminal_drift; }).filter(has);
+    var worst = matches.map(function(m){ return m.max_abs_drift; }).filter(has);
+    if (!ends.length){
+      document.getElementById("an-summary").innerHTML =
+        '<div><dt>No comparable windows</dt><dd>—</dd></div>';
+      return;
+    }
     var lo = Math.min.apply(null, ends), hi = Math.max.apply(null, ends);
     var maxExc = Math.max.apply(null, worst);
     var beyond = ends.filter(function(v){ return Math.abs(v) > 0.01; }).length;
@@ -683,8 +694,8 @@ function drawHedges(){
   document.getElementById("hedge-body").innerHTML = D.hedges.map(function(h){
     return '<tr>' +
       '<td class="n" style="font-weight:500">' + h.instrument + '</td>' +
-      '<td class="n">' + h.correlation.toFixed(2) + '</td>' +
-      '<td class="n">' + h.hedge_ratio.toFixed(2) + '</td>' +
+      '<td class="n">' + fix(h.correlation, 2) + '</td>' +
+      '<td class="n">' + fix(h.hedge_ratio, 2) + '</td>' +
       '<td class="n">' + usd(h.notional_usd) + '</td>' +
       '<td class="n">' + usd(h.cost_usd) + '</td>' +
       '<td><span class="pill ' + (h.stable ? "good" : "bad") + '">' +

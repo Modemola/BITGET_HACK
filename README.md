@@ -24,8 +24,8 @@ costs. See [`docs/FINDINGS.md`](docs/FINDINGS.md).
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
-python -m pytest tests/ -q              # 41 tests
+pip install -e ".[dev]"
+python -m pytest -q                     # 61 tests
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 ```
