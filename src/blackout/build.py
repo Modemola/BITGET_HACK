@@ -20,6 +20,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from .analogues import FEATURES, build_feature_table
 from .basis import add_premium, hourly_frame
 from .clock import ClosureClock, Regime
 from .distributions import drift_by_elapsed_hour, summarise, terminal_gap, window_paths
@@ -59,6 +60,14 @@ def build() -> dict:
     # Buckets carried by a single window are the one 73h Good Friday outlier;
     # showing them beside 27-window buckets would misrepresent the sample.
     drift = drift[drift["n_windows"] >= 5]
+
+    # Analogue features live on a frame carrying the premium AND the crypto
+    # proxy, so retrieval can condition on risk appetite going into the window.
+    feat_frame = hourly_frame({"x": series["NVDAx"], "nvda": series["NVDA"],
+                               "nq": series["NQ_F"], "btc": series["BTC-USD"]}, clock)
+    feat_frame = add_premium(feat_frame, token="x", native="nvda")
+    feat_frame = feat_frame[feat_frame.index >= ANALYSIS_START]
+    features = build_feature_table(feat_frame, clock, token="x", crypto="btc")
 
     hedge_df = hourly_frame({k: series[k] for k in
                              ("NVDAx", "TSLAx", "BTC-USD", "ETH-USD")}, clock)
@@ -117,6 +126,14 @@ def build() -> dict:
         "dispersion": dispersion,
         "drift": _records(drift),
         "terminal_gaps": _records(term[["window_start", "drift"]]),
+        # The whole feature table ships, so the page runs retrieval client-side
+        # and a trader can move the query rather than read a frozen answer.
+        "analogue_features": _records(features),
+        "analogue_feature_names": list(FEATURES),
+        "analogue_defaults": {
+            f: (float(features[f].median()) if f in features.columns else None)
+            for f in FEATURES
+        },
         "hedges": _records(menu) if not menu.empty else [],
         "blackout_windows": windows,
         "regime_runs": runs,
@@ -146,6 +163,8 @@ def main() -> int:
           f"{len(payload['blackout_windows'])} upcoming in calendar")
     print(f"  hedges   : {len(payload['hedges'])} instruments priced")
     print(f"  timeline : {len(payload['regime_runs'])} regime runs over 21 days")
+    print(f"  analogues: {len(payload['analogue_features'])} windows, "
+          f"features {', '.join(payload['analogue_feature_names'])}")
     return 0
 
 
