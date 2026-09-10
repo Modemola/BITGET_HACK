@@ -56,7 +56,7 @@ because the calendar work was done before any data work.
 |---|---|
 | Closure clock (regime + τ engine) | Built, 8 tests passing |
 | Blackout statistics | Built, run above |
-| Data source probe | Written, **cannot run in this sandbox** (see below) |
+| Data source probe | Rewritten with pagination; first run gave a false negative |
 | Synthetic reference price | Not started — blocked on data |
 | Band model / backtest | Not started — blocked on data |
 
@@ -77,6 +77,30 @@ python3 scripts/probe_sources.py     # exit 0 = Blackout Basis is GO
 
 If no source clears the bar, the fallback is Idea 3 (the Friday 15:45 closure
 risk desk), which reasons about closure risk qualitatively and needs no backtest.
+
+### First probe run, 2026-09-10 — 7x24 property confirmed
+
+The first run reported NO-GO. That verdict was wrong: the probe fetched a single
+1000-bar page (the API maximum), then failed the source for returning exactly
+what was asked of it. 1000 hourly bars is 41.7 days, which is the whole of the
+reported "43d span".
+
+What the run did establish, and it is the finding that matters:
+
+- **AAPLx returned 27% weekend bars.** Saturdays and Sundays are 28.6% of
+  wall-clock time, so the series is continuously quoted through weekends with
+  essentially no gaps. This is the property the strategy depends on and the one
+  most equity data sources fail outright.
+- AAPLx pool liquidity was **$305,550** — thin, and a live constraint on
+  strategy capacity rather than on validity.
+- The Bitget failure was a DNS resolution error on the operator's machine, not
+  a statement about data availability.
+- The Stooq failure was a malformed URL in the probe.
+
+The probe now pages backwards with `before_timestamp`, scans every xStocks
+symbol rather than stopping at the first hit, reports liquidity and depth per
+symbol, and distinguishes "hit the page cap" from "history exhausted" so that a
+capped read can never again be mistaken for missing data.
 
 ## Layout
 
