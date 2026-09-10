@@ -29,7 +29,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 41 tests
+python -m pytest -q                     # 61 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -78,6 +78,19 @@ web/
 - **The page must work without the LLM.** `claude.use("sample")` returns `null`
   for a signed-out viewer, so every analytic renders statically and the language
   layer is an enhancement only.
+- **Never inline a figure into the page or the payload by hand.** `verdict` was
+  once transcribed literals; a data refresh would have left the product's
+  central claim contradicting the numbers printed beside it. `test_build.py`
+  now re-derives those four numbers and fails if they drift.
+- **The payload must never carry NaN.** Python writes a bare `NaN` token, which
+  `JSON.parse` rejects, which renders the page *entirely blank* with no error.
+  `build._json_safe` maps non-finite values to null and both writers pass
+  `allow_nan=False`. The page's formatters render null as an em dash.
+- **Retrieval exists twice**, in `analogues.py` and again in JS on the page.
+  `test_js_parity.py` extracts the real functions from the template and runs
+  them under node against the shipped payload, requiring identical ordering and
+  distances. Don't delete it; a drifted copy would not error, it would quietly
+  show the wrong five weekends.
 
 ## Traps already hit — don't repeat them
 
@@ -89,8 +102,12 @@ web/
   under load. A single unpaginated page reads as "only 41 days of history exist"
   and an unspaced burst of searches fails every symbol. `probe_sources.py` has a
   global 3.5s limiter, backoff, and a resumable on-disk cache.
-- **Windows console is cp1252.** Em-dashes and arrows in printed strings render
-  as `?`. Keep script output ASCII; the HTML page is UTF-8 and unaffected.
+- **Windows defaults to cp1252, and it bites in two places.** Printed script
+  output mangles em-dashes and arrows, so keep script output ASCII (the HTML
+  page is UTF-8 and unaffected). And `subprocess.run(..., text=True)` decodes
+  with the *locale* codec, so any test shelling out to node must pass
+  `encoding="utf-8"` or non-ASCII output comes back corrupted and comparisons
+  fail for reasons that look nothing like encoding.
 - **The Claude Code web sandbox cannot reach any market data host** (403 at the
   proxy). Only GitHub and package registries resolve. Data is committed to the
   repo deliberately — that is how it travels between machines.

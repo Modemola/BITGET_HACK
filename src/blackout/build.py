@@ -15,13 +15,14 @@ Run: python -m blackout.build
 from __future__ import annotations
 
 import json
+import math
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
 
 from .analogues import FEATURES, build_feature_table
-from .basis import add_premium, hourly_frame
+from .basis import add_premium, decompose_closure, hourly_frame
 from .clock import ClosureClock, Regime
 from .distributions import drift_by_elapsed_hour, summarise, terminal_gap, window_paths
 from .exposure import Position, horizon_breakdown, unhedgeable_exposure
@@ -44,6 +45,24 @@ def load(symbol: str) -> pd.Series:
 
 def _records(df: pd.DataFrame) -> list[dict]:
     return json.loads(df.to_json(orient="records", date_format="iso"))
+
+
+def _json_safe(value):
+    """Replace NaN and infinities with null, recursively.
+
+    Python emits bare `NaN` and `Infinity` tokens, which are not valid JSON and
+    which `JSON.parse` rejects outright. Since the payload is inlined into the
+    page, one NaN anywhere renders the entire page blank -- silently, with no
+    error a viewer could act on. A legitimately absent value (a hedge quoted on
+    too little history, say) becomes null, which the page can branch on.
+    """
+    if isinstance(value, dict):
+        return {k: _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    return value
 
 
 def build() -> dict:
@@ -100,6 +119,26 @@ def build() -> dict:
 
     term = terminal_gap(paths)
 
+    # The last bar of each blackout: where a trader fading the premium would
+    # have entered, and the moment the decomposition has to be measured from.
+    closes = pd.DatetimeIndex([
+        d[(d.index >= w["start"]) & (d.index < w["end"])].index.max()
+        for _, w in clock.blackouts().iterrows()
+        if len(d[(d.index >= w["start"]) & (d.index < w["end"])]) >= 20
+        and w["regime"] == Regime.WEEKEND_BLACKOUT.value
+        and w["start"] >= d.index.min() and w["end"] <= d.index.max()
+    ])
+
+    horizons = {1: "1h", 6: "6h", 12: "12h"}
+    verdict = {"n_weekends": int(paths["window_start"].nunique())}
+    for hours, label in horizons.items():
+        stats = decompose_closure(d, closes, token="x", horizon_h=hours)
+        verdict[f"token_share_{label}"] = stats["token_share"]
+        verdict[f"token_pnl_{label}"] = stats["token_leg_pnl"]
+        if hours == 12:
+            verdict["hit_rate"] = stats["hit_rate"]
+            verdict["net_at_10bp"] = stats["token_leg_pnl"] - 0.0010
+
     # Run-length encoded regime schedule so the page can draw a live timeline
     # without reconstructing exchange sessions in JavaScript.
     horizon = pd.date_range(now.floor("h"), periods=24 * 21, freq="h", tz="UTC")
@@ -143,18 +182,19 @@ def build() -> dict:
             "horizon_h": 72,
         },
         # The finding, as numbers the page can render rather than prose it repeats.
-        "verdict": {
-            "token_share_1h": 0.06, "token_share_6h": 0.27, "token_share_12h": 0.13,
-            "hit_rate": 0.50, "n_weekends": int(paths["window_start"].nunique()),
-            "net_at_10bp": -0.00009,
-        },
+        # Derived, never transcribed: the page's headline evidence has to move
+        # with the data like everything else on it, or a refresh leaves the one
+        # claim the product is built on quietly out of date.
+        "verdict": verdict,
     }
 
 
 def main() -> int:
-    payload = build()
+    payload = _json_safe(build())
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    # allow_nan=False turns any surviving non-finite value into a loud build
+    # failure rather than a page that will not parse in a browser.
+    OUT.write_text(json.dumps(payload, indent=1, allow_nan=False), encoding="utf-8")
     kb = OUT.stat().st_size / 1024
     print(f"wrote {OUT.relative_to(ROOT)}  ({kb:.1f} KB)")
     print(f"  coverage : {payload['coverage']['bars']} bars, "
