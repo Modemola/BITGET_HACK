@@ -43,6 +43,11 @@ TARGETS = {
     "TSLA": "native equity — underlying for TSLAx",
     "NQ=F": "Nasdaq-100 futures — weeknight reference",
     "ES=F": "S&P 500 futures — weeknight reference / risk proxy",
+    # Crypto trades through the blackout, so it is the only deep instrument a
+    # trader can reach while equities and futures are shut. Whether it hedges
+    # anything is an empirical question -- see src/blackout/hedges.py.
+    "BTC-USD": "crypto proxy — the only deep hedge live during a blackout",
+    "ETH-USD": "crypto proxy — secondary risk-on/off read",
 }
 
 
