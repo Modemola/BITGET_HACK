@@ -91,3 +91,69 @@ def test_midweek_horizon_has_no_blackout():
     b = horizon_breakdown(CLOCK, as_of, 24)
     blackout = b[b["regime"].isin([Regime.WEEKEND_BLACKOUT.value, Regime.HOLIDAY_BLACKOUT.value])]
     assert blackout["hours"].sum() == 0
+
+
+# --- hedges -----------------------------------------------------------------
+
+from blackout.hedges import HedgeQuote, hedge_menu, quote_hedge, window_returns  # noqa: E402
+
+
+def _returns(n=30, seed=0, corr=0.9):
+    """Two return series with a controllable relationship."""
+    rng = np.random.default_rng(seed)
+    hedge = rng.normal(0, 0.02, n)
+    noise = rng.normal(0, 0.02 * np.sqrt(max(1 - corr**2, 0)), n)
+    return pd.DataFrame({
+        "window_start": pd.date_range("2026-01-03", periods=n, freq="7D", tz="UTC"),
+        "TOKEN": corr * hedge + noise,
+        "HEDGE": hedge,
+    })
+
+
+def test_a_strong_stable_hedge_is_reported_as_usable():
+    q = quote_hedge(_returns(corr=0.95), "TOKEN", "HEDGE")
+    assert q.correlation > 0.8
+    assert q.risk_reduction > 0.3
+    assert q.is_stable
+    assert "removes" in q.verdict
+
+
+def test_a_sign_flipping_correlation_is_never_called_a_hedge():
+    """The measured BTC case: high average correlation, unstable underneath."""
+    rng = np.random.default_rng(3)
+    n = 30
+    hedge = rng.normal(0, 0.02, n)
+    token = hedge.copy()
+    token[: n // 2] *= -1              # correlation inverts across the sample
+    r = pd.DataFrame({"TOKEN": token, "HEDGE": hedge})
+    q = quote_hedge(r, "TOKEN", "HEDGE")
+    assert not q.is_stable
+    assert "unstable" in q.verdict
+
+
+def test_declines_to_quote_on_thin_history():
+    q = quote_hedge(_returns(n=4), "TOKEN", "HEDGE")
+    assert q.n_windows < 12
+    assert q.verdict == "insufficient history to quote"
+
+
+def test_menu_prices_the_hedge_in_dollars_not_just_ratios():
+    r = _returns(corr=0.9)
+    menu = hedge_menu(r, "TOKEN", ["HEDGE"], exposure_usd=250_000)
+    row = menu.iloc[0]
+    assert row["notional_usd"] == pytest.approx(250_000 * abs(row["hedge_ratio"]))
+    assert row["cost_usd"] > 0
+    assert row["cost_usd"] == pytest.approx(row["notional_usd"] * row["cost_pct"])
+
+
+def test_menu_never_offers_the_exposure_as_its_own_hedge():
+    menu = hedge_menu(_returns(), "TOKEN", ["TOKEN", "HEDGE"], exposure_usd=1000)
+    assert "TOKEN" not in set(menu["instrument"])
+
+
+def test_window_returns_skips_windows_with_thin_coverage():
+    clock = ClosureClock(start="2026-01-01", end="2026-12-31")
+    grid = pd.date_range("2026-09-07", "2026-09-21", freq="h", tz="UTC")
+    df = pd.DataFrame({"A": np.linspace(100, 110, len(grid))}, index=grid)
+    assert window_returns(df, clock, ["A"], min_bars=10_000).empty
+    assert not window_returns(df, clock, ["A"], min_bars=5).empty

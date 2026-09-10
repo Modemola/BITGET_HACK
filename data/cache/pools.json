@@ -1,0 +1,58 @@
+[
+ {
+  "symbol": "AAPLx",
+  "pool": "CKwJZwm7oj3nu4653N1EpDrqXbXAYXoPFiPeEnLouF8y",
+  "liquidity": 300518.7162,
+  "volume_24h": 3719051.28452225,
+  "error": ""
+ },
+ {
+  "symbol": "TSLAx",
+  "pool": "8aDaBQkTrS6HVMjyc6EZebgdiaXhLYGriDWKWWp1NpFF",
+  "liquidity": 2097048.7246,
+  "volume_24h": 1751831.23961932,
+  "error": ""
+ },
+ {
+  "symbol": "NVDAx",
+  "pool": "49iMatQtoyabsYAQc8GafVq6aeBFVDxSRH44oiatyyw6",
+  "liquidity": 2110391.27,
+  "volume_24h": 1785053.67431269,
+  "error": ""
+ },
+ {
+  "symbol": "SPYx",
+  "pool": "9QkUksrHRtJcCZd5euVR9DcBbjKLx9xjBszkRVwdfZVs",
+  "liquidity": 9846998.0845,
+  "volume_24h": 1031.2131165174,
+  "error": ""
+ },
+ {
+  "symbol": "MSTRx",
+  "pool": "2ngTuP7xA581dqX9uJkGRqxmKuehY3k4SDfPebeoRG2J",
+  "liquidity": 703435.5301,
+  "volume_24h": 533053.926482713,
+  "error": ""
+ },
+ {
+  "symbol": "COINx",
+  "pool": "w7SGmPeXoMCsjvXqgsAmUn56uypyDsjAtsxeVkaiqxa",
+  "liquidity": 933733.99,
+  "volume_24h": 477599.316296069,
+  "error": ""
+ },
+ {
+  "symbol": "GOOGLx",
+  "pool": "4k43WcUS8kPXkmL7PhgpwCteYYaSgzXvfKU63FEE1WS5",
+  "liquidity": 280718.5426,
+  "volume_24h": 225976.939683679,
+  "error": ""
+ },
+ {
+  "symbol": "METAx",
+  "pool": "3L7KbPVaAQA4UTecaGQYsm6UCq5F3sZM9zAYkxqYt63j",
+  "liquidity": 171160.9351,
+  "volume_24h": 386217.095010953,
+  "error": ""
+ }
+]
