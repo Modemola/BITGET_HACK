@@ -22,6 +22,7 @@ Exit code 0 means at least one source cleared the bar.
 
 from __future__ import annotations
 
+import io
 import sys
 from dataclasses import dataclass
 
@@ -119,7 +120,7 @@ def probe_stooq() -> Verdict:
         r.raise_for_status()
         if "Date" not in r.text[:200]:
             return Verdict(name, False, "unexpected payload")
-        df = pd.read_csv(pd.io.common.StringIO(r.text), parse_dates=["Date"])
+        df = pd.read_csv(io.StringIO(r.text), parse_dates=["Date"])
         return Verdict(name, len(df) > 500, f"AAPL {len(df)} daily bars to {df['Date'].max():%Y-%m-%d}")
     except Exception as e:  # noqa: BLE001
         return Verdict(name, False, f"{type(e).__name__}: {e}")
