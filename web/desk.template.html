@@ -130,6 +130,29 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   color:var(--muted)}
 .expo-key span{display:inline-flex;align-items:center;gap:7px}
 
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:20px 28px;padding-bottom:20px;margin-bottom:20px;
+  border-bottom:1px solid var(--rule)}
+.ctrl label{display:flex;justify-content:space-between;align-items:baseline;
+  gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+.ctrl label .num{font-size:14px;letter-spacing:0;text-transform:none;
+  color:var(--ink);font-weight:500}
+.ctrl input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.ctrl.static .static-val{font-size:14px;font-weight:500;color:var(--ink);
+  padding-top:2px}
+.analogue-summary{display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+  background:var(--rule);border:1px solid var(--rule);border-radius:6px;
+  overflow:hidden;margin-bottom:22px}
+.analogue-summary div{background:var(--surface);padding:13px 15px}
+.analogue-summary dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.analogue-summary dd{margin:0;font-family:var(--mono);font-size:19px;
+  font-weight:500;font-variant-numeric:tabular-nums}
+.match-bar{display:inline-block;height:5px;border-radius:3px;
+  background:var(--accent);vertical-align:middle;min-width:2px}
+
 #ask{display:none}
 #ask.on{display:block}
 .ask-box{display:flex;gap:10px;flex-wrap:wrap}
@@ -220,6 +243,40 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
     <div class="chart-scroll"><svg class="chart" id="drift-chart" viewBox="0 0 900 330"
          role="img" aria-label="Premium drift by hours elapsed into a blackout"></svg></div>
     <p class="note" id="drift-note"></p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>Weekends that looked like this one</h2>
+    <p>Set the conditions you are walking into. The desk retrieves the closest
+       matches from <span class="num" id="an-total">27</span> past blackouts and shows
+       how each resolved &mdash; not a forecast, a distribution you can read yourself.</p>
+  </div>
+  <div class="panel">
+    <div class="controls">
+      <div class="ctrl">
+        <label for="vol">Realised volatility, 5d
+          <span class="num" id="vol-out"></span></label>
+        <input id="vol" type="range" min="20" max="90" step="1">
+      </div>
+      <div class="ctrl">
+        <label for="prem">Premium at the close
+          <span class="num" id="prem-out"></span></label>
+        <input id="prem" type="range" min="-100" max="100" step="5">
+      </div>
+      <div class="ctrl static">
+        <label>Window length</label>
+        <div class="num static-val" id="win-out"></div>
+      </div>
+    </div>
+    <div class="analogue-summary" id="an-summary"></div>
+    <div class="table-scroll"><table>
+      <thead><tr><th>Weekend</th><th>Vol</th><th>Premium in</th>
+        <th>Ended</th><th>Worst point</th><th>Match</th></tr></thead>
+      <tbody id="an-body"></tbody>
+    </table></div>
+    <p class="note" id="an-note"></p>
   </div>
 </section>
 
@@ -461,6 +518,123 @@ function drawDrift(){
     ". Based on " + last.n_windows + " weekends — a thin sample, and the width of the band reflects it.";
 }
 
+/* ---- analogue retrieval ----------------------------------------------- */
+/* Mirrors blackout.analogues.find_analogues: weighted Euclidean over z-scored
+   features, computed only on the features the query supplies. Kept in the page
+   rather than precomputed so the trader can move the query and watch the
+   retrieved set change, which is the point of a stress test. */
+var WEIGHTS = { realised_vol_5d:1.0, premium_at_close:1.0, window_hours:0.5, crypto_vol_5d:0.5 };
+
+function featureStats(rows, name){
+  var vals = rows.map(function(r){ return r[name]; })
+                 .filter(function(v){ return typeof v === "number" && isFinite(v); });
+  if (!vals.length) return null;
+  var mu = vals.reduce(function(a,b){ return a+b; }, 0) / vals.length;
+  var varr = vals.reduce(function(a,b){ return a + (b-mu)*(b-mu); }, 0) / vals.length;
+  var sd = Math.sqrt(varr);
+  return { mu: mu, sd: (sd > 0 && isFinite(sd)) ? sd : 1 };
+}
+
+function findAnalogues(rows, query, k){
+  var names = Object.keys(query).filter(function(f){
+    return query[f] !== null && query[f] !== undefined && WEIGHTS[f] !== undefined;
+  });
+  if (!names.length || !rows.length) return [];
+  var stats = {};
+  names.forEach(function(f){ stats[f] = featureStats(rows, f); });
+
+  return rows.map(function(r){
+    var d2 = 0;
+    names.forEach(function(f){
+      var s = stats[f];
+      if (!s) return;
+      var hv = r[f];
+      if (typeof hv !== "number" || !isFinite(hv)) return;
+      var delta = (hv - s.mu)/s.sd - (query[f] - s.mu)/s.sd;
+      d2 += WEIGHTS[f] * delta * delta;
+    });
+    var out = Object.create(null);
+    for (var key in r) out[key] = r[key];
+    out.distance = Math.sqrt(d2);
+    return out;
+  }).sort(function(a,b){ return a.distance - b.distance; }).slice(0, k);
+}
+
+function nextWindowHours(){
+  var now = Math.floor(Date.now()/1000);
+  for (var i = 0; i < D.blackout_windows.length; i++){
+    var w = D.blackout_windows[i];
+    if (w.end > now) return w.hours;
+  }
+  return 49;
+}
+
+function drawAnalogues(){
+  var rows = D.analogue_features || [];
+  if (!rows.length) return;
+  var vol = document.getElementById("vol");
+  var prem = document.getElementById("prem");
+  var hours = nextWindowHours();
+
+  document.getElementById("an-total").textContent = rows.length;
+  document.getElementById("win-out").textContent = hours + "h";
+
+  function render(){
+    var q = {
+      realised_vol_5d: Number(vol.value)/100,
+      premium_at_close: Number(prem.value)/10000,
+      window_hours: hours
+    };
+    document.getElementById("vol-out").textContent = Math.round(q.realised_vol_5d*100) + "%";
+    document.getElementById("prem-out").textContent = sgn(q.premium_at_close, 2);
+
+    var matches = findAnalogues(rows, q, 5);
+    var maxDist = matches.length ? matches[matches.length-1].distance || 1 : 1;
+
+    document.getElementById("an-body").innerHTML = matches.map(function(m){
+      var when = new Date(m.window_start).toISOString().slice(0,10);
+      var strength = Math.max(4, 46 * (1 - (m.distance/(maxDist*1.25))));
+      return '<tr>' +
+        '<td class="n">' + when + '</td>' +
+        '<td class="n">' + pct(m.realised_vol_5d, 0) + '</td>' +
+        '<td class="n">' + sgn(m.premium_at_close) + '</td>' +
+        '<td class="n" style="font-weight:500">' + sgn(m.terminal_drift) + '</td>' +
+        '<td class="n">' + pct(m.max_abs_drift) + '</td>' +
+        '<td><span class="match-bar" style="width:' + strength + 'px"></span>' +
+          '<span class="num" style="color:var(--faint);font-size:11.5px;margin-left:8px">' +
+          m.distance.toFixed(2) + '</span></td>' +
+        '</tr>';
+    }).join("");
+
+    var ends = matches.map(function(m){ return m.terminal_drift; });
+    var worst = matches.map(function(m){ return m.max_abs_drift; });
+    var lo = Math.min.apply(null, ends), hi = Math.max.apply(null, ends);
+    var maxExc = Math.max.apply(null, worst);
+    var beyond = ends.filter(function(v){ return Math.abs(v) > 0.01; }).length;
+
+    document.getElementById("an-summary").innerHTML = [
+      ["Ended between", sgn(lo) + " / " + sgn(hi)],
+      ["Worst point reached", pct(maxExc)],
+      ["Beyond 1%", beyond + " of " + ends.length]
+    ].map(function(t){
+      return '<div><dt>' + t[0] + '</dt><dd>' + t[1] + '</dd></div>';
+    }).join("");
+
+    document.getElementById("an-note").textContent =
+      "Matched on realised volatility, premium at the close, and a " + hours +
+      "-hour window. The worst point reached is larger than where these weekends " +
+      "ended — the drawdown you sit through is not the number you wake up to. " +
+      "Five matches from " + rows.length + " windows is a small set; read the range, not the middle.";
+  }
+
+  var defaults = D.analogue_defaults || {};
+  vol.value = String(Math.round((defaults.realised_vol_5d || 0.48) * 100));
+  prem.value = String(Math.round((defaults.premium_at_close || 0) * 10000));
+  vol.addEventListener("input", render);
+  prem.addEventListener("input", render);
+  render();
+}
+
 /* ---- exposure --------------------------------------------------------- */
 function drawExposure(){
   var now = Math.floor(Date.now()/1000);
@@ -563,7 +737,8 @@ function initAsk(){
 
       var context = {
         coverage: D.coverage, summary: D.summary, verdict: D.verdict,
-        dispersion: D.dispersion, drift: D.drift, hedges: D.hedges, demo: D.demo
+        dispersion: D.dispersion, drift: D.drift, hedges: D.hedges, demo: D.demo,
+        analogues: D.analogue_features
       };
       var prompt = [
         "You are Blackout Desk, a closure-window risk desk for tokenized US stocks.",
@@ -602,6 +777,7 @@ function initAsk(){
 drawTimeline();
 drawEvidence();
 drawDrift();
+drawAnalogues();
 drawExposure();
 drawHedges();
 drawFooter();

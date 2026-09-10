@@ -97,7 +97,7 @@ decorative.
 | 1 | `closure_window(as_of)` | Which regime am I in, when does each venue reopen, how many blackout hours are ahead? |
 | 2 | `exposure(positions, as_of)` | What is my book worth per regime, and what is unhedgeable? |
 | 3 | `divergence_distribution(symbol, elapsed_h)` | How far does price typically drift by hour *H* of a blackout? |
-| 4 | `historical_analogues(symbol, conditions, k)` | Which past weekends looked like this one, and how did they resolve? |
+| 4 | `historical_analogues(symbol, conditions, k)` | Which past weekends looked like this one, and how did they resolve? ✅ |
 | 5 | `premium_verdict(symbol, as_of)` | Is the current premium tradeable? *(Almost always: no — with evidence.)* |
 | 6 | `hedge_menu(exposure)` | What can I actually trade during the blackout, and what does it cost? |
 | 7 | `macro_calendar(window)` | What is scheduled between now and the reopen? |
@@ -124,7 +124,7 @@ src/blackout/
   basis.py              ✅ fair value, premium, leg decomposition
   exposure.py           ▢  positions → per-regime exposure
   distributions.py      ▢  empirical drift by elapsed blackout hour
-  analogues.py          ▢  nearest-neighbour retrieval over past windows
+  analogues.py          ✅ nearest-neighbour retrieval over past windows
   hedges.py             ✅ instruments live during blackout + cost model
   calendar_events.py    ▢  macro events inside a window
   tools.py              ▢  the 7 typed tools; single source of truth

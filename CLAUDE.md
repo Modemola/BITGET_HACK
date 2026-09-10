@@ -52,7 +52,7 @@ src/blackout/
   distributions.py   drift by elapsed blackout hour
   exposure.py        positions -> per-regime exposure
   hedges.py          what still trades during a blackout, and whether it helps
-  analogues.py       NOT BUILT - nearest-neighbour retrieval over past windows
+  analogues.py       causal feature table + weighted kNN over past windows
   calendar_events.py macro events in a window (needs data/macro_events.csv)
   build.py           precompute -> web/data/desk.json
 web/
@@ -69,6 +69,10 @@ web/
   beside every distribution.
 - **Unbuilt modules raise, never return placeholder data.** A fabricated number
   in a risk tool is worse than a missing one.
+- **Analogue features must be knowable at Friday 15:45.** Features and outcomes
+  are built separately so lookahead cannot creep in; two tests enforce it. Note
+  that reading the *previous* weekend's blackout is causal, not lookahead — the
+  five-day window legitimately reaches back into it.
 - **Label figures observed / estimated / targeted** — the submission form
   requires it and it is how the research reads as credible.
 - **The page must work without the LLM.** `claude.use("sample")` returns `null`
@@ -95,7 +99,7 @@ web/
 
 ## Open items
 
-- `analogues.py` and `calendar_events.py` are scaffolded but unbuilt.
+- `calendar_events.py` is scaffolded but unbuilt.
 - No macro calendar source; `data/macro_events.csv` does not exist yet.
 - Bitget API DNS fails on the operator's machine, blocking Agent Hub /
   `bitget-signal` Skills integration (a scoring item — stretch goal).

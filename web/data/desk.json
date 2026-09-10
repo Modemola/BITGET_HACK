@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-10T13:30:34+00:00",
+ "generated_at": "2026-09-10T13:47:11+00:00",
  "coverage": {
   "symbol": "NVDAx",
   "start": "2026-03-01T00:00:00+00:00",
@@ -279,6 +279,317 @@
    "drift": -0.0002857065
   }
  ],
+ "analogue_features": [
+  {
+   "window_start": "2026-03-06T22:00:00.000Z",
+   "window_hours": 48.0,
+   "realised_vol_5d": 0.6003270681,
+   "premium_at_close": -0.001043057,
+   "crypto_vol_5d": 0.6670801365,
+   "terminal_drift": -0.0111800175,
+   "max_abs_drift": 0.014263463,
+   "token_return": -0.0109417606,
+   "bars": 48
+  },
+  {
+   "window_start": "2026-03-13T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.40267372,
+   "premium_at_close": 0.0026973159,
+   "crypto_vol_5d": 0.5731893645,
+   "terminal_drift": 0.0037819358,
+   "max_abs_drift": 0.0075304022,
+   "token_return": 0.0034860832,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-03-20T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.2988500093,
+   "premium_at_close": 0.0024468385,
+   "crypto_vol_5d": 0.4304792299,
+   "terminal_drift": -0.0154157084,
+   "max_abs_drift": 0.0154157084,
+   "token_return": -0.0166153256,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-03-27T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4796515807,
+   "premium_at_close": 0.0023196585,
+   "crypto_vol_5d": 0.5047768352,
+   "terminal_drift": 0.0003537732,
+   "max_abs_drift": 0.0052033626,
+   "token_return": -0.0040775132,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-04-02T21:00:00.000Z",
+   "window_hours": 73.0,
+   "realised_vol_5d": 0.4755820328,
+   "premium_at_close": 0.000112517,
+   "crypto_vol_5d": 0.4585770769,
+   "terminal_drift": -0.0002857065,
+   "max_abs_drift": 0.0071732152,
+   "token_return": -0.0038157852,
+   "bars": 73
+  },
+  {
+   "window_start": "2026-04-10T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.3942161087,
+   "premium_at_close": -0.0009212707,
+   "crypto_vol_5d": 0.456413364,
+   "terminal_drift": -0.0203648721,
+   "max_abs_drift": 0.022408814,
+   "token_return": -0.0202801776,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-04-17T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.375881499,
+   "premium_at_close": 0.0003821663,
+   "crypto_vol_5d": 0.4531739238,
+   "terminal_drift": -0.0115420676,
+   "max_abs_drift": 0.0146354802,
+   "token_return": -0.01277292,
+   "bars": 48
+  },
+  {
+   "window_start": "2026-04-24T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.445601413,
+   "premium_at_close": 0.0007182598,
+   "crypto_vol_5d": 0.3687549218,
+   "terminal_drift": 0.0063712942,
+   "max_abs_drift": 0.0080318494,
+   "token_return": 0.0077733976,
+   "bars": 48
+  },
+  {
+   "window_start": "2026-05-01T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.5535692885,
+   "premium_at_close": -0.0006450047,
+   "crypto_vol_5d": 0.3439490917,
+   "terminal_drift": 0.0141543347,
+   "max_abs_drift": 0.0141543347,
+   "token_return": 0.0133962495,
+   "bars": 45
+  },
+  {
+   "window_start": "2026-05-08T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4186492306,
+   "premium_at_close": -0.0009604459,
+   "crypto_vol_5d": 0.3528765395,
+   "terminal_drift": 0.0052106545,
+   "max_abs_drift": 0.0112406551,
+   "token_return": 0.0055897498,
+   "bars": 47
+  },
+  {
+   "window_start": "2026-05-15T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.6026709737,
+   "premium_at_close": -0.0019337018,
+   "crypto_vol_5d": 0.3995167837,
+   "terminal_drift": 0.0062886066,
+   "max_abs_drift": 0.0100468692,
+   "token_return": 0.0047382394,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-05-22T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.5596599796,
+   "premium_at_close": 0.0012134106,
+   "crypto_vol_5d": 0.3063675135,
+   "terminal_drift": 0.0176403054,
+   "max_abs_drift": 0.0268994753,
+   "token_return": 0.0140580866,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-05-29T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4932242091,
+   "premium_at_close": 0.001406998,
+   "crypto_vol_5d": 0.3316580019,
+   "terminal_drift": 0.0123299274,
+   "max_abs_drift": 0.0214910475,
+   "token_return": 0.0122649653,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-06-05T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.6056283244,
+   "premium_at_close": 0.0018535647,
+   "crypto_vol_5d": 0.7594836894,
+   "terminal_drift": 0.0059735498,
+   "max_abs_drift": 0.0205023789,
+   "token_return": -0.0019237785,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-06-12T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4902637502,
+   "premium_at_close": -0.0031180193,
+   "crypto_vol_5d": 0.4530812993,
+   "terminal_drift": 0.0213952367,
+   "max_abs_drift": 0.0213952367,
+   "token_return": 0.0219302793,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-06-19T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.3024648554,
+   "premium_at_close": 0.0027773384,
+   "crypto_vol_5d": 0.4276002683,
+   "terminal_drift": -0.0003468273,
+   "max_abs_drift": 0.0062492495,
+   "token_return": -0.0003458667,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-06-26T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.6030871348,
+   "premium_at_close": -0.0010757002,
+   "crypto_vol_5d": 0.7454902922,
+   "terminal_drift": 0.0049858857,
+   "max_abs_drift": 0.0125782493,
+   "token_return": 0.0071854448,
+   "bars": 48
+  },
+  {
+   "window_start": "2026-07-03T16:00:00.000Z",
+   "window_hours": 54.0,
+   "realised_vol_5d": 0.3911560624,
+   "premium_at_close": 0.0043017351,
+   "crypto_vol_5d": 0.4103450052,
+   "terminal_drift": 0.00712899,
+   "max_abs_drift": 0.0074923543,
+   "token_return": 0.0070984543,
+   "bars": 50
+  },
+  {
+   "window_start": "2026-07-10T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.527029204,
+   "premium_at_close": 0.0008662697,
+   "crypto_vol_5d": 0.4305446839,
+   "terminal_drift": 0.011432242,
+   "max_abs_drift": 0.0136544386,
+   "token_return": 0.0125283048,
+   "bars": 47
+  },
+  {
+   "window_start": "2026-07-17T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4415310596,
+   "premium_at_close": -1.87794e-05,
+   "crypto_vol_5d": 0.3574067334,
+   "terminal_drift": 0.0069467253,
+   "max_abs_drift": 0.0069467253,
+   "token_return": 0.0060212646,
+   "bars": 43
+  },
+  {
+   "window_start": "2026-07-24T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4846829209,
+   "premium_at_close": 0.0011616107,
+   "crypto_vol_5d": 0.3348944048,
+   "terminal_drift": 0.006256098,
+   "max_abs_drift": 0.0100045262,
+   "token_return": 0.0057357572,
+   "bars": 40
+  },
+  {
+   "window_start": "2026-07-31T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.6459820202,
+   "premium_at_close": 0.0036369608,
+   "crypto_vol_5d": 0.3669344112,
+   "terminal_drift": 0.0025633885,
+   "max_abs_drift": 0.009669216,
+   "token_return": 0.0020982556,
+   "bars": 45
+  },
+  {
+   "window_start": "2026-08-07T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.5137786099,
+   "premium_at_close": 0.001084569,
+   "crypto_vol_5d": 0.2547715989,
+   "terminal_drift": 0.0065719513,
+   "max_abs_drift": 0.0092708563,
+   "token_return": 0.0083999088,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-08-14T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.3721419533,
+   "premium_at_close": 0.0014516517,
+   "crypto_vol_5d": 0.2266972367,
+   "terminal_drift": -0.0003169245,
+   "max_abs_drift": 0.0047937843,
+   "token_return": -0.0013891985,
+   "bars": 47
+  },
+  {
+   "window_start": "2026-08-21T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4151253935,
+   "premium_at_close": 0.0014128799,
+   "crypto_vol_5d": 0.6462761139,
+   "terminal_drift": 0.0135421969,
+   "max_abs_drift": 0.0199459272,
+   "token_return": 0.0144651139,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-08-28T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.6821766474,
+   "premium_at_close": -0.0005644432,
+   "crypto_vol_5d": 0.422749633,
+   "terminal_drift": 0.0054770091,
+   "max_abs_drift": 0.0128595205,
+   "token_return": 0.0059856576,
+   "bars": 49
+  },
+  {
+   "window_start": "2026-09-04T21:00:00.000Z",
+   "window_hours": 49.0,
+   "realised_vol_5d": 0.4833780876,
+   "premium_at_close": 0.0023186385,
+   "crypto_vol_5d": 0.4218880321,
+   "terminal_drift": 0.0082685193,
+   "max_abs_drift": 0.0109059605,
+   "token_return": 0.005703363,
+   "bars": 49
+  }
+ ],
+ "analogue_feature_names": [
+  "realised_vol_5d",
+  "premium_at_close",
+  "window_hours",
+  "crypto_vol_5d"
+ ],
+ "analogue_defaults": {
+  "realised_vol_5d": 0.48337808762612244,
+  "premium_at_close": 0.0010845689926399782,
+  "window_hours": 49.0,
+  "crypto_vol_5d": 0.42274963297783413
+ },
  "hedges": [
   {
    "instrument": "TSLAx",
