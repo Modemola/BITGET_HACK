@@ -20,6 +20,8 @@ costs. See [`docs/FINDINGS.md`](docs/FINDINGS.md).
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System design, tool contract, build plan to 21 Sep |
 | [`docs/FINDINGS.md`](docs/FINDINGS.md) | The research result and every variant tested |
 | [`docs/S2_BRIEF.md`](docs/S2_BRIEF.md) | Competition rules, tracks, submission requirements |
+| [`docs/SUBMISSION.md`](docs/SUBMISSION.md) | The six-part project description, ready for the form |
+| [`docs/RESEARCH_TASK.md`](docs/RESEARCH_TASK.md) | The required end-to-end research task |
 
 ## Quick start
 
