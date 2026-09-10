@@ -34,6 +34,7 @@ python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
+python scripts/research_task.py         # the required demo task, all 7 tools end to end
 ```
 
 Refreshing market data (needs open network):
@@ -125,9 +126,19 @@ web/
   them and cross-checks against the statement dates, so past meetings validate
   the parser the future ones depend on.
 
+## Submission
+
+`docs/SUBMISSION.md` is written to be pasted into the Google Form: all six parts
+of the project description, the LLM-role field, and the X post copy.
+`docs/RESEARCH_TASK.md` is the required research-task deliverable, regenerated
+by running `scripts/research_task.py` so its figures cannot go stale.
+
 ## Open items
 
 - All seven tools are built.
+- **No user testing yet.** Part 3 of the submission states the plan and labels
+  every product metric as targeted rather than observed. Do not report a usage
+  number that has not been measured.
 - The event calendar covers FOMC only. Anything added must come from its issuing
   authority; a scraped aggregator has no place in a tool whose argument is that
   its numbers are checkable.
