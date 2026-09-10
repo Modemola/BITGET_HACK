@@ -100,7 +100,7 @@ decorative.
 | 4 | `historical_analogues(symbol, conditions, k)` | Which past weekends looked like this one, and how did they resolve? ✅ |
 | 5 | `premium_verdict(symbol, as_of)` | Is the current premium tradeable? *(Almost always: no — with evidence.)* |
 | 6 | `hedge_menu(exposure)` | What can I actually trade during the blackout, and what does it cost? |
-| 7 | `macro_calendar(window)` | What is scheduled between now and the reopen? |
+| 7 | `macro_calendar(window)` | What is scheduled between now and the reopen? ✅ |
 
 Tools 3, 4 and 5 are backed by our own measured data and are the ones no other
 entry can produce. Tool 5 is the thesis in executable form.
@@ -126,7 +126,7 @@ src/blackout/
   distributions.py      ▢  empirical drift by elapsed blackout hour
   analogues.py          ✅ nearest-neighbour retrieval over past windows
   hedges.py             ✅ instruments live during blackout + cost model
-  calendar_events.py    ▢  macro events inside a window
+  calendar_events.py    ✅ macro events inside a window
   tools.py              ▢  the 7 typed tools; single source of truth
   build.py              ✅ L1+L2 → web/data/desk.json
 web/
@@ -152,7 +152,7 @@ docs/
 | Gap | Impact | Plan |
 |---|---|---|
 | ~~No BTC/ETH data~~ | Resolved 10 Sep. BTC correlates +0.71 with NVDAx across blackouts and removes 29% of variance, but the rolling correlation spans −0.51 to +0.89 and changes sign, so `hedges.py` reports every candidate as unstable | Done |
-| **No macro calendar source** | Tool 7 has no input | Hand-curate the events in our 210-day window; honest and sufficient at this scale |
+| ~~No macro calendar source~~ | Resolved 10 Sep. FOMC decisions parsed from federalreserve.gov, cross-validated against published statement dates. Across 134 weekend blackouts, **none of the 22 scheduled decisions has ever fallen inside one** — weekend risk is unscheduled risk, now a measurement rather than an assertion | Done |
 | **`sample` may be unavailable to a judge** | LUI silent | Static-first design + screen recording |
 | **27 weekends is a thin sample** | Distributions are wide | State it on the page beside every figure rather than hiding it |
 | **Bitget DNS fails on the operator's machine** | Blocks Agent Hub / bitget-signal integration | Diagnose separately; treat Skills integration as a stretch goal |

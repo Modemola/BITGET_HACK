@@ -29,7 +29,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 61 tests
+python -m pytest -q                     # 74 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -41,6 +41,7 @@ Refreshing market data (needs open network):
 ```bash
 python scripts/probe_sources.py         # rToken hourly; rate-limited, resumable
 python scripts/fetch_reference.py       # native equity, futures, crypto proxies
+python scripts/fetch_events.py          # FOMC decisions, parsed from federalreserve.gov
 ```
 
 ## Layout
@@ -53,7 +54,7 @@ src/blackout/
   exposure.py        positions -> per-regime exposure
   hedges.py          what still trades during a blackout, and whether it helps
   analogues.py       causal feature table + weighted kNN over past windows
-  calendar_events.py macro events in a window (needs data/macro_events.csv)
+  calendar_events.py scheduled events vs a closure window (FOMC, from the Fed)
   build.py           precompute -> web/data/desk.json
 web/
   desk.template.html page source, with a __DESK_JSON__ placeholder
@@ -113,11 +114,23 @@ web/
   repo deliberately — that is how it travels between machines.
 - **`data/` is force-listed in `.gitignore`** via negation rules so CSVs commit
   normally. Don't "tidy" that up.
+- **`ClosureClock.annotate` labels out-of-range timestamps `WEEKNIGHT`** rather
+  than flagging them, so anything comparing events against the calendar must
+  first restrict to the span the clock was built over. The page's JS clock does
+  report out-of-range correctly (`currentRun` returns null).
+- **The Fed's FOMC page carries each meeting twice** — a statement link with the
+  exact date for past meetings, and a month plus day range for future ones. Only
+  the range exists for the meetings that matter, and straddling meetings use
+  abbreviated months (`Jan/Feb`). `fetch_events.py` parses ranges for all of
+  them and cross-checks against the statement dates, so past meetings validate
+  the parser the future ones depend on.
 
 ## Open items
 
-- `calendar_events.py` is scaffolded but unbuilt.
-- No macro calendar source; `data/macro_events.csv` does not exist yet.
+- All seven tools are built.
+- The event calendar covers FOMC only. Anything added must come from its issuing
+  authority; a scraped aggregator has no place in a tool whose argument is that
+  its numbers are checkable.
 - Bitget API DNS fails on the operator's machine, blocking Agent Hub /
   `bitget-signal` Skills integration (a scoring item — stretch goal).
 - The artifact is **private by default**; it must be shared from the page's
