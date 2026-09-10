@@ -1,5 +1,16 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-data/
 .venv/
+*.egg-info/
+
+# Data is committed on purpose. The Claude Code sandbox cannot reach any market
+# data host, so the repo is the only way these series travel between the machine
+# that can fetch them and the one that analyses them. Without this, every new
+# series needs `git add -f` and is one forgotten flag away from being lost.
+data/**
+!data/raw/
+!data/raw/*.csv
+!data/cache/
+!data/cache/*.json
+!data/macro_events.csv

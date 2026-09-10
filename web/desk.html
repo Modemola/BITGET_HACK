@@ -1,0 +1,612 @@
+<title>Blackout Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#FBFBFC; --surface:#FFFFFF; --surface-2:#F3F5F7;
+  --ink:#14181F; --muted:#5B6472; --faint:#8A93A1;
+  --rule:#E2E5EA; --rule-strong:#CBD2DB;
+  --accent:#0F5E6B; --accent-soft:#DCEDF0;
+  --blackout:#1C2230; --blackout-soft:#DDE1E8;
+  --risk:#B4453A; --risk-soft:#F6E4E2;
+  --ok:#2F6B4F;
+  --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -16px rgba(20,24,31,.25);
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E1116; --surface:#161B23; --surface-2:#1D242E;
+    --ink:#E8EBF0; --muted:#9AA4B2; --faint:#6C7686;
+    --rule:#262D38; --rule-strong:#38414F;
+    --accent:#4FB3C4; --accent-soft:#14313A;
+    --blackout:#070A0F; --blackout-soft:#232B37;
+    --risk:#E0796C; --risk-soft:#3A211E;
+    --ok:#6FBF95;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E1116; --surface:#161B23; --surface-2:#1D242E;
+  --ink:#E8EBF0; --muted:#9AA4B2; --faint:#6C7686;
+  --rule:#262D38; --rule-strong:#38414F;
+  --accent:#4FB3C4; --accent-soft:#14313A;
+  --blackout:#070A0F; --blackout-soft:#232B37;
+  --risk:#E0796C; --risk-soft:#3A211E;
+  --ok:#6FBF95;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:0 64px}
+h1,h2,h3{text-wrap:balance;margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint)}
+
+header{border-bottom:1px solid var(--rule);padding-block:28px 22px;margin-bottom:34px}
+.masthead{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;
+  justify-content:space-between}
+.brand h1{font-family:var(--display);font-size:38px;font-weight:500;
+  letter-spacing:-.015em;line-height:1.05}
+.brand p{margin:6px 0 0;color:var(--muted);max-width:44ch}
+.status{display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+  text-align:right}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;
+  border-radius:999px;font-family:var(--mono);font-size:12px;font-weight:500;
+  border:1px solid var(--rule-strong);background:var(--surface-2);color:var(--ink)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.chip[data-state="blackout"]{background:var(--blackout);color:#EDF0F4;
+  border-color:transparent}
+.chip[data-state="blackout"] .dot{background:var(--risk)}
+.countdown{font-family:var(--mono);font-size:26px;font-weight:500;
+  letter-spacing:-.02em}
+.countdown small{font-size:12px;color:var(--muted);font-weight:400}
+
+.timeline{background:var(--surface);border:1px solid var(--rule);
+  border-radius:10px;padding:22px 24px 18px;box-shadow:var(--shadow)}
+.timeline-head{display:flex;flex-wrap:wrap;gap:12px;
+  justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.timeline-head h2{font-family:var(--display);font-size:19px;font-weight:500}
+.tl-scroll{overflow-x:auto}
+.tl-svg{display:block;width:100%;min-width:640px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;
+  font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.swatch{width:14px;height:9px;border-radius:2px;display:inline-block}
+
+section{margin-top:38px}
+.sec-head{margin-bottom:16px}
+.sec-head h2{font-family:var(--display);font-size:24px;font-weight:500;
+  letter-spacing:-.01em}
+.sec-head p{margin:6px 0 0;color:var(--muted);max-width:66ch}
+
+.verdict{border:1px solid var(--rule);border-left:3px solid var(--risk);
+  border-radius:8px;background:var(--surface);padding:24px 26px;
+  box-shadow:var(--shadow)}
+.verdict h3{font-family:var(--display);font-size:22px;font-weight:500;
+  margin-bottom:8px}
+.verdict p{margin:0 0 18px;color:var(--muted);max-width:68ch}
+.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;
+  overflow:hidden}
+.evidence div{background:var(--surface);padding:14px 16px}
+.evidence dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+.evidence dd{margin:0;font-family:var(--mono);font-size:21px;font-weight:500;
+  font-variant-numeric:tabular-nums}
+
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;
+  padding:22px 24px;box-shadow:var(--shadow)}
+.chart-scroll{overflow-x:auto}
+.chart{display:block;width:100%;min-width:520px;height:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+.table-scroll{overflow-x:auto}
+th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);font-weight:500;
+  padding:0 12px 9px 0;border-bottom:1px solid var(--rule);white-space:nowrap}
+td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule);
+  vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
+  white-space:nowrap}
+.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
+  font-family:var(--mono);font-weight:500;white-space:nowrap}
+.pill.bad{background:var(--risk-soft);color:var(--risk)}
+.pill.good{background:var(--accent-soft);color:var(--accent)}
+.note{font-size:12.5px;color:var(--faint);margin-top:14px;max-width:70ch}
+
+.expo{display:flex;height:38px;border-radius:6px;overflow:hidden;
+  border:1px solid var(--rule)}
+.expo div{display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  min-width:0;overflow:hidden}
+.expo-key{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;font-size:12.5px;
+  color:var(--muted)}
+.expo-key span{display:inline-flex;align-items:center;gap:7px}
+
+#ask{display:none}
+#ask.on{display:block}
+.ask-box{display:flex;gap:10px;flex-wrap:wrap}
+.ask-box input{flex:1 1 260px;min-width:0;padding:11px 14px;border-radius:6px;
+  border:1px solid var(--rule-strong);background:var(--ground);color:var(--ink);
+  font-family:var(--body);font-size:14px}
+.ask-box input:focus-visible,button:focus-visible{outline:2px solid var(--accent);
+  outline-offset:2px}
+button{padding:11px 20px;border-radius:6px;border:1px solid transparent;
+  background:var(--accent);color:var(--ground);font-family:var(--body);
+  font-size:14px;font-weight:500;cursor:pointer}
+button:hover{filter:brightness(1.08)}
+button:disabled{opacity:.55;cursor:default}
+.suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.suggest button{background:transparent;color:var(--muted);
+  border-color:var(--rule-strong);font-size:12.5px;padding:6px 12px}
+.answer{margin-top:18px;padding-top:18px;border-top:1px solid var(--rule);
+  white-space:pre-wrap;line-height:1.65}
+.answer:empty{display:none}
+
+footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
+  color:var(--faint);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px 28px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;
+  transition:none!important}}
+@media (max-width:640px){
+  .brand h1{font-size:30px}
+  .masthead{flex-direction:column;align-items:flex-start}
+  .status{align-items:flex-start;text-align:left}
+}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="masthead">
+    <div class="brand">
+      <div class="eyebrow">Closure-window risk</div>
+      <h1>Blackout Desk</h1>
+      <p>For <span class="num">49</span> hours each weekend, one venue on earth
+         quotes your tokenized US stock. This is what you are exposed to.</p>
+    </div>
+    <div class="status">
+      <div class="chip" id="regime-chip"><span class="dot"></span><span id="regime-label">loading</span></div>
+      <div class="countdown" id="countdown">&mdash;</div>
+      <div class="eyebrow" id="countdown-label"></div>
+    </div>
+  </div>
+</header>
+
+<div class="timeline">
+  <div class="timeline-head">
+    <h2>The next three weeks, by who is quoting</h2>
+    <div class="eyebrow">UTC</div>
+  </div>
+  <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 960 168"
+       role="img" aria-label="Trading venue availability over the next 21 days"></svg></div>
+  <div class="legend">
+    <span><i class="swatch" style="background:var(--accent)"></i>NYSE cash session</span>
+    <span><i class="swatch" style="background:var(--blackout-soft)"></i>Globex only &mdash; a futures reference exists</span>
+    <span><i class="swatch" style="background:var(--blackout)"></i>Blackout &mdash; rToken alone, no reference price</span>
+  </div>
+</div>
+
+<section>
+  <div class="sec-head">
+    <h2>Before you trade the premium</h2>
+  </div>
+  <div class="verdict">
+    <h3>That weekend premium is not an arbitrage.</h3>
+    <p>Across <span class="num" id="v-weekends">27</span> weekend blackouts, the gap between
+       rToken and fair value closed almost entirely because the <em>reference</em> caught up
+       once futures reopened &mdash; not because the token corrected. The token leg, the only
+       one you can actually trade, contributes almost nothing. Fading it is a coin flip that
+       loses to fees.</p>
+    <dl class="evidence" id="evidence"></dl>
+    <p class="note">Measured on NVDAx hourly bars, <span id="cov-range"></span>.
+       Method and every variant tested in <code>docs/FINDINGS.md</code>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>How far it drifts, hour by hour</h2>
+    <p>Divergence accumulated from where the premium sat when the blackout opened.
+       The inner band is the middle half of outcomes; the outer band spans the 5th to
+       95th percentile.</p>
+  </div>
+  <div class="panel">
+    <div class="chart-scroll"><svg class="chart" id="drift-chart" viewBox="0 0 900 330"
+         role="img" aria-label="Premium drift by hours elapsed into a blackout"></svg></div>
+    <p class="note" id="drift-note"></p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>A position held across the window</h2>
+    <p id="expo-caption">Calculating from the live clock.</p>
+  </div>
+  <div class="panel">
+    <div class="expo" id="expo-bar"></div>
+    <div class="expo-key" id="expo-key"></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <h2>What you can actually hedge with</h2>
+    <p>Equities, futures and options are all shut. These are the instruments still
+       quoting, measured against your exposure over the same blackout windows.</p>
+  </div>
+  <div class="panel">
+    <div class="table-scroll"><table>
+      <thead><tr><th>Instrument</th><th>Corr.</th><th>Ratio</th>
+        <th>Short</th><th>Cost</th><th>Assessment</th></tr></thead>
+      <tbody id="hedge-body"></tbody>
+    </table></div>
+    <p class="note">A hedge justified by an average correlation that changes sign is not a
+       hedge. The rolling range is reported so you see the instability rather than the
+       flattering average.</p>
+  </div>
+</section>
+
+<section id="ask">
+  <div class="sec-head">
+    <h2>Ask the desk</h2>
+    <p>Answers are grounded in the measurements on this page, not general knowledge
+       about markets.</p>
+  </div>
+  <div class="panel">
+    <div class="ask-box">
+      <label for="q" style="position:absolute;left:-9999px">Your question</label>
+      <input id="q" type="text" placeholder="Should I hedge $250k of NVDAx into this weekend?">
+      <button id="send" type="button">Ask</button>
+    </div>
+    <div class="suggest" id="suggest"></div>
+    <div class="answer" id="answer"></div>
+  </div>
+</section>
+
+<footer>
+  <span>Data: xStocks on Solana, Yahoo reference legs</span>
+  <span id="foot-gen"></span>
+  <span id="foot-sample"></span>
+</footer>
+</div>
+
+<script id="desk-data" type="application/json">{"generated_at":"2026-09-10T13:30:34+00:00","coverage":{"symbol":"NVDAx","start":"2026-03-01T00:00:00+00:00","end":"2026-09-10T12:00:00+00:00","bars":4607,"beta":1.1500206808487181},"summary":{"n_windows":27,"median_window_hours":48.0,"mean_abs_terminal_drift":0.008374990682405959,"p95_abs_terminal_drift":0.019547502072379427,"worst_terminal_drift":0.02139523668610821,"share_exceeding_1pct":0.37037037037037035},"regime_shares":[{"regime":"US_CASH","share":0.1732146733232038},{"regime":"WEEKNIGHT","share":0.5337529845886694},{"regime":"WEEKEND_BLACKOUT","share":0.29042761015845453},{"regime":"HOLIDAY_BLACKOUT","share":0.002604731929672238}],"dispersion":[{"regime":"US_CASH","n":798,"mean":0.00014936898691316917,"std":0.004169692734511753,"p5":-0.006566823612439349,"p95":0.007108357401924347},{"regime":"WEEKNIGHT","n":2459,"mean":0.0009583407629489456,"std":0.005128762779095616,"p5":-0.0046153570576489165,"p95":0.008991878112755878},{"regime":"WEEKEND_BLACKOUT","n":1338,"mean":0.0019325611740633845,"std":0.006963840083472285,"p5":-0.009972229128778758,"p95":0.01374488464952495}],"drift":[{"elapsed_h_from":0,"n":158,"n_windows":27,"mean_abs":0.0020939539,"std":0.0030391079,"q05":-0.0062601877,"q25":-0.0021318315,"q50":-0.0001939152,"q75":0.0005256016,"q95":0.0038641014},{"elapsed_h_from":6,"n":158,"n_windows":27,"mean_abs":0.0034329896,"std":0.0044647416,"q05":-0.0092311736,"q25":-0.0033862555,"q50":-0.0009034715,"q75":0.0018468176,"q95":0.0058779982},{"elapsed_h_from":12,"n":158,"n_windows":27,"mean_abs":0.0033394731,"std":0.0042112458,"q05":-0.0075551003,"q25":-0.0029033357,"q50":-0.0005450829,"q75":0.0024145189,"q95":0.0069066019},{"elapsed_h_from":18,"n":158,"n_windows":27,"mean_abs":0.0046615444,"std":0.005939922,"q05":-0.008375171,"q25":-0.0034917359,"q50":0.0008278933,"q75":0.0040518022,"q95":0.0104422994},{"elapsed_h_from":24,"n":158,"n_windows":27,"mean_abs":0.0054447205,"std":0.0073445489,"q05":-0.0104149193,"q25":-0.0029159894,"q50":0.0013531212,"q75":0.0046336045,"q95":0.0152503729},{"elapsed_h_from":30,"n":155,"n_windows":27,"mean_abs":0.0061504652,"std":0.0077903755,"q05":-0.0102015523,"q25":-0.0021279211,"q50":0.0016671909,"q75":0.0064899973,"q95":0.0194303882},{"elapsed_h_from":36,"n":159,"n_windows":27,"mean_abs":0.0068218958,"std":0.008320591,"q05":-0.0121555295,"q25":-0.0011801269,"q50":0.003431092,"q75":0.006948149,"q95":0.0187039081},{"elapsed_h_from":42,"n":157,"n_windows":27,"mean_abs":0.0074667728,"std":0.0086896936,"q05":-0.0119119415,"q25":-3.21452e-05,"q50":0.0044175722,"q75":0.0083470271,"q95":0.0182158256},{"elapsed_h_from":48,"n":35,"n_windows":26,"mean_abs":0.006983959,"std":0.0081574377,"q05":-0.0127041598,"q25":0.0003326191,"q50":0.0054770091,"q75":0.0072400984,"q95":0.0152001259}],"terminal_gaps":[{"window_start":"2026-03-06T22:00:00.000Z","drift":-0.0111800175},{"window_start":"2026-05-08T21:00:00.000Z","drift":0.0052106545},{"window_start":"2026-05-15T21:00:00.000Z","drift":0.0062886066},{"window_start":"2026-05-22T21:00:00.000Z","drift":0.0176403054},{"window_start":"2026-05-29T21:00:00.000Z","drift":0.0123299274},{"window_start":"2026-07-10T21:00:00.000Z","drift":0.011432242},{"window_start":"2026-08-07T21:00:00.000Z","drift":0.0065719513},{"window_start":"2026-07-31T21:00:00.000Z","drift":0.0025633885},{"window_start":"2026-09-04T21:00:00.000Z","drift":0.0082685193},{"window_start":"2026-08-14T21:00:00.000Z","drift":-0.0003169245},{"window_start":"2026-07-24T21:00:00.000Z","drift":0.006256098},{"window_start":"2026-07-17T21:00:00.000Z","drift":0.0069467253},{"window_start":"2026-06-26T21:00:00.000Z","drift":0.0049858857},{"window_start":"2026-03-13T21:00:00.000Z","drift":0.0037819358},{"window_start":"2026-06-12T21:00:00.000Z","drift":0.0213952367},{"window_start":"2026-06-19T21:00:00.000Z","drift":-0.0003468273},{"window_start":"2026-08-21T21:00:00.000Z","drift":0.0135421969},{"window_start":"2026-04-10T21:00:00.000Z","drift":-0.0203648721},{"window_start":"2026-04-17T21:00:00.000Z","drift":-0.0115420676},{"window_start":"2026-04-24T21:00:00.000Z","drift":0.0063712942},{"window_start":"2026-05-01T21:00:00.000Z","drift":0.0141543347},{"window_start":"2026-06-05T21:00:00.000Z","drift":0.0059735498},{"window_start":"2026-08-28T21:00:00.000Z","drift":0.0054770091},{"window_start":"2026-03-27T21:00:00.000Z","drift":0.0003537732},{"window_start":"2026-03-20T21:00:00.000Z","drift":-0.0154157084},{"window_start":"2026-07-03T16:00:00.000Z","drift":0.00712899},{"window_start":"2026-04-02T21:00:00.000Z","drift":-0.0002857065}],"hedges":[{"instrument":"TSLAx","correlation":0.7649256373,"hedge_ratio":0.9336344025,"notional_usd":233408.6006251606,"risk_reduction":0.3558814011,"cost_pct":0.006,"cost_usd":1400.451603751,"stable":false,"verdict":"unstable - rolling correlation spans -0.45 to +0.97; has been risk-adding"},{"instrument":"BTC-USD","correlation":0.7082594072,"hedge_ratio":0.4343644034,"notional_usd":108591.1008576909,"risk_reduction":0.2940477268,"cost_pct":0.0015,"cost_usd":162.8866512865,"stable":false,"verdict":"unstable - rolling correlation spans -0.51 to +0.89; has been risk-adding"},{"instrument":"ETH-USD","correlation":0.6121952292,"hedge_ratio":0.2641375015,"notional_usd":66034.3753792344,"risk_reduction":0.2092933532,"cost_pct":0.0015,"cost_usd":99.0515630689,"stable":false,"verdict":"unstable - rolling correlation spans -0.35 to +0.79; has been risk-adding"}],"blackout_windows":[{"start":1788555600,"end":1788732000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1788796800,"end":1788818400,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1789160400,"end":1789336800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1789765200,"end":1789941600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1790370000,"end":1790546400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1790974800,"end":1791151200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1791579600,"end":1791756000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1792184400,"end":1792360800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1792789200,"end":1792965600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1793394000,"end":1793574000,"hours":50.0,"regime":"WEEKEND_BLACKOUT"},{"start":1794002400,"end":1794178800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1794607200,"end":1794783600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1795212000,"end":1795388400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1795712400,"end":1795734000,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1795798800,"end":1795993200,"hours":54.0,"regime":"WEEKEND_BLACKOUT"},{"start":1796421600,"end":1796598000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1797026400,"end":1797202800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1797631200,"end":1797807600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1798131600,"end":1798412400,"hours":78.0,"regime":"WEEKEND_BLACKOUT"},{"start":1798754400,"end":1799017200,"hours":73.0,"regime":"WEEKEND_BLACKOUT"},{"start":1799445600,"end":1799622000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1800050400,"end":1800226800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1800291600,"end":1800313200,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1800655200,"end":1800831600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1801260000,"end":1801436400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1801864800,"end":1802041200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1802469600,"end":1802646000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1802710800,"end":1802732400,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1803074400,"end":1803250800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1803679200,"end":1803855600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1804284000,"end":1804460400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1804888800,"end":1805061600,"hours":48.0,"regime":"WEEKEND_BLACKOUT"},{"start":1805490000,"end":1805666400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1806008400,"end":1806271200,"hours":73.0,"regime":"WEEKEND_BLACKOUT"},{"start":1806699600,"end":1806876000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1807304400,"end":1807480800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1807909200,"end":1808085600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1808514000,"end":1808690400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1809118800,"end":1809295200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1809723600,"end":1809900000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1810328400,"end":1810504800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1810933200,"end":1811109600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1811538000,"end":1811714400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1811779200,"end":1811800800,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1812142800,"end":1812319200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1812747600,"end":1812924000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1813352400,"end":1813528800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1813957200,"end":1814133600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1814562000,"end":1814738400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1814803200,"end":1814824800,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1815166800,"end":1815343200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1815771600,"end":1815948000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1816376400,"end":1816552800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1816981200,"end":1817157600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1817586000,"end":1817762400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1818190800,"end":1818367200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1818795600,"end":1818972000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1819400400,"end":1819576800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1820005200,"end":1820181600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1820246400,"end":1820268000,"hours":6.0,"regime":"HOLIDAY_BLACKOUT"},{"start":1820610000,"end":1820786400,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1821214800,"end":1821391200,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1821819600,"end":1821996000,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1822424400,"end":1822600800,"hours":49.0,"regime":"WEEKEND_BLACKOUT"},{"start":1823029200,"end":1823205600,"hours":49.0,"regime":"WEEKEND_BLACKOUT"}],"regime_runs":[{"start":1789045200,"end":1789048800,"regime":"WEEKNIGHT"},{"start":1789048800,"end":1789070400,"regime":"US_CASH"},{"start":1789070400,"end":1789135200,"regime":"WEEKNIGHT"},{"start":1789135200,"end":1789156800,"regime":"US_CASH"},{"start":1789156800,"end":1789160400,"regime":"WEEKNIGHT"},{"start":1789160400,"end":1789336800,"regime":"WEEKEND_BLACKOUT"},{"start":1789336800,"end":1789394400,"regime":"WEEKNIGHT"},{"start":1789394400,"end":1789416000,"regime":"US_CASH"},{"start":1789416000,"end":1789480800,"regime":"WEEKNIGHT"},{"start":1789480800,"end":1789502400,"regime":"US_CASH"},{"start":1789502400,"end":1789567200,"regime":"WEEKNIGHT"},{"start":1789567200,"end":1789588800,"regime":"US_CASH"},{"start":1789588800,"end":1789653600,"regime":"WEEKNIGHT"},{"start":1789653600,"end":1789675200,"regime":"US_CASH"},{"start":1789675200,"end":1789740000,"regime":"WEEKNIGHT"},{"start":1789740000,"end":1789761600,"regime":"US_CASH"},{"start":1789761600,"end":1789765200,"regime":"WEEKNIGHT"},{"start":1789765200,"end":1789941600,"regime":"WEEKEND_BLACKOUT"},{"start":1789941600,"end":1789999200,"regime":"WEEKNIGHT"},{"start":1789999200,"end":1790020800,"regime":"US_CASH"},{"start":1790020800,"end":1790085600,"regime":"WEEKNIGHT"},{"start":1790085600,"end":1790107200,"regime":"US_CASH"},{"start":1790107200,"end":1790172000,"regime":"WEEKNIGHT"},{"start":1790172000,"end":1790193600,"regime":"US_CASH"},{"start":1790193600,"end":1790258400,"regime":"WEEKNIGHT"},{"start":1790258400,"end":1790280000,"regime":"US_CASH"},{"start":1790280000,"end":1790344800,"regime":"WEEKNIGHT"},{"start":1790344800,"end":1790366400,"regime":"US_CASH"},{"start":1790366400,"end":1790370000,"regime":"WEEKNIGHT"},{"start":1790370000,"end":1790546400,"regime":"WEEKEND_BLACKOUT"},{"start":1790546400,"end":1790604000,"regime":"WEEKNIGHT"},{"start":1790604000,"end":1790625600,"regime":"US_CASH"},{"start":1790625600,"end":1790690400,"regime":"WEEKNIGHT"},{"start":1790690400,"end":1790712000,"regime":"US_CASH"},{"start":1790712000,"end":1790776800,"regime":"WEEKNIGHT"},{"start":1790776800,"end":1790798400,"regime":"US_CASH"},{"start":1790798400,"end":1790859600,"regime":"WEEKNIGHT"}],"demo":{"exposure_usd":250000,"symbol":"NVDAx","horizon_h":72},"verdict":{"token_share_1h":0.06,"token_share_6h":0.27,"token_share_12h":0.13,"hit_rate":0.5,"n_weekends":27,"net_at_10bp":-9e-05}}</script>
+<script>
+(function(){
+"use strict";
+var D = JSON.parse(document.getElementById("desk-data").textContent);
+
+function pct(v, d){ return (v*100).toFixed(d === undefined ? 2 : d) + "%"; }
+function sgn(v, d){ return (v >= 0 ? "+" : "") + (v*100).toFixed(d === undefined ? 2 : d) + "%"; }
+function usd(v){ return "$" + Math.round(v).toLocaleString("en-US"); }
+function isBlackout(regime){ return regime.indexOf("BLACKOUT") >= 0; }
+
+var FILL = {
+  US_CASH: "var(--accent)", WEEKNIGHT: "var(--blackout-soft)",
+  WEEKEND_BLACKOUT: "var(--blackout)", HOLIDAY_BLACKOUT: "var(--blackout)"
+};
+var NAME = {
+  US_CASH: "NYSE open", WEEKNIGHT: "Globex only",
+  WEEKEND_BLACKOUT: "Blackout", HOLIDAY_BLACKOUT: "Holiday blackout"
+};
+
+/* ---- live clock ------------------------------------------------------- */
+function currentRun(now){
+  for (var i = 0; i < D.regime_runs.length; i++){
+    var r = D.regime_runs[i];
+    if (now >= r.start && now < r.end) return r;
+  }
+  return null;
+}
+function nextReferenceAt(now){
+  for (var i = 0; i < D.regime_runs.length; i++){
+    var r = D.regime_runs[i];
+    if (r.start > now && !isBlackout(r.regime)) return r.start;
+  }
+  return null;
+}
+function nextBlackoutAt(now){
+  for (var i = 0; i < D.blackout_windows.length; i++){
+    if (D.blackout_windows[i].start > now) return D.blackout_windows[i].start;
+  }
+  return null;
+}
+function tick(){
+  var now = Math.floor(Date.now()/1000);
+  var run = currentRun(now);
+  var chip = document.getElementById("regime-chip");
+  var label = document.getElementById("regime-label");
+  var cd = document.getElementById("countdown");
+  var cdl = document.getElementById("countdown-label");
+  if (!run){ label.textContent = "schedule out of range"; return; }
+
+  var dark = isBlackout(run.regime);
+  label.textContent = NAME[run.regime] || run.regime;
+  chip.setAttribute("data-state", dark ? "blackout" : "open");
+
+  var target = dark ? nextReferenceAt(now) : nextBlackoutAt(now);
+  var caption = dark ? "until a reference price returns" : "until the next blackout";
+  if (!target){ cd.textContent = "—"; cdl.textContent = ""; return; }
+
+  var s = Math.max(target - now, 0);
+  var h = Math.floor(s/3600), m = Math.floor((s % 3600)/60);
+  cd.innerHTML = h + "<small>h </small>" + (m < 10 ? "0" + m : m) + "<small>m</small>";
+  cdl.textContent = caption;
+}
+
+/* ---- timeline --------------------------------------------------------- */
+function drawTimeline(){
+  var svg = document.getElementById("timeline");
+  var W = 960, H = 168, L = 8, R = 8, top = 26, rowH = 30, gap = 12;
+  var runs = D.regime_runs;
+  if (!runs.length) return;
+  var t0 = runs[0].start, t1 = runs[runs.length-1].end;
+  function X(t){ return L + (t - t0)/(t1 - t0) * (W - L - R); }
+
+  var rows = [
+    { key: "NYSE",   shows: function(r){ return r.regime === "US_CASH"; } },
+    { key: "GLOBEX", shows: function(r){ return r.regime === "US_CASH" || r.regime === "WEEKNIGHT"; } },
+    { key: "RTOKEN", shows: function(){ return true; } }
+  ];
+  var out = "";
+  rows.forEach(function(row, i){
+    var y = top + i*(rowH + gap);
+    out += '<text x="' + L + '" y="' + (y - 7) + '" font-family="var(--mono)" font-size="10.5" ' +
+           'letter-spacing="1.4" fill="var(--faint)">' + row.key + '</text>';
+    out += '<rect x="' + L + '" y="' + y + '" width="' + (W-L-R) + '" height="' + rowH +
+           '" rx="3" fill="var(--surface-2)"></rect>';
+    runs.forEach(function(r){
+      if (!row.shows(r)) return;
+      var fill = row.key === "RTOKEN"
+        ? (isBlackout(r.regime) ? "var(--blackout)" : "var(--accent)")
+        : FILL[r.regime];
+      var w = Math.max(X(r.end) - X(r.start), 0.7);
+      out += '<rect x="' + X(r.start) + '" y="' + y + '" width="' + w + '" height="' + rowH +
+             '" fill="' + fill + '"></rect>';
+    });
+  });
+
+  var bottom = top + 3*(rowH + gap) - gap;
+  for (var t = Math.ceil(t0/86400)*86400; t < t1; t += 86400){
+    var dt = new Date(t*1000);
+    var monday = dt.getUTCDay() === 1;
+    out += '<line x1="' + X(t) + '" y1="' + (top-4) + '" x2="' + X(t) + '" y2="' + (bottom+4) +
+           '" stroke="var(--rule)" stroke-width="' + (monday ? 1.2 : 0.6) + '"></line>';
+    if (monday){
+      out += '<text x="' + (X(t)+4) + '" y="' + (H-8) + '" font-family="var(--mono)" ' +
+             'font-size="10" fill="var(--faint)">' + dt.toUTCString().slice(5,11) + '</text>';
+    }
+  }
+  var now = Math.floor(Date.now()/1000);
+  if (now > t0 && now < t1){
+    out += '<line x1="' + X(now) + '" y1="' + (top-12) + '" x2="' + X(now) + '" y2="' + (bottom+6) +
+           '" stroke="var(--risk)" stroke-width="1.6"></line>';
+    out += '<text x="' + (X(now)+5) + '" y="' + (top-15) + '" font-family="var(--mono)" ' +
+           'font-size="10" fill="var(--risk)">NOW</text>';
+  }
+  svg.innerHTML = out;
+}
+
+/* ---- evidence --------------------------------------------------------- */
+function drawEvidence(){
+  var v = D.verdict, s = D.summary;
+  var tiles = [
+    ["Closes via the token", pct(v.token_share_6h, 0), "6-hour horizon"],
+    ["Hit rate fading it", pct(v.hit_rate, 0), "a coin flip"],
+    ["Net at 10bp cost", sgn(v.net_at_10bp, 3), "per weekend"],
+    ["Weekends beyond 1%", pct(s.share_exceeding_1pct, 0), "of " + s.n_windows]
+  ];
+  document.getElementById("evidence").innerHTML = tiles.map(function(t){
+    return '<div><dt>' + t[0] + '</dt><dd>' + t[1] + '</dd></div>';
+  }).join("");
+  document.getElementById("v-weekends").textContent = s.n_windows;
+  document.getElementById("cov-range").textContent =
+    D.coverage.start.slice(0,10) + " to " + D.coverage.end.slice(0,10);
+}
+
+/* ---- drift fan chart -------------------------------------------------- */
+function drawDrift(){
+  var svg = document.getElementById("drift-chart");
+  var rows = D.drift;
+  if (!rows.length) return;
+  var W = 900, H = 330, L = 62, R = 18, T = 18, B = 46;
+  var xmax = rows[rows.length-1].elapsed_h_from + 6;
+  var lo = Math.min.apply(null, rows.map(function(r){ return r.q05; }));
+  var hi = Math.max.apply(null, rows.map(function(r){ return r.q95; }));
+  var pad = (hi - lo) * 0.12;
+  var ymin = lo - pad, ymax = hi + pad;
+  function X(h){ return L + h/xmax * (W - L - R); }
+  function Y(v){ return T + (ymax - v)/(ymax - ymin) * (H - T - B); }
+  function mid(r){ return r.elapsed_h_from + 3; }
+  function band(a, b){
+    var up = rows.map(function(r){ return X(mid(r)) + "," + Y(r[a]); });
+    var dn = rows.slice().reverse().map(function(r){ return X(mid(r)) + "," + Y(r[b]); });
+    return up.concat(dn).join(" ");
+  }
+
+  var out = "";
+  for (var i = 0; i <= 4; i++){
+    var v = ymin + i*(ymax - ymin)/4;
+    out += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + (W-R) + '" y2="' + Y(v) +
+           '" stroke="var(--rule)" stroke-width="0.8"></line>';
+    out += '<text x="' + (L-9) + '" y="' + (Y(v)+3.5) + '" text-anchor="end" ' +
+           'font-family="var(--mono)" font-size="10.5" fill="var(--faint)">' + sgn(v,1) + '</text>';
+  }
+  out += '<polygon points="' + band("q05","q95") + '" fill="var(--accent)" opacity="0.13"></polygon>';
+  out += '<polygon points="' + band("q25","q75") + '" fill="var(--accent)" opacity="0.26"></polygon>';
+  out += '<line x1="' + L + '" y1="' + Y(0) + '" x2="' + (W-R) + '" y2="' + Y(0) +
+         '" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 3"></line>';
+  out += '<polyline points="' + rows.map(function(r){ return X(mid(r)) + "," + Y(r.q50); }).join(" ") +
+         '" fill="none" stroke="var(--accent)" stroke-width="2"></polyline>';
+  rows.forEach(function(r){
+    out += '<circle cx="' + X(mid(r)) + '" cy="' + Y(r.q50) + '" r="3" fill="var(--accent)"></circle>';
+    out += '<text x="' + X(mid(r)) + '" y="' + (H-26) + '" text-anchor="middle" ' +
+           'font-family="var(--mono)" font-size="10.5" fill="var(--faint)">' + r.elapsed_h_from + '</text>';
+  });
+  out += '<text x="' + ((L + W - R)/2) + '" y="' + (H-6) + '" text-anchor="middle" ' +
+         'font-family="var(--mono)" font-size="10.5" letter-spacing="1.2" ' +
+         'fill="var(--faint)">HOURS INTO THE BLACKOUT</text>';
+  svg.innerHTML = out;
+
+  var last = rows[rows.length-1];
+  document.getElementById("drift-note").textContent =
+    "By hour " + last.elapsed_h_from + ", half of weekends sat between " + sgn(last.q25) +
+    " and " + sgn(last.q75) + ", and one in twenty beyond " + sgn(last.q95) +
+    ". Based on " + last.n_windows + " weekends — a thin sample, and the width of the band reflects it.";
+}
+
+/* ---- exposure --------------------------------------------------------- */
+function drawExposure(){
+  var now = Math.floor(Date.now()/1000);
+  var end = now + D.demo.horizon_h*3600;
+  var acc = {}, total = 0;
+  D.regime_runs.forEach(function(r){
+    var s = Math.max(r.start, now), e = Math.min(r.end, end);
+    if (e > s){ acc[r.regime] = (acc[r.regime] || 0) + (e - s); total += (e - s); }
+  });
+  if (!total) return;
+
+  var bar = document.getElementById("expo-bar");
+  var key = document.getElementById("expo-key");
+  bar.innerHTML = ""; key.innerHTML = "";
+  var blackoutHours = 0;
+
+  ["US_CASH","WEEKNIGHT","WEEKEND_BLACKOUT","HOLIDAY_BLACKOUT"].forEach(function(k){
+    var secs = acc[k];
+    if (!secs) return;
+    var share = secs/total, hours = Math.round(secs/3600);
+    if (isBlackout(k)) blackoutHours += hours;
+
+    var seg = document.createElement("div");
+    seg.style.flexGrow = String(share);
+    seg.style.flexBasis = "0";
+    seg.style.background = FILL[k];
+    seg.style.color = (k === "WEEKNIGHT") ? "var(--ink)" : "#F4F7FA";
+    seg.textContent = share > 0.09 ? hours + "h" : "";
+    seg.title = (NAME[k] || k) + " — " + hours + "h";
+    bar.appendChild(seg);
+
+    var item = document.createElement("span");
+    item.innerHTML = '<i class="swatch" style="background:' + FILL[k] + '"></i>' +
+      (NAME[k] || k) + ' <span class="num">' + hours + 'h</span> ' +
+      '<span class="num" style="color:var(--faint)">' + pct(share, 0) + '</span>';
+    key.appendChild(item);
+  });
+
+  document.getElementById("expo-caption").textContent =
+    usd(D.demo.exposure_usd) + " of " + D.demo.symbol + ", held from now across the next " +
+    D.demo.horizon_h + " hours. " + blackoutHours + " of those hours have no reference price.";
+}
+
+/* ---- hedges ----------------------------------------------------------- */
+function drawHedges(){
+  document.getElementById("hedge-body").innerHTML = D.hedges.map(function(h){
+    return '<tr>' +
+      '<td class="n" style="font-weight:500">' + h.instrument + '</td>' +
+      '<td class="n">' + h.correlation.toFixed(2) + '</td>' +
+      '<td class="n">' + h.hedge_ratio.toFixed(2) + '</td>' +
+      '<td class="n">' + usd(h.notional_usd) + '</td>' +
+      '<td class="n">' + usd(h.cost_usd) + '</td>' +
+      '<td><span class="pill ' + (h.stable ? "good" : "bad") + '">' +
+        (h.stable ? "usable" : "unstable") + '</span>' +
+        '<div style="margin-top:5px;color:var(--muted);font-size:12.5px">' + h.verdict + '</div>' +
+      '</td></tr>';
+  }).join("");
+}
+
+function drawFooter(){
+  document.getElementById("foot-gen").textContent =
+    "Analytics generated " + D.generated_at.slice(0,10) + ", not live prices";
+  document.getElementById("foot-sample").textContent =
+    D.summary.n_windows + " weekend blackouts · " + D.coverage.bars + " hourly bars";
+}
+
+/* ---- language layer, when the viewer can run it ----------------------- */
+var QUESTIONS = [
+  "Should I hedge $250k of NVDAx into this weekend?",
+  "Why isn't the weekend premium an arbitrage?",
+  "How bad was the worst weekend in the sample?"
+];
+
+function initAsk(){
+  if (!window.claude || !window.claude.use) return;
+  window.claude.use("sample").then(function(sample){
+    if (!sample) return;                    // page is complete without it
+    document.getElementById("ask").classList.add("on");
+
+    var input = document.getElementById("q");
+    var send = document.getElementById("send");
+    var out = document.getElementById("answer");
+    var suggest = document.getElementById("suggest");
+
+    suggest.innerHTML = QUESTIONS.map(function(q){
+      return '<button type="button" data-q="' + q.replace(/"/g, "&quot;") + '">' + q + '</button>';
+    }).join("");
+    suggest.addEventListener("click", function(e){
+      var b = e.target.closest("button");
+      if (!b) return;
+      input.value = b.getAttribute("data-q");
+      ask();
+    });
+
+    function ask(){
+      var q = input.value.trim();
+      if (!q) return;
+      send.disabled = true;
+      out.textContent = "Thinking…";
+
+      var context = {
+        coverage: D.coverage, summary: D.summary, verdict: D.verdict,
+        dispersion: D.dispersion, drift: D.drift, hedges: D.hedges, demo: D.demo
+      };
+      var prompt = [
+        "You are Blackout Desk, a closure-window risk desk for tokenized US stocks.",
+        "Answer ONLY from the measurements in the JSON below. If it does not contain the",
+        "answer, say so plainly rather than reasoning from general market knowledge.",
+        "State the sample size (27 weekend blackouts) whenever you quote a distribution.",
+        "Never call the weekend premium an arbitrage opportunity: the measurements show it",
+        "is an information lead, and the token leg is not tradeable after costs.",
+        "Be concise and concrete, use percentages and dollar figures, and leave the final",
+        "decision to the trader.",
+        "",
+        "MEASUREMENTS:", JSON.stringify(context),
+        "",
+        "QUESTION: " + q
+      ].join("\n");
+
+      sample(prompt, {
+        modelTier: "default",
+        onText: function(ev){ out.textContent = ev.text; }
+      }).then(function(res){
+        out.textContent = res.text;
+      })["catch"](function(err){
+        out.textContent = (err && err.code === "rate_limited")
+          ? "Rate limited — wait a moment and ask again."
+          : "Could not reach the model. Every measurement above still stands.";
+      }).then(function(){
+        send.disabled = false;
+      });
+    }
+
+    send.addEventListener("click", ask);
+    input.addEventListener("keydown", function(e){ if (e.key === "Enter") ask(); });
+  });
+}
+
+drawTimeline();
+drawEvidence();
+drawDrift();
+drawExposure();
+drawHedges();
+drawFooter();
+tick();
+setInterval(tick, 30000);
+initAsk();
+})();
+</script>

@@ -125,12 +125,13 @@ src/blackout/
   exposure.py           ▢  positions → per-regime exposure
   distributions.py      ▢  empirical drift by elapsed blackout hour
   analogues.py          ▢  nearest-neighbour retrieval over past windows
-  hedges.py             ▢  instruments live during blackout + cost model
+  hedges.py             ✅ instruments live during blackout + cost model
   calendar_events.py    ▢  macro events inside a window
   tools.py              ▢  the 7 typed tools; single source of truth
-  build.py              ▢  L1+L2 → web/data/desk.json
+  build.py              ✅ L1+L2 → web/data/desk.json
 web/
-  desk.html             ▢  artifact source (static + LUI)
+  desk.template.html    ✅ page source (static + LUI)
+  desk.html             ✅ generated; published as the live demo
   data/desk.json        ▢  generated; never hand-edited
 scripts/
   probe_sources.py      ✅ rToken ingestion, rate-limited, resumable
@@ -150,7 +151,7 @@ docs/
 
 | Gap | Impact | Plan |
 |---|---|---|
-| **No BTC/ETH data** | `hedge_menu` cannot price the only hedge available during a blackout | Added to `scripts/fetch_reference.py`; one operator run |
+| ~~No BTC/ETH data~~ | Resolved 10 Sep. BTC correlates +0.71 with NVDAx across blackouts and removes 29% of variance, but the rolling correlation spans −0.51 to +0.89 and changes sign, so `hedges.py` reports every candidate as unstable | Done |
 | **No macro calendar source** | Tool 7 has no input | Hand-curate the events in our 210-day window; honest and sufficient at this scale |
 | **`sample` may be unavailable to a judge** | LUI silent | Static-first design + screen recording |
 | **27 weekends is a thin sample** | Distributions are wide | State it on the page beside every figure rather than hiding it |
@@ -162,11 +163,11 @@ docs/
 
 | Day | Milestone | Gate |
 |---|---|---|
-| **10 Sep (today)** | Architecture, scaffold, **X post live** | Post is a validity gate; reach compounds |
+| **10 Sep** | ✅ Architecture, scaffold, hedges, build pipeline, **live demo URL** | Demo gate cleared 6 days early |
 | 11–12 Sep | L2 analytics: distributions, analogues, exposure | Tests green on each |
 | 12 Sep | `fetch_hedges.py` run; BTC/ETH landed | Needs one operator run |
 | 13–14 Sep | `tools.py` + `build.py` → `desk.json` | 7 tools callable from Python |
-| 15–16 Sep | Artifact v1: static analytics, charts, both themes | Judge-accessible URL exists |
+| 15–16 Sep | ~~Artifact v1~~ done 10 Sep — use this slot for analogues + macro calendar | Judge-accessible URL exists |
 | 17–18 Sep | LUI layer: `sample` + tool bindings | Demo task runs end to end |
 | 19 Sep | Polish, mobile, screen recording | |
 | 20 Sep | `SUBMISSION.md`, form dry run | |
