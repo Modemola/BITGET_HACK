@@ -12,10 +12,10 @@ path keeps the same URL.
 
 ## The finding everything rests on
 
-Across 210 days of hourly rToken data, the closure-window premium is **not a
-mispricing — it is an information lead**. When the reference reopens, 87–92% of
+Across 197 days of hourly rToken data, the closure-window premium is **not a
+mispricing — it is an information lead**. When the reference reopens, 78–98% of
 the gap closes because fair value catches up to the token, not because the token
-corrects. Fading it is a 48–52% coin flip that dies at 10bp costs.
+corrects. Fading it is a 46% coin flip that dies at 10bp costs.
 
 This was measured, not assumed, and it falsified our original strategy. Four
 variants were tested and all agree (`docs/FINDINGS.md`). The product's job is to
@@ -29,7 +29,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 74 tests
+python -m pytest -q                     # 99 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -67,7 +67,7 @@ web/
 - **Every number traces to raw data.** Nothing appears on the page that
   `scripts/analyse_basis.py` cannot reproduce.
 - **Report `n_windows`, not `n`.** 158 hourly bars from one weekend are not 158
-  independent observations. The honest sample is 27 weekends, and it is stated
+  independent observations. The honest sample is 28 weekends, and it is stated
   beside every distribution.
 - **Unbuilt modules raise, never return placeholder data.** A fabricated number
   in a risk tool is worse than a missing one.
@@ -88,6 +88,11 @@ web/
   `JSON.parse` rejects, which renders the page *entirely blank* with no error.
   `build._json_safe` maps non-finite values to null and both writers pass
   `allow_nan=False`. The page's formatters render null as an em dash.
+- **Prose goes stale when the data refreshes.** `tests/test_doc_figures.py` pins
+  every figure quoted in the docs to the payload field it came from and fails
+  naming the file and sentence. It also blocks copy that calls the premium an
+  arbitrage opportunity. Add a CLAIMS entry whenever a doc starts quoting a new
+  number; don't delete entries to make a failure go away.
 - **Retrieval exists twice**, in `analogues.py` and again in JS on the page.
   `test_js_parity.py` extracts the real functions from the template and runs
   them under node against the shipped payload, requiring identical ordering and
@@ -119,6 +124,11 @@ web/
   than flagging them, so anything comparing events against the calendar must
   first restrict to the span the clock was built over. The page's JS clock does
   report out-of-range correctly (`currentRun` returns null).
+- **The rToken fetcher must catch up before it extends.** GeckoTerminal only
+  pages backwards, so `probe_sources.py` first walks back from *now* until it
+  overlaps the cache, then pages back from the cache's oldest bar for depth. It
+  previously did only the second step, so a stale file stayed stale however
+  often it ran and every new weekend was silently missed.
 - **The Fed's FOMC page carries each meeting twice** — a statement link with the
   exact date for past meetings, and a month plus day range for future ones. Only
   the range exists for the meetings that matter, and straddling meetings use

@@ -18,8 +18,8 @@ import pytest
 
 from blackout import ClosureClock, Regime
 from blackout.calendar_events import (
-    SCHEMA, assess, events_after_reopen, events_in_window, historical_overlap,
-    load_events, next_blackout,
+    SCHEMA, assess, events_after_reopen, events_before_window, events_in_window,
+    historical_overlap, load_events, next_blackout,
 )
 
 CLOCK = ClosureClock(start="2024-06-01", end="2028-01-01")
@@ -136,3 +136,38 @@ def test_real_events_land_midweek_while_the_cash_market_is_open():
     regimes = CLOCK.annotate(pd.DatetimeIndex(covered["ts_utc"]))["regime"]
     assert (regimes == Regime.US_CASH.value).all(), \
         "a rate decision released outside the cash session would change the analysis"
+
+
+def test_an_event_before_the_window_opens_is_not_silently_dropped():
+    """The Monday case: FOMC on Wednesday, blackout on Friday.
+
+    The tool previously reported only what fell inside the window or after the
+    reopen, so a rate decision three days away - the one thing a trader could
+    still act on - went unmentioned.
+    """
+    midweek = pd.Timestamp("2026-09-14 12:00", tz="UTC")          # Monday
+    wednesday = synthetic_events(["2026-09-16 18:00"])
+    result = assess(CLOCK, midweek, wednesday)
+
+    assert result["events_before"] == 1, "event between now and the window was dropped"
+    assert result["events_inside"] == 0
+    assert result["next_event_ts"] == pd.Timestamp("2026-09-16 18:00", tz="UTC")
+
+
+def test_next_event_is_the_soonest_across_all_three_spans():
+    """Ordering must be chronological, not by which bucket it landed in."""
+    midweek = pd.Timestamp("2026-09-14 12:00", tz="UTC")
+    spread = synthetic_events(["2026-09-23 18:00",   # after the reopen
+                               "2026-09-19 12:00",   # inside the window
+                               "2026-09-16 18:00"])  # before it opens
+    result = assess(CLOCK, midweek, spread)
+    assert result["events_before"] == 1
+    assert result["events_inside"] == 1
+    assert result["events_after"] == 1
+    assert result["next_event_ts"] == pd.Timestamp("2026-09-16 18:00", tz="UTC")
+
+
+def test_events_already_past_are_not_reported_as_upcoming():
+    midweek = pd.Timestamp("2026-09-14 12:00", tz="UTC")
+    past = synthetic_events(["2026-09-09 18:00"])
+    assert assess(CLOCK, midweek, past)["events_before"] == 0

@@ -715,6 +715,12 @@ function drawCalendar(){
   }
   if (!window_){ strip.innerHTML = ""; return; }
 
+  // Three spans, because the position exists across all of them. Omitting the
+  // first made the panel silent about a rate decision three days away purely
+  // because it fell before the window rather than inside it.
+  var before = events.filter(function(e){
+    return e.ts >= now && e.ts < window_.start;
+  });
   var inside = events.filter(function(e){
     return e.ts >= window_.start && e.ts < window_.end;
   });
@@ -740,13 +746,21 @@ function drawCalendar(){
       " Weekend risk is unscheduled risk."
     : "No event calendar loaded.";
 
-  strip.innerHTML =
+  var panels =
     '<div class="cal-item"><dt>Scheduled inside the window</dt><dd>' +
       listOr(inside, "Nothing.") + '</dd></div>' +
     '<div class="cal-item"><dt>Waiting at the reopen</dt><dd>' +
       listOr(after, "Nothing in the following 72 hours.") + '</dd></div>' +
     '<div class="cal-item"><dt>Why that is normal</dt><dd class="cal-none">' +
       claim + '</dd></div>';
+
+  // Shown only when it applies, so a Friday reader is not told about an empty
+  // span that has already elapsed.
+  if (before.length){
+    panels = '<div class="cal-item"><dt>Before the window opens</dt><dd>' +
+      listOr(before, "Nothing.") + '</dd></div>' + panels;
+  }
+  strip.innerHTML = panels;
 }
 
 /* ---- hedges ----------------------------------------------------------- */

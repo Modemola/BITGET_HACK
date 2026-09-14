@@ -1,14 +1,14 @@
 # Findings — rToken pricing across market-closure windows
 
-**Data:** NVDAx and TSLAx hourly (Solana, xStocks), 2026-03-01 → 2026-09-10,
-4,607 usable bars, joined to NVDA/TSLA native equity and NQ/ES index futures.
+**Data:** NVDAx and TSLAx hourly (Solana, xStocks), 2026-03-01 → 2026-09-14,
+4,702 usable bars, joined to NVDA/TSLA native equity and NQ/ES index futures.
 99% hourly coverage, 0% stale bars, 0 outliers beyond ±5%, 0 nulls.
 Reproduce with `python scripts/analyse_basis.py`.
 
 ## Headline result
 
 **During market-closure windows, rToken is the efficient price and the
-reference is the laggard.** The arbitrage band closes because fair value catches
+reference is the laggard.** The band closes because fair value catches
 up to the token, not because the token corrects. There is no tradeable
 convergence in it.
 
@@ -38,7 +38,7 @@ venues shut:
 
 Divergence accumulates through a blackout: mean |premium| grows from **0.16% at
 the start of a weekend to 0.91% by its end**, a ~6× expansion over 49 hours.
-Across 27 weekends, the premium moved toward zero at the reopen **85%** of the
+Across 28 weekends, the premium moved toward zero at the reopen **85%** of the
 time, mean 0.26%.
 
 ## What did not hold, and why it matters
@@ -75,8 +75,8 @@ per trade, and negative after the cheapest realistic cost:
 
 | Variant | Sample | Result |
 |---|---|---|
-| Fade the blackout premium (token leg) | 27 weekends | Hit 48–52%, dies at 10bp costs |
-| Follow the drift on the futures leg | 27 weekends | corr(signal, move) = −0.05; only 1 of 5 horizons positive; first half of sample negative |
+| Fade the blackout premium (token leg) | 28 weekends | Hit 48–52%, dies at 10bp costs |
+| Follow the drift on the futures leg | 28 weekends | corr(signal, move) = −0.05; only 1 of 5 horizons positive; first half of sample negative |
 | Fade the weeknight premium, z>1.0/1.5/2.0 | 2,361 bars, 424 signals | Sharpe/trade 0.03–0.13; **worse at stronger thresholds** |
 | Decomposition at z>1.5, 6h | 206 signals | Token leg contributes **−9%** — it moves *away* |
 
@@ -91,7 +91,7 @@ everyone assumes is retail-dominated and mispriced is, at hourly resolution,
 pricing closure-window information correctly. What looks like a 0.91% weekend
 mispricing is a 0.91% **information lead** over a reference that cannot trade.
 
-Two caveats stated plainly. The sample is 27 weekends, which is what 210 days of
+Two caveats stated plainly. The sample is 28 weekends, which is what 197 days of
 rToken history allows and is thin for anything Sharpe-based. And the test is at
 hourly resolution — sub-hourly microstructure could behave differently, and we
 have no data to say.

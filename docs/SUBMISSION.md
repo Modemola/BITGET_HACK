@@ -34,18 +34,18 @@ until rToken existed the concept had no product surface.
 **The hypothesis we started with, and why we abandoned it.** We began building a
 strategy, not a tool. The premise was obvious: a thin, retail-dominated venue
 trading alone for 49 hours must misprice, and that mispricing must be
-harvestable. Across 210 days of hourly data the premium does behave exactly as
+harvestable. Across 197 days of hourly data the premium does behave exactly as
 predicted — dispersion widens monotonically from **0.42%** in the cash session
 to **0.51%** overnight to **0.70%** in a blackout, and the AR(1) half-life
 stretches from 0.2h to 1.0h to 6.0h as venues shut. Divergence accumulates ~6×
-across a weekend, and across 27 weekends the gap converged at the reopen **85%**
+across a weekend, and across 28 weekends the gap converged at the reopen **85%**
 of the time.
 
 None of it is tradeable. Decomposing that convergence into its two legs shows
-**87–92% of it happens because fair value catches up to the token, not because
+**78–98% of it happens because fair value catches up to the token, not because
 the token corrects.** The reference was stale; the token was already right. The
-leg you can actually trade returns a **48.1%** hit rate — a coin flip — and
-**−0.009%** per weekend after 10bp of costs. We tested four variants (fade the
+leg you can actually trade returns a **46.4%** hit rate — a coin flip — and
+**−0.083%** per weekend after 10bp of costs. We tested four variants (fade the
 blackout premium, follow the drift on futures, fade the weeknight premium at
 three z-thresholds) and every one agrees. Signals got *worse* at stronger
 thresholds, which is what noise does and a real edge never does.
@@ -78,8 +78,8 @@ traders holding $10k–$500k of tokenized US equity exposure across weekends.**
 
 **Why this segment specifically.** Capital small enough that thin rToken books
 are not a binding constraint — a $2.1M NVDAx pool can absorb them, where it
-cannot absorb an institution. Large enough that the observed **0.84% mean** and
-**2.14% worst** weekend divergence is real money: on $250k that is $2,100 typical
+cannot absorb an institution. Large enough that the observed **0.86% mean** and
+**2.14% worst** weekend divergence is real money: on $250k that is $2,150 typical
 and $5,350 at the observed worst. And crucially, this is the segment with **no
 risk infrastructure at all** — an institution already models closure risk; a
 retail holder has literally nothing, and the tools they can reach do not even
@@ -93,27 +93,27 @@ hedge is unstable** and two of the three cost more than they are worth.
 
 ### Part 3 · Validation data and key metrics
 
-**Research validation (observed).** 4,607 hourly bars, 2026-03-01 → 2026-09-10,
+**Research validation (observed).** 4,702 hourly bars, 2026-03-01 → 2026-09-14,
 NVDAx and TSLAx (xStocks, Solana) joined to NVDA/TSLA native equity, NQ/ES index
 futures and BTC/ETH. 99% hourly coverage, 0% stale bars, no outliers beyond ±5%,
 no nulls. Reproduce with `python scripts/analyse_basis.py`.
 
 | Metric | Value | Label |
 |---|---|---|
-| Weekend blackouts analysed | 27 | observed |
+| Weekend blackouts analysed | 28 | observed |
 | Premium dispersion, cash / weeknight / blackout | 0.42% / 0.51% / 0.70% | observed |
 | AR(1) half-life, cash / weeknight / blackout | 0.2h / 1.0h / 6.0h | observed |
-| Mean absolute terminal drift | 0.84% | observed |
-| p95 / worst terminal drift | 1.95% / 2.14% | observed |
-| Weekends ending beyond ±1% | 37% | observed |
-| Closure attributable to the token leg (1h/6h/12h) | 6% / 27% / 13% | observed |
-| Hit rate fading the premium | 48.1% | observed |
-| Net per weekend at 10bp round-trip | −0.009% | observed |
+| Mean absolute terminal drift | 0.86% | observed |
+| p95 / worst terminal drift | 1.94% / 2.14% | observed |
+| Weekends ending beyond ±1% | 39% | observed |
+| Closure attributable to the token leg (1h/6h/12h) | 6% / 22% / 2% | observed |
+| Hit rate fading the premium | 46.4% | observed |
+| Net per weekend at 10bp round-trip | −0.083% | observed |
 | Scheduled rate decisions inside a blackout | 0 of 22, across 134 windows | observed |
 | BTC hedge: correlation / variance removed | +0.71 / 29% | observed |
 | BTC hedge: rolling correlation range | −0.51 to +0.89, sign-flipping | observed |
 
-**Stated limitations.** The honest sample is **27 weekends** — thin, and reported
+**Stated limitations.** The honest sample is **28 weekends** — thin, and reported
 beside every distribution on the page rather than hidden behind an hourly bar
 count that would look ten times larger. Hourly resolution says nothing about
 sub-hourly microstructure. One issuer family (xStocks on Solana) and two names.
@@ -272,8 +272,8 @@ Must include `#BitgetHackathon` and `@Bitget_AI`, and retweet the official post.
 > We spent a week trying to arbitrage tokenized US stocks across the 49-hour
 > weekend blackout, when rToken is the only venue on earth quoting US equity.
 >
-> The trade doesn't exist. 87–92% of the convergence happens because the
-> *reference* catches up — not because the token corrects. Fading it is a 48%
+> The trade doesn't exist. 78–98% of the convergence happens because the
+> *reference* catches up — not because the token corrects. Fading it is a 46%
 > coin flip that dies at 10bp costs.
 >
 > So we built the tool that tells you that instead. Blackout Desk: what you're

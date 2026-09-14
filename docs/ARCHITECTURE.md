@@ -20,7 +20,7 @@ should I do about it before it starts?**
 
 Our own research (`docs/FINDINGS.md`) falsified the intuitive read. Across 210
 days of hourly rToken data we found the closure-window premium is **not a
-mispricing** — it is an information lead. When the reference reopens, 87–92% of
+mispricing** — it is an information lead. When the reference reopens, 78–98% of
 the gap closes because fair value catches up to the token, not because the
 token corrects. Trading against it is a coin flip that dies at 10bp costs.
 
@@ -63,7 +63,7 @@ constraint, large enough that a 1% weekend gap is real money.
 └───────────────────────────────────────────────────────────────────┘
 ┌───────────────────────────────────────────────────────────────────┐
 │  L1  DATA SPINE        clock.py · basis.py · data/raw/*.csv        │
-│      Built and tested. 4,607 usable hourly bars, 99% coverage.     │
+│      Built and tested. 4,702 usable hourly bars, 99% coverage.     │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
@@ -154,7 +154,7 @@ docs/
 | ~~No BTC/ETH data~~ | Resolved 10 Sep. BTC correlates +0.71 with NVDAx across blackouts and removes 29% of variance, but the rolling correlation spans −0.51 to +0.89 and changes sign, so `hedges.py` reports every candidate as unstable | Done |
 | ~~No macro calendar source~~ | Resolved 10 Sep. FOMC decisions parsed from federalreserve.gov, cross-validated against published statement dates. Across 134 weekend blackouts, **none of the 22 scheduled decisions has ever fallen inside one** — weekend risk is unscheduled risk, now a measurement rather than an assertion | Done |
 | **`sample` may be unavailable to a judge** | LUI silent | Static-first design + screen recording |
-| **27 weekends is a thin sample** | Distributions are wide | State it on the page beside every figure rather than hiding it |
+| **28 weekends is a thin sample** | Distributions are wide | State it on the page beside every figure rather than hiding it |
 | **Bitget DNS fails on the operator's machine** | Blocks Agent Hub / bitget-signal integration | Diagnose separately; treat Skills integration as a stretch goal |
 
 ---
@@ -184,7 +184,7 @@ open scores zero.
 1. **Every number traces to raw data.** No figure appears on the page that
    `scripts/analyse_basis.py` cannot reproduce.
 2. **Label observed / estimated / targeted**, as the submission form demands.
-3. **State the sample size next to the statistic.** 27 weekends is thin; saying
+3. **State the sample size next to the statistic.** 28 weekends is thin; saying
    so is credibility, hiding it is the thing judges are trained to catch.
 4. **The page works without the LLM.** Degrade per capability, never fail.
 5. **Prevented losses count.** The product's headline value is talking a trader

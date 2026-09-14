@@ -112,21 +112,69 @@ def test_fetch_writes_after_every_page(monkeypatch, tmp_path):
     assert len(saved) == 2 * ps.PAGE_LIMIT, "first two pages must survive the failure"
 
 
-def test_fetch_resumes_from_cache(monkeypatch, tmp_path):
+def test_fetch_catches_up_before_extending_history(monkeypatch, tmp_path):
+    """The first request must be anchored at *now*, not at the cache's oldest bar.
+
+    This is the bug that made the fetcher unable to reach the present: it only
+    ever paged backwards from the cache minimum, so a stale file stayed stale
+    however often it ran, and every new weekend was silently missed.
+    """
     monkeypatch.setattr(ps, "RAW", tmp_path)
     seed = pd.DataFrame({"ts": [NEWEST - i * HOUR for i in range(500)],
                          "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1})
     seed.to_csv(tmp_path / "AAPLx_hour.csv", index=False)
 
-    seen = {}
+    calls = []
     def capture(path, params=None):
-        seen.update(params or {})
-        return _page(10, NEWEST - 5000 * HOUR)
+        calls.append(dict(params or {}))
+        # Overlap the cache immediately so catch-up terminates on the first page.
+        return _page(10, NEWEST - 5 * HOUR)
     monkeypatch.setattr(ps, "api_get", capture)
 
-    df = ps.fetch_ohlcv(ps.Candidate("AAPLx", pool="p"), max_pages=1, refresh=False)
-    assert seen.get("before_timestamp") == int(seed["ts"].min()), "must page older than cache"
-    assert len(df) == 510
+    ps.fetch_ohlcv(ps.Candidate("AAPLx", pool="p"), max_pages=1, refresh=False)
+    assert calls, "no request was made at all"
+    assert "before_timestamp" not in calls[0], \
+        "first request must fetch the newest bars, not page backwards from the cache"
+
+
+def test_stale_cache_gains_new_bars(monkeypatch, tmp_path):
+    """A cache with enough history but an old tail must still pull in new bars."""
+    monkeypatch.setattr(ps, "RAW", tmp_path)
+    # Deep history (well past MIN_DAYS) whose newest bar is four days old.
+    stale_end = NEWEST - 96 * HOUR
+    seed = pd.DataFrame({"ts": [stale_end - i * HOUR for i in range(24 * 200)],
+                         "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1})
+    seed.to_csv(tmp_path / "AAPLx_hour.csv", index=False)
+    assert ps._span_days(seed) >= ps.MIN_DAYS, "fixture must already satisfy the history bar"
+
+    def serve(path, params=None):
+        before = (params or {}).get("before_timestamp", NEWEST + HOUR)
+        return _page(ps.PAGE_LIMIT, int(before) - ps.PAGE_LIMIT * HOUR)
+    monkeypatch.setattr(ps, "api_get", serve)
+
+    df = ps.fetch_ohlcv(ps.Candidate("AAPLx", pool="p"), max_pages=4, refresh=False)
+    assert df["ts"].max() > stale_end, \
+        "fetcher did not advance past the stale tail - it cannot reach the present"
+    assert len(df) > len(seed)
+
+
+def test_catch_up_stops_once_it_overlaps_the_cache(monkeypatch, tmp_path):
+    """Catching up must not re-walk the entire history it already holds."""
+    monkeypatch.setattr(ps, "RAW", tmp_path)
+    seed = pd.DataFrame({"ts": [NEWEST - i * HOUR for i in range(24 * 200)],
+                         "open": 1, "high": 1, "low": 1, "close": 1, "volume": 1})
+    seed.to_csv(tmp_path / "AAPLx_hour.csv", index=False)
+
+    calls = []
+    def serve(path, params=None):
+        calls.append(dict(params or {}))
+        before = (params or {}).get("before_timestamp", NEWEST + HOUR)
+        return _page(ps.PAGE_LIMIT, int(before) - ps.PAGE_LIMIT * HOUR)
+    monkeypatch.setattr(ps, "api_get", serve)
+
+    ps.fetch_ohlcv(ps.Candidate("AAPLx", pool="p"), max_pages=8, refresh=False)
+    assert len(calls) == 1, \
+        f"an up-to-date cache should need one page, not {len(calls)}"
 
 
 def test_weekend_share_separates_7x24_from_session_only():
