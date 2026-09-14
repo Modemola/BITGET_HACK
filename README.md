@@ -23,12 +23,13 @@ costs, measured across 28 weekend blackouts. See [`docs/FINDINGS.md`](docs/FINDI
 | [`docs/SUBMISSION.md`](docs/SUBMISSION.md) | The six-part project description, ready for the form |
 | [`docs/RESEARCH_TASK.md`](docs/RESEARCH_TASK.md) | The required end-to-end research task |
 | [`docs/FRONTEND.md`](docs/FRONTEND.md) | Visual architecture: palette, type, the living-state mechanic |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | The two deployments and why they differ |
 
 ## Quick start
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest -q                     # 121 tests
+python -m pytest -q                     # 131 tests
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 python scripts/figures.py               # canonical figures, stable and diffable

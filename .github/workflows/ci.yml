@@ -56,7 +56,7 @@ jobs:
           echo "parity tests ran"
 
   page-in-sync:
-    name: published page matches its payload
+    name: both builds match their payload
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -74,15 +74,16 @@ jobs:
       - name: Rebuild the page from the committed payload
         run: python scripts/build_page.py
 
-      - name: It must be byte-identical to what is committed
+      - name: Both builds must be byte-identical to what is committed
         run: |
-          if ! git diff --quiet -- web/desk.html; then
-            echo "::error::web/desk.html does not match template + payload."
-            echo "Edit web/desk.template.html and run scripts/build_page.py; never edit desk.html."
-            git --no-pager diff --stat -- web/desk.html
+          if ! git diff --quiet -- web/desk.html public/index.html; then
+            echo "::error::a built page does not match template + payload."
+            echo "Edit web/desk.template.html and run scripts/build_page.py;"
+            echo "never edit web/desk.html or public/index.html by hand."
+            git --no-pager diff --stat -- web/desk.html public/index.html
             exit 1
           fi
-          echo "page is in sync with its payload"
+          echo "artifact fragment and static document are both in sync"
 
   figures:
     name: documented figures

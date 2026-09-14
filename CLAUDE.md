@@ -6,9 +6,19 @@ Decision Stress Testing sub-theme. **Deadline: 21 September 2026 (UTC+8).**
 A closure-window risk desk for traders holding tokenized US stocks (rToken).
 Full design in `docs/ARCHITECTURE.md`; competition rules in `docs/S2_BRIEF.md`.
 
-**Live demo:** https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461
-Republish by rebuilding and calling the Artifact tool on `web/desk.html` — same
-path keeps the same URL.
+**Two deployments, see `docs/DEPLOY.md`.** `python scripts/build_page.py` emits
+both from one template:
+
+- `public/index.html` — a complete document for Vercel. The public demo: a plain
+  URL, no account, no sharing step. Redeploys on push.
+- `web/desk.html` — a **fragment** for the Claude artifact, which supplies its
+  own doctype, charset and viewport. Carries the natural-language layer.
+  https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 —
+  republish by calling the Artifact tool on that same path.
+
+Never give the artifact build a document shell, and never ship the fragment to a
+static host: no charset breaks every em-dash, no viewport breaks every
+responsive rule. `tests/test_deploy.py` pins both.
 
 ## The finding everything rests on
 
@@ -29,7 +39,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 121 tests
+python -m pytest -q                     # 131 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -194,5 +204,8 @@ by running `scripts/research_task.py` so its figures cannot go stale.
   its numbers are checkable.
 - Bitget API DNS fails on the operator's machine, blocking Agent Hub /
   `bitget-signal` Skills integration (a scoring item — stretch goal).
-- The artifact is **private by default**; it must be shared from the page's
-  share menu before judges can open it.
+- The artifact is **private by default**. The Vercel URL is the accessible-demo
+  answer, so sharing the artifact is now optional rather than a validity gate —
+  but the language layer only exists there, and it is a scored feature.
+- **A data refresh needs the artifact republished by hand.** Vercel redeploys on
+  push; nothing republishes the artifact, and it keeps serving old numbers.
