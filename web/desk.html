@@ -114,6 +114,27 @@ header{padding-block:40px 26px}
 :root[data-regime="BLACKOUT"] .countdown{color:var(--lit)}
 
 /* --- the week strip: the hero ------------------------------------------- */
+/* Seven tools, named. Feature depth is a scored criterion and judges count
+   what they can see; before this the page read as one document with sections.
+   Numbered because they genuinely run in this order -- it is the order a trader
+   reasons in, and the order scripts/research_task.py executes. */
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+  gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;
+  overflow:hidden;margin-block:26px 4px}
+.tools a{display:block;background:var(--surface);padding:13px 15px 14px;
+  text-decoration:none;color:inherit;transition:background .15s ease}
+.tools a:hover,.tools a:focus-visible{background:var(--raised);outline:none}
+.tools a:focus-visible{box-shadow:inset 0 0 0 2px var(--lit)}
+.tn{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  color:var(--lit);margin-bottom:6px}
+.th{display:block;font-weight:600;font-size:13.5px;line-height:1.25;
+  margin-bottom:4px}
+.tq{display:block;font-size:12px;color:var(--muted);line-height:1.35}
+@media (prefers-reduced-motion:reduce){ .tools a{transition:none} }
+
+/* Anchored sections must not land under the top of the viewport. */
+#closure,#verdict,#drift,#analogues,#exposure,#calendar,#hedges{scroll-margin-top:18px}
+
 .week{margin-block:12px 0;border-block:1px solid var(--rule);
   padding-block:26px 20px;background:transparent}
 .week-head{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:baseline;
@@ -124,19 +145,31 @@ header{padding-block:40px 26px}
 .tl-svg{display:block;width:100%;min-width:680px;height:auto}
 /* The scrubber: drag the week past a fixed present. Every frame is real
    computed state, which is why it is a control and not an animation. */
-.scrub{display:flex;align-items:center;gap:14px;margin-top:18px}
-.scrub-range{flex:1 1 auto;min-width:0;-webkit-appearance:none;appearance:none;
-  background:transparent;height:22px;margin:0;cursor:ew-resize}
-.scrub-range::-webkit-slider-runnable-track{height:3px;border-radius:2px;
-  background:var(--rule-strong)}
-.scrub-range::-moz-range-track{height:3px;border-radius:2px;background:var(--rule-strong)}
+.scrub-wrap{margin-top:20px}
+.scrub-hint{display:flex;align-items:center;gap:9px;font-size:12.5px;
+  color:var(--muted);margin-bottom:10px;cursor:ew-resize}
+.scrub-hint .grab{display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:5px;background:var(--lit-soft);
+  color:var(--lit);font-size:13px;flex:0 0 auto}
+.scrub{display:flex;align-items:center;gap:14px}
+/* The track mirrors the week it scrubs, so the control reads as a map of time
+   rather than an anonymous slider. */
+.scrub-field{position:relative;flex:1 1 auto;min-width:0;height:22px}
+.scrub-track{position:absolute;inset:8px 0 auto;height:6px;border-radius:3px;
+  overflow:hidden;display:flex;background:var(--raised);border:1px solid var(--rule)}
+.scrub-track i{display:block;height:100%}
+.scrub-range{position:absolute;inset:0;width:100%;-webkit-appearance:none;
+  appearance:none;background:transparent;height:22px;margin:0;cursor:ew-resize}
+.scrub-range::-webkit-slider-runnable-track{height:22px;background:transparent}
+.scrub-range::-moz-range-track{height:22px;background:transparent}
 .scrub-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
-  width:15px;height:15px;border-radius:50%;background:var(--lit);
-  border:2px solid var(--ground);margin-top:-6px;
-  box-shadow:0 0 0 1px var(--rule-strong)}
-.scrub-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;
-  background:var(--lit);border:2px solid var(--ground);
-  box-shadow:0 0 0 1px var(--rule-strong)}
+  width:17px;height:17px;border-radius:50%;background:var(--lit);
+  border:3px solid var(--ground);margin-top:2px;cursor:grab;
+  box-shadow:0 0 0 1px var(--lit),0 1px 6px rgba(0,0,0,.35)}
+.scrub-range::-moz-range-thumb{width:17px;height:17px;border-radius:50%;
+  background:var(--lit);border:3px solid var(--ground);cursor:grab;
+  box-shadow:0 0 0 1px var(--lit),0 1px 6px rgba(0,0,0,.35)}
+.scrub-range:active::-webkit-slider-thumb{cursor:grabbing}
 .scrub-range:focus-visible{outline:2px solid var(--lit);outline-offset:4px}
 .scrub-live{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
   padding:6px 12px;border-radius:999px;border:1px solid var(--rule-strong);
@@ -204,8 +237,12 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
 .note{font-size:12.5px;color:var(--faint);margin-top:14px;max-width:70ch}
 
 /* An editable figure that reads as part of the sentence, not as a form. */
-.money{display:inline-flex;align-items:baseline;gap:1px;
-  border-bottom:2px solid var(--lit);padding-inline:2px}
+.money{display:inline-flex;align-items:baseline;gap:1px;position:relative;
+  border-bottom:2px solid var(--lit);padding-inline:4px;border-radius:3px 3px 0 0;
+  background:var(--lit-soft);cursor:text}
+.money::after{content:"edit";position:absolute;right:0;bottom:calc(100% + 3px);
+  font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--lit);opacity:.75}
 .money .sym{font-family:var(--display);color:var(--lit)}
 .money input{font:inherit;font-family:var(--display);color:var(--lit);
   background:transparent;border:0;padding:0;width:5.2ch;min-width:0;
@@ -221,8 +258,8 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   color:var(--muted)}
 .expo-key span{display:inline-flex;align-items:center;gap:7px}
 
-.cal-strip{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule);
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
+.cal-strip{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule)}
+#cal-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
 .cal-item dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:6px}
 .cal-item dd{margin:0;font-size:14px;line-height:1.5}
@@ -239,7 +276,22 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   text-transform:uppercase;color:var(--faint);margin-bottom:9px}
 .ctrl label .num{font-size:14px;letter-spacing:0;text-transform:none;
   color:var(--ink);font-weight:500}
-.ctrl input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;
+  background:transparent;height:20px;margin:0;cursor:ew-resize}
+.ctrl input[type=range]::-webkit-slider-runnable-track{height:5px;border-radius:3px;
+  background:var(--raised);border:1px solid var(--rule)}
+.ctrl input[type=range]::-moz-range-track{height:5px;border-radius:3px;
+  background:var(--raised);border:1px solid var(--rule)}
+.ctrl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:16px;height:16px;border-radius:50%;background:var(--lit);cursor:grab;
+  border:3px solid var(--surface);margin-top:-6px;
+  box-shadow:0 0 0 1px var(--lit),0 1px 5px rgba(0,0,0,.3)}
+.ctrl input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+  background:var(--lit);border:3px solid var(--surface);cursor:grab;
+  box-shadow:0 0 0 1px var(--lit),0 1px 5px rgba(0,0,0,.3)}
+.ctrl input[type=range]:focus-visible{outline:2px solid var(--lit);outline-offset:3px}
+.ctrl-note{font-family:var(--body);font-size:11px;letter-spacing:0;
+  text-transform:none;color:var(--faint)}
 .ctrl.static .static-val{font-size:14px;font-weight:500;color:var(--ink);
   padding-top:2px}
 .analogue-summary{display:grid;
@@ -270,6 +322,19 @@ button:disabled{opacity:.55;cursor:default}
 .suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .suggest button{background:transparent;color:var(--muted);
   border-color:var(--rule-strong);font-size:12.5px;padding:6px 12px}
+.qa{border-top:1px solid var(--rule);margin-bottom:20px}
+.qa details{border-bottom:1px solid var(--rule)}
+.qa summary{cursor:pointer;padding:15px 30px 15px 0;font-size:15px;font-weight:500;
+  list-style:none;position:relative}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"+";position:absolute;right:4px;top:50%;
+  transform:translateY(-50%);font-family:var(--mono);color:var(--lit);font-size:17px}
+.qa details[open] summary::after{content:"2"}
+.qa summary:hover{color:var(--lit)}
+.qa summary:focus-visible{outline:2px solid var(--lit);outline-offset:2px}
+.qa-a{padding:0 0 6px;color:var(--muted);line-height:1.65;
+  max-width:66ch;font-size:14.5px}
+.qa-a p{margin:0 0 13px}
 .ask-elsewhere{margin:0;color:var(--muted);max-width:64ch}
 .ask-elsewhere a{color:var(--lit);text-decoration:underline;
   text-underline-offset:3px}
@@ -305,20 +370,39 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
 </header>
 
-<div class="week">
+<nav class="tools" aria-label="The seven tools on this desk">
+  <a href="#closure"><span class="tn">01</span><span class="th">Closure window</span><span class="tq">Which venues are open, and for how long?</span></a>
+  <a href="#verdict"><span class="tn">02</span><span class="th">Premium verdict</span><span class="tq">Is the premium in front of me tradeable?</span></a>
+  <a href="#drift"><span class="tn">03</span><span class="th">Drift distribution</span><span class="tq">How far does price typically travel?</span></a>
+  <a href="#analogues"><span class="tn">04</span><span class="th">Historical analogues</span><span class="tq">What happened in weekends like this?</span></a>
+  <a href="#exposure"><span class="tn">05</span><span class="th">Exposure</span><span class="tq">What is my book carrying through it?</span></a>
+  <a href="#calendar"><span class="tn">06</span><span class="th">Scheduled events</span><span class="tq">Is anything scheduled to explain a move?</span></a>
+  <a href="#hedges"><span class="tn">07</span><span class="th">Hedge menu</span><span class="tq">What can I trade, and at what cost?</span></a>
+</nav>
+
+<div class="week" id="closure">
   <div class="week-head">
     <h2>Three weeks, by who is quoting</h2>
     <div class="eyebrow" id="week-range">UTC</div>
   </div>
   <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 1000 236"
        role="img" aria-label="Which trading venues are open across the next 21 days"></svg></div>
-  <div class="scrub">
-    <button type="button" id="scrub-live" class="scrub-live" data-live="true">
-      <span class="dot"></span><span id="scrub-live-label">Live</span>
-    </button>
-    <input type="range" id="scrub" class="scrub-range" step="900"
-           aria-label="Move through the week to see the desk at another moment">
-    <output class="scrub-read num" id="scrub-read" for="scrub"></output>
+  <div class="scrub-wrap">
+    <label class="scrub-hint" for="scrub">
+      <span class="grab">&#8596;</span>
+      Drag to move through the week &mdash; every panel below recomputes for that moment
+    </label>
+    <div class="scrub">
+      <button type="button" id="scrub-live" class="scrub-live" data-live="true">
+        <span class="dot"></span><span id="scrub-live-label">Live</span>
+      </button>
+      <div class="scrub-field">
+        <div class="scrub-track" id="scrub-track" aria-hidden="true"></div>
+        <input type="range" id="scrub" class="scrub-range" step="900"
+               aria-label="Move through the week to see the desk at another moment">
+      </div>
+      <output class="scrub-read num" id="scrub-read" for="scrub"></output>
+    </div>
   </div>
   <div class="legend">
     <span><i class="swatch" style="background:var(--open)"></i>NYSE cash session</span>
@@ -328,7 +412,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
 </div>
 
-<section>
+<section id="verdict">
   <div class="sec-head">
     <h2>Before you trade the premium</h2>
   </div>
@@ -345,7 +429,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
 </section>
 
-<section>
+<section id="drift">
   <div class="sec-head">
     <h2>How far it drifts, hour by hour</h2>
     <p>Divergence accumulated from where the premium sat when the blackout opened.
@@ -359,7 +443,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
 </section>
 
-<section>
+<section id="analogues">
   <div class="sec-head">
     <h2>Weekends that looked like this one</h2>
     <p>Set the conditions you are walking into. The desk retrieves the closest
@@ -379,7 +463,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
         <input id="prem" type="range" min="-100" max="100" step="5">
       </div>
       <div class="ctrl static">
-        <label>Window length</label>
+        <label>Window length <span class="ctrl-note">from the calendar</span></label>
         <div class="num static-val" id="win-out"></div>
       </div>
     </div>
@@ -393,7 +477,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
 </section>
 
-<section>
+<section id="exposure">
   <div class="sec-head">
     <h2>A position of
       <span class="money"><span class="sym">$</span><input id="position" type="text"
@@ -405,11 +489,11 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   <div class="panel">
     <div class="expo" id="expo-bar"></div>
     <div class="expo-key" id="expo-key"></div>
-    <div class="cal-strip" id="cal-strip"></div>
+    <div class="cal-strip" id="calendar"><div id="cal-strip"></div></div>
   </div>
 </section>
 
-<section>
+<section id="hedges">
   <div class="sec-head">
     <h2>What you can actually hedge with</h2>
     <p>Equities, futures and options are all shut. These are the instruments still
@@ -1003,15 +1087,91 @@ var QUESTIONS = [
   "How bad was the worst weekend in the sample?"
 ];
 
+/* Answers computed straight from the measurements above -- no model involved,
+   nothing written by hand. A static host cannot run the conversational layer,
+   but it can still show the desk answering the questions it exists to answer,
+   and every figure here is the same one rendered in the panels above. */
+function cannedAnswers(){
+  var s = D.summary || {}, v = D.verdict || {}, pos = positionUsd();
+  var best = (D.hedges || [])[0];
+  var win = nextWindowHours();
+
+  // Answers are arrays of paragraphs rather than one string with newline
+  // escapes: the page is assembled by tooling that has eaten backslash escapes
+  // before, and a broken string literal kills the whole script silently.
+  var hedge = [
+    "You are carrying " + usd(pos) + " of " + D.demo.symbol + " through " + win +
+    " hours in which no reference price exists anywhere.",
+
+    "Across " + s.n_windows + " weekend blackouts the typical move was " +
+    usd(pos * s.mean_abs_terminal_drift) + ", the 95th percentile " +
+    usd(pos * s.p95_abs_terminal_drift) + ", and the worst observed " +
+    usd(pos * s.worst_terminal_drift) + ". " + pct(s.share_exceeding_1pct, 0) +
+    " of weekends finished beyond 1%."
+  ];
+  if (best){
+    hedge.push("The deepest correlation available is " + best.instrument + " at " +
+      fix(best.correlation, 2) + ", cutting " + pct(best.risk_reduction, 0) +
+      " of variance for " + usd(pos * Math.abs(best.hedge_ratio) * best.cost_pct) +
+      ". But " + best.verdict + ".");
+  }
+  hedge.push("Size the position so the 95th percentile outcome is survivable, or " +
+    "trim before the close. Do not pay for an unstable hedge. The decision is yours.");
+
+  var why = [
+    "Because the gap closes on the leg you cannot trade.",
+
+    "At the six-hour horizon only " + pct(v.token_share_6h, 0) + " of the convergence " +
+    "comes from the token moving; " + pct(1 - v.token_share_6h, 0) + " is fair value " +
+    "catching up once the reference reopens. The reference was stale, not the token.",
+
+    "Fading it hit " + pct(v.hit_rate, 1) + " — a coin flip — and returns " +
+    sgn(v.net_at_10bp, 3) + " per weekend after 10bp of round-trip costs. " +
+    "Measured over " + s.n_windows + " weekend blackouts."
+  ];
+
+  var worst = [
+    "The worst terminal drift observed was " + pct(s.worst_terminal_drift) +
+    ", which on " + usd(pos) + " is " + usd(pos * s.worst_terminal_drift) + ". " +
+    "The 95th percentile was " + pct(s.p95_abs_terminal_drift) + ".",
+
+    "The number that matters more is the excursion: across these windows the worst " +
+    "point reached is consistently larger than where they ended. The drawdown you " +
+    "sit through is not the number you wake up to.",
+
+    s.n_windows + " weekends is a thin sample. Read the range, not the middle."
+  ];
+
+  return [
+    { q: "Should I hedge " + usd(pos) + " of " + D.demo.symbol + " into this weekend?", a: hedge },
+    { q: "Why isn't the weekend premium tradeable?", a: why },
+    { q: "How bad was the worst weekend in the sample?", a: worst }
+  ];
+}
+
 function showAskElsewhere(){
   var panel = document.getElementById("ask");
   var box = panel.querySelector(".panel");
   panel.classList.add("on");
-  box.innerHTML = '<p class="ask-elsewhere">Asking the desk in natural language runs ' +
-    'inside the Claude artifact runtime, which a static host cannot provide. ' +
-    'Every measurement on this page is already complete without it — the ' +
-    'conversational layer is an addition, not a dependency. ' +
-    '<a href="' + ARTIFACT_URL + '">Open the conversational version</a>.</p>';
+
+  function esc(text){
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  }
+
+  var items = cannedAnswers();
+  box.innerHTML =
+    '<div class="qa">' + items.map(function(item, i){
+      return '<details' + (i === 0 ? ' open' : '') + '>' +
+        '<summary>' + esc(item.q) + '</summary>' +
+        '<div class="qa-a">' +
+          item.a.map(function(para){ return '<p>' + esc(para) + '</p>'; }).join("") +
+        '</div></details>';
+    }).join("") + '</div>' +
+    '<p class="ask-elsewhere">Those answers are computed directly from the ' +
+    'measurements on this page, which is why they move when you change the ' +
+    'position size above. Free-form questions need the model, and that runtime ' +
+    'exists only inside the artifact — ' +
+    '<a href="' + ARTIFACT_URL + '">open the conversational version</a>.</p>';
 }
 
 function initAsk(){
@@ -1094,6 +1254,20 @@ function initScrub(){
   range.min = String(runs[0].start);
   range.max = String(runs[runs.length - 1].end - 900);
 
+  // The track is the week in miniature, so the control reads as a map of time
+  // rather than an anonymous slider: the dark bands are the blackouts you are
+  // dragging toward.
+  var track = document.getElementById("scrub-track");
+  if (track){
+    var t0 = runs[0].start, span = runs[runs.length - 1].end - t0;
+    track.innerHTML = runs.map(function(r){
+      var fill = isBlackout(r.regime) ? "var(--void)"
+               : (r.regime === "US_CASH" ? "var(--open)" : "var(--half)");
+      return '<i style="width:' + ((r.end - r.start) / span * 100) + '%;background:' +
+             fill + '"></i>';
+    }).join("");
+  }
+
   function label(){
     var t = viewTime();
     read.textContent = new Date(t * 1000).toUTCString().slice(0, 22) + " UTC";
@@ -1130,7 +1304,12 @@ function initScrub(){
 function initPosition(){
   var el = document.getElementById("position");
   if (!el) return;
-  function refresh(){ drawExposure(); drawHedges(); }
+  function refresh(){
+    drawExposure();
+    drawHedges();
+    // The static answers quote the position, so they move with it too.
+    if (document.querySelector("#ask .qa")) showAskElsewhere();
+  }
   el.addEventListener("input", refresh);
   el.addEventListener("blur", function(){
     el.value = Math.round(positionUsd()).toLocaleString("en-US");

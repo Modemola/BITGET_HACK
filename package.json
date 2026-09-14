@@ -1,0 +1,8 @@
+{
+  "name": "blackout-desk",
+  "private": true,
+  "description": "Render smoke tests for the built page. Not a build system - the page has no build step.",
+  "devDependencies": {
+    "jsdom": "^25.0.0"
+  }
+}

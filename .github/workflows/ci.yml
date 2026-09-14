@@ -41,6 +41,14 @@ jobs:
       - name: Install
         run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
 
+      # jsdom backs tests/test_page_runtime.py, which loads the built page in a
+      # real DOM. A stripped escape once turned a string literal into a syntax
+      # error: the HTML validated, every element was present, the whole suite
+      # passed, and the page shipped with both charts empty and every control
+      # dead. Only running the script catches that.
+      - name: Install jsdom
+        run: npm install --no-audit --no-fund
+
       - name: Test
         run: python -m pytest -q
 
