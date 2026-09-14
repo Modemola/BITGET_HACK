@@ -29,7 +29,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 110 tests
+python -m pytest -q                     # 111 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -147,10 +147,16 @@ palette, the regime modulates illumination inside it, and regime never changes a
 hue. **Do not adopt Bitget's brand identity**; a page wearing it reads as an
 official product of theirs, which this is not.
 
-Steps 1-4 are built: token layer, masthead, the full-bleed week strip, and
-`applyRegime` wiring. `tests/test_page_style.py` holds the visual invariants and
-`test_js_parity.py` pins the regime stamp to the calendar. Still to build:
-the time scrubber, the verdict pull-quote, and an editable position size.
+Steps 1-7 are built: token layer, masthead, the full-bleed week strip,
+`applyRegime` wiring, the time scrubber, the verdict pull-quote, and an editable
+position size. `tests/test_page_style.py` holds the visual invariants;
+`test_js_parity.py` pins the regime stamp to the calendar and the position
+input's clamping.
+
+**Every time-dependent panel reads `viewTime()`, never `Date.now()`.** That one
+value is what the scrubber moves, so dragging recomputes real analytics for that
+moment rather than animating a mock-up. Adding a panel that reads the clock
+directly breaks the scrubber silently.
 
 ## Submission
 

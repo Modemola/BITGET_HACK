@@ -122,6 +122,37 @@ header{padding-block:40px 26px}
   letter-spacing:-.01em}
 .tl-scroll{overflow-x:auto;overflow-y:hidden}
 .tl-svg{display:block;width:100%;min-width:680px;height:auto}
+/* The scrubber: drag the week past a fixed present. Every frame is real
+   computed state, which is why it is a control and not an animation. */
+.scrub{display:flex;align-items:center;gap:14px;margin-top:18px}
+.scrub-range{flex:1 1 auto;min-width:0;-webkit-appearance:none;appearance:none;
+  background:transparent;height:22px;margin:0;cursor:ew-resize}
+.scrub-range::-webkit-slider-runnable-track{height:3px;border-radius:2px;
+  background:var(--rule-strong)}
+.scrub-range::-moz-range-track{height:3px;border-radius:2px;background:var(--rule-strong)}
+.scrub-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+  width:15px;height:15px;border-radius:50%;background:var(--lit);
+  border:2px solid var(--ground);margin-top:-6px;
+  box-shadow:0 0 0 1px var(--rule-strong)}
+.scrub-range::-moz-range-thumb{width:15px;height:15px;border-radius:50%;
+  background:var(--lit);border:2px solid var(--ground);
+  box-shadow:0 0 0 1px var(--rule-strong)}
+.scrub-range:focus-visible{outline:2px solid var(--lit);outline-offset:4px}
+.scrub-live{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
+  padding:6px 12px;border-radius:999px;border:1px solid var(--rule-strong);
+  background:var(--surface);color:var(--muted);font-family:var(--mono);
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:default}
+.scrub-live .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.scrub-live[data-live="false"]{cursor:pointer;color:var(--lit);
+  border-color:var(--lit)}
+.scrub-live[data-live="false"] .dot{background:var(--lit)}
+.scrub-read{flex:0 0 auto;font-size:12.5px;color:var(--muted);
+  min-width:15ch;text-align:right}
+@media (max-width:640px){
+  .scrub{flex-wrap:wrap}
+  .scrub-range{order:3;flex-basis:100%}
+  .scrub-read{text-align:left;min-width:0}
+}
 .legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;
   font-size:12.5px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:8px}
@@ -134,20 +165,23 @@ section{margin-top:38px}
   letter-spacing:-.01em}
 .sec-head p{margin:6px 0 0;color:var(--muted);max-width:66ch}
 
-.verdict{border:1px solid var(--rule);border-left:3px solid var(--risk);
-  border-radius:8px;background:var(--surface);padding:24px 26px;
-  box-shadow:var(--shadow)}
-.verdict h3{font-family:var(--display);font-size:22px;font-weight:500;
-  margin-bottom:8px}
-.verdict p{margin:0 0 18px;color:var(--muted);max-width:68ch}
-.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;
-  overflow:hidden}
-.evidence div{background:var(--surface);padding:14px 16px}
+/* The one sentence worth remembering, so it is set like a thesis rather than
+   like a notification. No card, no border: air does the emphasis. */
+.verdict{padding-block:12px 4px}
+.verdict h3{font-family:var(--display);font-size:44px;font-style:italic;
+  font-weight:400;line-height:1.08;letter-spacing:-.02em;max-width:17ch;
+  margin-bottom:22px;color:var(--ink)}
+.verdict h3 em{font-style:normal;color:var(--lit)}
+.verdict p{margin:0 0 26px;color:var(--muted);max-width:64ch;font-size:15.5px}
+@media (max-width:640px){ .verdict h3{font-size:32px;max-width:none} }
+.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
+  gap:0;border-top:1px solid var(--rule);background:transparent}
+.evidence div{padding:16px 20px 16px 0;border-right:1px solid var(--rule)}
+.evidence div:last-child{border-right:none}
 .evidence dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:5px}
-.evidence dd{margin:0;font-family:var(--mono);font-size:21px;font-weight:500;
-  font-variant-numeric:tabular-nums}
+.evidence dd{margin:0;font-family:var(--display);font-size:30px;font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.02em}
 
 .panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;
   padding:22px 24px;box-shadow:var(--shadow)}
@@ -169,6 +203,15 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
 .pill.good{background:var(--ok-soft);color:var(--ok)}
 .note{font-size:12.5px;color:var(--faint);margin-top:14px;max-width:70ch}
 
+/* An editable figure that reads as part of the sentence, not as a form. */
+.money{display:inline-flex;align-items:baseline;gap:1px;
+  border-bottom:2px solid var(--lit);padding-inline:2px}
+.money .sym{font-family:var(--display);color:var(--lit)}
+.money input{font:inherit;font-family:var(--display);color:var(--lit);
+  background:transparent;border:0;padding:0;width:5.2ch;min-width:0;
+  font-variant-numeric:tabular-nums}
+.money input:focus{outline:none}
+.money:focus-within{background:var(--lit-soft)}
 .expo{display:flex;height:38px;border-radius:6px;overflow:hidden;
   border:1px solid var(--rule)}
 .expo div{display:flex;align-items:center;justify-content:center;
@@ -266,6 +309,14 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
   <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 1000 236"
        role="img" aria-label="Which trading venues are open across the next 21 days"></svg></div>
+  <div class="scrub">
+    <button type="button" id="scrub-live" class="scrub-live" data-live="true">
+      <span class="dot"></span><span id="scrub-live-label">Live</span>
+    </button>
+    <input type="range" id="scrub" class="scrub-range" step="900"
+           aria-label="Move through the week to see the desk at another moment">
+    <output class="scrub-read num" id="scrub-read" for="scrub"></output>
+  </div>
   <div class="legend">
     <span><i class="swatch" style="background:var(--open)"></i>NYSE cash session</span>
     <span><i class="swatch" style="background:var(--half)"></i>Globex only &mdash; a futures reference exists</span>
@@ -279,7 +330,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
     <h2>Before you trade the premium</h2>
   </div>
   <div class="verdict">
-    <h3>That weekend premium is not an arbitrage.</h3>
+    <h3>That weekend premium is <em>not</em> free money.</h3>
     <p>Across <span class="num" id="v-weekends">27</span> weekend blackouts, the gap between
        rToken and fair value closed almost entirely because the <em>reference</em> caught up
        once futures reopened &mdash; not because the token corrected. The token leg, the only
@@ -341,7 +392,11 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 
 <section>
   <div class="sec-head">
-    <h2>A position held across the window</h2>
+    <h2>A position of
+      <span class="money"><span class="sym">$</span><input id="position" type="text"
+        inputmode="numeric" value="250,000" aria-label="Position size in US dollars"
+        size="7"></span>
+      held across the window</h2>
     <p id="expo-caption">Calculating from the live clock.</p>
   </div>
   <div class="panel">
@@ -419,6 +474,40 @@ var NAME = {
   WEEKEND_BLACKOUT: "Blackout", HOLIDAY_BLACKOUT: "Holiday blackout"
 };
 
+/* ---- the viewer's own position ---------------------------------------- */
+/* Typing a real number is what turns a demo into their situation, so the figure
+   flows through the exposure caption and the hedge table rather than sitting in
+   a heading. Clamped, because a risk tool quoting nonsense is worse than one
+   refusing to. */
+var MIN_POSITION = 1000, MAX_POSITION = 100000000;
+function positionUsd(){
+  var el = document.getElementById("position");
+  var raw = el ? Number(String(el.value).replace(/[^0-9.]/g, "")) : NaN;
+  if (!isFinite(raw) || raw <= 0) return D.demo.exposure_usd;
+  return Math.min(Math.max(raw, MIN_POSITION), MAX_POSITION);
+}
+
+/* ---- one clock, so the whole page agrees on "when" --------------------- */
+/* The scrubber works by moving this single value. Every time-dependent panel
+   reads viewTime() rather than Date.now(), so dragging recomputes the real
+   analytics for that moment instead of animating a mock-up. */
+var scrubTs = null;                       // null = follow the wall clock
+function viewTime(){
+  return scrubTs === null ? Math.floor(Date.now() / 1000) : scrubTs;
+}
+function isLive(){ return scrubTs === null; }
+
+/* Everything that depends on "when". Deliberately excludes the panels that do
+   not move with time (drift, hedges, verdict), so a drag stays cheap. */
+var analogueRender = null;
+function renderTimeDependent(){
+  tick();
+  drawTimeline();
+  drawExposure();
+  drawCalendar();
+  if (analogueRender) analogueRender();
+}
+
 /* ---- the page carries the closure state ------------------------------- */
 /* Regime is stamped on the root element and CSS responds through tokens only.
    It never changes a hue: panels dim, rules recede, --lit stays exactly as it
@@ -455,7 +544,7 @@ function nextBlackoutAt(now){
   return null;
 }
 function tick(){
-  var now = Math.floor(Date.now()/1000);
+  var now = viewTime();
   var run = currentRun(now);
   var chip = document.getElementById("regime-chip");
   var label = document.getElementById("regime-label");
@@ -550,12 +639,14 @@ function drawTimeline(){
   }
 
   // 5. Now.
-  var now = Math.floor(Date.now() / 1000);
+  var now = viewTime();
   if (now > t0 && now < t1){
     out += '<line x1="' + X(now) + '" y1="' + (STACK_TOP - 18) + '" x2="' + X(now) +
            '" y2="' + (STACK_BOT + 8) + '" stroke="var(--ink)" stroke-width="1.4"></line>';
     out += '<text x="' + (X(now) + 6) + '" y="' + (STACK_TOP - 21) + '" font-family="var(--mono)" ' +
-           'font-size="10" letter-spacing="1.2" fill="var(--ink)">NOW</text>';
+           'font-size="10" letter-spacing="1.2" fill="var(--ink)">' +
+           (isLive() ? "NOW" : new Date(now * 1000).toUTCString().slice(0, 16).toUpperCase()) +
+           '</text>';
   }
 
   svg.innerHTML = out;
@@ -678,7 +769,7 @@ function findAnalogues(rows, query, k){
 }
 
 function nextWindowHours(){
-  var now = Math.floor(Date.now()/1000);
+  var now = viewTime();
   for (var i = 0; i < D.blackout_windows.length; i++){
     var w = D.blackout_windows[i];
     if (w.end > now) return w.hours;
@@ -691,12 +782,12 @@ function drawAnalogues(){
   if (!rows.length) return;
   var vol = document.getElementById("vol");
   var prem = document.getElementById("prem");
-  var hours = nextWindowHours();
 
   document.getElementById("an-total").textContent = rows.length;
-  document.getElementById("win-out").textContent = hours + "h";
 
   function render(){
+    var hours = nextWindowHours();       // re-read: the scrubber can change it
+    document.getElementById("win-out").textContent = hours + "h";
     var q = {
       realised_vol_5d: Number(vol.value)/100,
       premium_at_close: Number(prem.value)/10000,
@@ -754,12 +845,14 @@ function drawAnalogues(){
   prem.value = String(Math.round((defaults.premium_at_close || 0) * 10000));
   vol.addEventListener("input", render);
   prem.addEventListener("input", render);
+  // Exposed so a scrub can refresh the panel without rebinding these listeners.
+  analogueRender = render;
   render();
 }
 
 /* ---- exposure --------------------------------------------------------- */
 function drawExposure(){
-  var now = Math.floor(Date.now()/1000);
+  var now = viewTime();
   var end = now + D.demo.horizon_h*3600;
   var acc = {}, total = 0;
   D.regime_runs.forEach(function(r){
@@ -795,9 +888,17 @@ function drawExposure(){
     key.appendChild(item);
   });
 
-  document.getElementById("expo-caption").textContent =
-    usd(D.demo.exposure_usd) + " of " + D.demo.symbol + ", held from now across the next " +
-    D.demo.horizon_h + " hours. " + blackoutHours + " of those hours have no reference price.";
+  var pos = positionUsd();
+  var sum = D.summary || {};
+  var caption = D.demo.symbol + ", held across the next " + D.demo.horizon_h +
+    " hours. " + blackoutHours + " of them have no reference price anywhere.";
+  if (has(sum.mean_abs_terminal_drift)){
+    caption += "  Across " + sum.n_windows + " weekends the typical move was " +
+      usd(pos * sum.mean_abs_terminal_drift) + ", with " +
+      usd(pos * sum.p95_abs_terminal_drift) + " at the 95th percentile and " +
+      usd(pos * sum.worst_terminal_drift) + " at the worst observed.";
+  }
+  document.getElementById("expo-caption").textContent = caption;
 }
 
 /* ---- scheduled events -------------------------------------------------- */
@@ -807,7 +908,7 @@ function drawCalendar(){
   var strip = document.getElementById("cal-strip");
   var stats = D.calendar_stats || {};
   var events = D.events || [];
-  var now = Math.floor(Date.now()/1000);
+  var now = viewTime();
 
   var window_ = null;
   for (var i = 0; i < D.blackout_windows.length; i++){
@@ -865,13 +966,18 @@ function drawCalendar(){
 
 /* ---- hedges ----------------------------------------------------------- */
 function drawHedges(){
+  // Notional and cost are recomputed from the live position rather than read
+  // from the payload, whose figures were built against the default size.
+  var pos = positionUsd();
   document.getElementById("hedge-body").innerHTML = D.hedges.map(function(h){
+    var notional = has(h.hedge_ratio) ? pos * Math.abs(h.hedge_ratio) : null;
+    var cost = has(notional) && has(h.cost_pct) ? notional * h.cost_pct : null;
     return '<tr>' +
       '<td class="n" style="font-weight:500">' + h.instrument + '</td>' +
       '<td class="n">' + fix(h.correlation, 2) + '</td>' +
       '<td class="n">' + fix(h.hedge_ratio, 2) + '</td>' +
-      '<td class="n">' + usd(h.notional_usd) + '</td>' +
-      '<td class="n">' + usd(h.cost_usd) + '</td>' +
+      '<td class="n">' + usd(notional) + '</td>' +
+      '<td class="n">' + usd(cost) + '</td>' +
       '<td><span class="pill ' + (h.stable ? "good" : "bad") + '">' +
         (h.stable ? "usable" : "unstable") + '</span>' +
         '<div style="margin-top:5px;color:var(--muted);font-size:12.5px">' + h.verdict + '</div>' +
@@ -960,6 +1066,64 @@ function initAsk(){
   });
 }
 
+/* ---- scrubber --------------------------------------------------------- */
+function initScrub(){
+  var range = document.getElementById("scrub");
+  var live = document.getElementById("scrub-live");
+  var liveLabel = document.getElementById("scrub-live-label");
+  var read = document.getElementById("scrub-read");
+  var runs = D.regime_runs;
+  if (!range || !runs.length) return;
+
+  range.min = String(runs[0].start);
+  range.max = String(runs[runs.length - 1].end - 900);
+
+  function label(){
+    var t = viewTime();
+    read.textContent = new Date(t * 1000).toUTCString().slice(0, 22) + " UTC";
+    var atNow = isLive();
+    live.setAttribute("data-live", atNow ? "true" : "false");
+    liveLabel.textContent = atNow ? "Live" : "Back to now";
+    live.setAttribute("title", atNow ? "Following the clock" : "Return to the present");
+  }
+
+  function syncSlider(){ range.value = String(viewTime()); }
+
+  range.addEventListener("input", function(){
+    scrubTs = Number(range.value);
+    renderTimeDependent();
+    label();
+  });
+
+  live.addEventListener("click", function(){
+    if (isLive()) return;
+    scrubTs = null;
+    syncSlider();
+    renderTimeDependent();
+    label();
+  });
+
+  syncSlider();
+  label();
+
+  // Only advance the slider while it is actually following the clock; moving it
+  // under a viewer mid-drag would be hostile.
+  setInterval(function(){ if (isLive()){ syncSlider(); label(); } }, 30000);
+}
+
+function initPosition(){
+  var el = document.getElementById("position");
+  if (!el) return;
+  function refresh(){ drawExposure(); drawHedges(); }
+  el.addEventListener("input", refresh);
+  el.addEventListener("blur", function(){
+    el.value = Math.round(positionUsd()).toLocaleString("en-US");
+    refresh();
+  });
+  el.addEventListener("keydown", function(e){ if (e.key === "Enter") el.blur(); });
+  el.value = Math.round(D.demo.exposure_usd).toLocaleString("en-US");
+}
+
 drawTimeline();
 drawEvidence();
 drawDrift();
@@ -969,6 +1133,8 @@ drawCalendar();
 drawHedges();
 drawFooter();
 tick();
+initScrub();
+initPosition();
 setInterval(tick, 30000);
 initAsk();
 })();
