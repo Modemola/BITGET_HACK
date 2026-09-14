@@ -137,6 +137,16 @@ web/
   them and cross-checks against the statement dates, so past meetings validate
   the parser the future ones depend on.
 
+## Frontend
+
+`docs/FRONTEND.md` is the visual architecture. The governing idea is that the
+page carries the closure state: as venues shut it darkens and drops chrome while
+one amber accent stays lit, because the rToken lane is the only thing still
+quoting. Regime and theme are separate axes — the viewer's theme picks the
+palette, the regime modulates illumination inside it, and regime never changes a
+hue. **Do not adopt Bitget's brand identity**; a page wearing it reads as an
+official product of theirs, which this is not.
+
 ## Submission
 
 `docs/SUBMISSION.md` is written to be pasted into the Google Form: all six parts

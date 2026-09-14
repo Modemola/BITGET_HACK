@@ -22,6 +22,7 @@ costs, measured across 28 weekend blackouts. See [`docs/FINDINGS.md`](docs/FINDI
 | [`docs/S2_BRIEF.md`](docs/S2_BRIEF.md) | Competition rules, tracks, submission requirements |
 | [`docs/SUBMISSION.md`](docs/SUBMISSION.md) | The six-part project description, ready for the form |
 | [`docs/RESEARCH_TASK.md`](docs/RESEARCH_TASK.md) | The required end-to-end research task |
+| [`docs/FRONTEND.md`](docs/FRONTEND.md) | Visual architecture: palette, type, the living-state mechanic |
 
 ## Quick start
 
