@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 131 tests
+python -m pytest -q                     # 140 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -106,6 +106,11 @@ web/
   free money, the one claim the product exists to prevent. Add a CLAIMS entry
   whenever a doc starts quoting a new number; don't delete entries to make a
   failure go away.
+- **A page that parses is not a page that runs.** `tests/test_page_runtime.py`
+  loads both builds in jsdom and counts what rendered. A stripped backslash once
+  turned a string literal into a syntax error: the HTML validated, every element
+  was in the markup, the whole suite passed, and both charts rendered empty with
+  every control dead. Static checks cannot see that. Run `npm install` once.
 - **Retrieval exists twice**, in `analogues.py` and again in JS on the page.
   `test_js_parity.py` extracts the real functions from the template and runs
   them under node against the shipped payload, requiring identical ordering and
@@ -122,6 +127,11 @@ web/
   under load. A single unpaginated page reads as "only 41 days of history exist"
   and an unspaced burst of searches fails every symbol. `probe_sources.py` has a
   global 3.5s limiter, backoff, and a resumable on-disk cache.
+- **Backslash escapes can be eaten in transit.** Writing JS through a shell
+  heredoc has silently turned `\n` into a real newline and dropped `\u2014`
+  entirely, breaking a string literal. Build multi-line strings as arrays of
+  paragraphs and use real characters; for edits to page JS, prefer the Edit tool
+  over shell-piped Python.
 - **Windows defaults to cp1252, and it bites in two places.** Printed script
   output mangles em-dashes and arrows, so keep script output ASCII (the HTML
   page is UTF-8 and unaffected). And `subprocess.run(..., text=True)` decodes
