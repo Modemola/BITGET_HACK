@@ -4,7 +4,7 @@ The page ships to two places, and they are not redundant.
 
 | | URL | What it is | Language layer |
 |---|---|---|---|
-| **Vercel** | *(set on first deploy)* | The public demo. A plain URL, no account, no sharing step. | No — points to the artifact |
+| **Vercel** | [https://blackout-desk-eight.vercel.app](https://blackout-desk-eight.vercel.app) | The public demo. A plain URL, no account, no sharing step. | No — points to the artifact |
 | **Claude Artifact** | [`…/artifact/15681462…`](https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461) | The full product, including "Ask the desk" | Yes, via the `sample` runtime capability |
 
 ## Why both
@@ -35,6 +35,12 @@ One template, two outputs, from `python scripts/build_page.py`:
 Getting this backwards fails silently in both directions: a fragment on a static
 host renders with no charset (every em-dash and ± in the copy breaks) and no
 viewport (a phone lays it out at desktop width). `tests/test_deploy.py` pins it.
+
+Deployed at **https://blackout-desk-eight.vercel.app**, from `main`.
+
+> Vercel builds the repository's **production branch**, which defaults to `main`.
+> The first deploy 404'd because all the work sat on a feature branch while
+> `main` was still the initial commit. `main` is now the canonical branch.
 
 ## First deploy
 

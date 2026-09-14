@@ -200,7 +200,7 @@ Everything is in the repository linked as **Submission Materials**:
 
 | Deliverable | Where |
 |---|---|
-| **Accessible demo** (required) | *(Vercel URL — plain link, no account needed)* |
+| **Accessible demo** (required) | https://blackout-desk-eight.vercel.app |
 | Full version, with the natural-language layer | https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 |
 | **Complete research task** (required) | `docs/RESEARCH_TASK.md` — question to actionable insight, end to end |
 | Research finding and every variant tested | `docs/FINDINGS.md` |
@@ -279,5 +279,7 @@ Must include `#BitgetHackathon` and `@Bitget_AI`, and retweet the official post.
 >
 > So we built the tool that tells you that instead. Blackout Desk: what you're
 > actually exposed to across the hours nobody is watching.
+>
+> https://blackout-desk-eight.vercel.app
 >
 > #BitgetHackathon @Bitget_AI

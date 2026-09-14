@@ -10,7 +10,9 @@ Full design in `docs/ARCHITECTURE.md`; competition rules in `docs/S2_BRIEF.md`.
 both from one template:
 
 - `public/index.html` — a complete document for Vercel. The public demo: a plain
-  URL, no account, no sharing step. Redeploys on push.
+  URL, no account, no sharing step. **https://blackout-desk-eight.vercel.app**,
+  built from `main` — Vercel deploys the production branch, so work must reach
+  `main` to go live.
 - `web/desk.html` — a **fragment** for the Claude artifact, which supplies its
   own doctype, charset and viewport. Carries the natural-language layer.
   https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 —
