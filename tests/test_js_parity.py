@@ -270,3 +270,105 @@ console.log(JSON.stringify(out));
             f"{name} rendered something other than a dash for a missing value: {out[name]}"
     assert out["good"] == ["5.00%", "-5.00%", "$1,235", "0.76"], \
         f"formatters broke on real values: {out['good']}"
+
+
+# --- the page carries the closure state -------------------------------------
+
+HELPER_START = "function applyRegime(regime)"
+HELPER_END = "/* ---- live clock ---"
+
+# The harness embeds the extracted source inside a JS template literal,
+# so any backtick in it would close that literal early.
+BACKTICK = chr(96)
+ESCAPED_BACKTICK = chr(92) + chr(96)
+
+
+def _regime_harness(payload: dict, script: str) -> str:
+    """Run applyRegime + currentRun under Node against a stubbed document."""
+    src = TEMPLATE.read_text(encoding="utf-8")
+    for marker in (HELPER_START, HELPER_END, CLOCK_START, CLOCK_END):
+        if marker not in src:
+            pytest.fail(f"marker {marker!r} moved in desk.template.html")
+    helper = src[src.index(HELPER_START):src.index(HELPER_END)]
+    clock = src[src.index(CLOCK_START):src.index(CLOCK_END)]
+
+    return f'''
+const D = {json.dumps({"regime_runs": payload["regime_runs"],
+                       "blackout_windows": payload["blackout_windows"]})};
+const attrs = {{}};
+const documentStub = {{ documentElement: {{
+  getAttribute: k => (k in attrs ? attrs[k] : null),
+  setAttribute: (k, v) => {{ attrs[k] = v; }},
+  removeAttribute: k => {{ delete attrs[k]; }}
+}} }};
+const make = new Function('document', 'D', 'isBlackout', `
+  {helper.replace(BACKTICK, ESCAPED_BACKTICK)}
+  {clock.replace(BACKTICK, ESCAPED_BACKTICK)}
+  return {{ applyRegime, currentRun }};
+`);
+const {{ applyRegime, currentRun }} = make(documentStub, D, r => r.indexOf('BLACKOUT') >= 0);
+{script}
+'''
+
+
+def _run_node(source: str) -> dict:
+    with tempfile.TemporaryDirectory() as tmp:
+        path = pathlib.Path(tmp) / "regime.mjs"
+        path.write_text(source, encoding="utf-8")
+        proc = subprocess.run([NODE, str(path)], capture_output=True, text=True,
+                              encoding="utf-8", timeout=60)
+    if proc.returncode != 0:
+        pytest.fail(f"node failed:\n{proc.stderr}")
+    return json.loads(proc.stdout)
+
+
+def test_every_regime_stamps_the_matching_visual_state(payload):
+    """What the page looks like and what it says must not disagree.
+
+    The stamp drives the palette through CSS tokens, so a wrong stamp shows a
+    trader a lit page during a blackout - the precise moment the design exists
+    to communicate.
+    """
+    out = _run_node(_regime_harness(payload, """
+const seen = {};
+for (const r of D.regime_runs) {
+  const mid = Math.floor((r.start + r.end) / 2);
+  const run = currentRun(mid);
+  applyRegime(run ? run.regime : null);
+  seen[r.regime] = attrs['data-regime'] ?? null;
+}
+console.log(JSON.stringify(seen));
+"""))
+    assert out, "no regimes exercised"
+    for regime, stamp in out.items():
+        expected = "BLACKOUT" if "BLACKOUT" in regime else regime
+        assert stamp == expected, f"{regime} stamped {stamp!r}, expected {expected!r}"
+
+
+def test_both_blackout_kinds_collapse_to_one_visual_state():
+    """A holiday blackout must look the same as a weekend one: dark is dark."""
+    fake = {"regime_runs": [
+        {"start": 0, "end": 100, "regime": "WEEKEND_BLACKOUT"},
+        {"start": 100, "end": 200, "regime": "HOLIDAY_BLACKOUT"},
+    ], "blackout_windows": []}
+    out = _run_node(_regime_harness(fake, """
+const seen = {};
+for (const r of D.regime_runs) {
+  applyRegime(r.regime);
+  seen[r.regime] = attrs['data-regime'] ?? null;
+}
+console.log(JSON.stringify(seen));
+"""))
+    assert set(out.values()) == {"BLACKOUT"}, out
+
+
+def test_leaving_the_calendar_clears_the_stamp(payload):
+    """Beyond the shipped horizon the page must not keep painting the last state."""
+    out = _run_node(_regime_harness(payload, """
+applyRegime('WEEKEND_BLACKOUT');
+const during = attrs['data-regime'] ?? null;
+applyRegime(null);
+console.log(JSON.stringify({ during, after: attrs['data-regime'] ?? null }));
+"""))
+    assert out["during"] == "BLACKOUT"
+    assert out["after"] is None, "a stale regime stamp survived leaving the calendar"

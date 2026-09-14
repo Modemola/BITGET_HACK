@@ -1,43 +1,78 @@
 <title>Blackout Desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
 <style>
+/* ---------------------------------------------------------------------------
+   Palette comes from the subject: sodium-vapour amber against cold blue-black,
+   the lit window in a dark street. --lit is the only accent and it marks the
+   one venue still quoting.
+
+   Theme and regime are separate axes. Theme picks the palette; regime only
+   modulates illumination inside it and never changes a hue -- panels dim, rules
+   recede, --lit stays exactly as it is. That is the whole point: one thing
+   stays on. Legacy token names are aliased so existing component CSS keeps
+   working against the new values.
+--------------------------------------------------------------------------- */
 :root{
-  --ground:#FBFBFC; --surface:#FFFFFF; --surface-2:#F3F5F7;
-  --ink:#14181F; --muted:#5B6472; --faint:#8A93A1;
-  --rule:#E2E5EA; --rule-strong:#CBD2DB;
-  --accent:#0F5E6B; --accent-soft:#DCEDF0;
-  --blackout:#1C2230; --blackout-soft:#DDE1E8;
+  --void:#161C26; --ground:#FAFAF8; --surface:#FFFFFF; --raised:#F2F4F7;
+  --ink:#11151B; --muted:#55606E; --faint:#8792A1;
+  --rule:#E4E7EC; --rule-strong:#CBD2DB;
+  --lit:#B87514; --lit-dim:#D8B98A; --lit-soft:#F7EEDF;
+  --open:#38506A; --half:#93A3B5;
   --risk:#B4453A; --risk-soft:#F6E4E2;
   --ok:#2F6B4F; --ok-soft:#DFEDE6;
-  --shadow:0 1px 2px rgba(20,24,31,.05), 0 8px 24px -16px rgba(20,24,31,.25);
-  --display:"Newsreader",Georgia,"Times New Roman",serif;
-  --body:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --shadow:0 1px 2px rgba(17,21,27,.05), 0 10px 30px -20px rgba(17,21,27,.30);
+
+  --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --body:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+
+  /* aliases kept so component CSS written against the old names still resolves */
+  --accent:var(--lit); --accent-soft:var(--lit-soft);
+  --blackout:var(--void); --blackout-soft:var(--half); --surface-2:var(--raised);
 }
+/* Light theme shows the regime through the lamp and the week strip rather than
+   by darkening the page, which would fight a viewer who chose light. */
+:root[data-regime="BLACKOUT"]{ --ground:#F0F2F5; --rule:#DEE2E8; }
+
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --ground:#0E1116; --surface:#161B23; --surface-2:#1D242E;
-    --ink:#E8EBF0; --muted:#9AA4B2; --faint:#6C7686;
-    --rule:#262D38; --rule-strong:#38414F;
-    --accent:#4FB3C4; --accent-soft:#14313A;
-    --blackout:#070A0F; --blackout-soft:#232B37;
-    --risk:#E0796C; --risk-soft:#3A211E;
-    --ok:#6FBF95; --ok-soft:#163023;
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    --void:#07090D; --ground:#0D1117; --surface:#141A22; --raised:#1B222C;
+    --ink:#E6EAF0; --muted:#8B97A8; --faint:#5A6575;
+    --rule:#1F2733; --rule-strong:#2C3746;
+    --lit:#E8A33D; --lit-dim:#8A6526; --lit-soft:#2A1F0E;
+    --open:#C9D8E8; --half:#5D7086;
+    --risk:#E06C60; --risk-soft:#3A211E;
+    --ok:#5FB894; --ok-soft:#163023;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
+  }
+  :root:not([data-theme="light"])[data-regime="WEEKNIGHT"]{ --ground:#0A0E14; }
+  :root:not([data-theme="light"])[data-regime="BLACKOUT"]{
+    --ground:var(--void); --surface:#0C1118; --raised:#131923; --rule:#161D27;
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0E1116; --surface:#161B23; --surface-2:#1D242E;
-  --ink:#E8EBF0; --muted:#9AA4B2; --faint:#6C7686;
-  --rule:#262D38; --rule-strong:#38414F;
-  --accent:#4FB3C4; --accent-soft:#14313A;
-  --blackout:#070A0F; --blackout-soft:#232B37;
-  --risk:#E0796C; --risk-soft:#3A211E;
-  --ok:#6FBF95; --ok-soft:#163023;
-  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  --void:#07090D; --ground:#0D1117; --surface:#141A22; --raised:#1B222C;
+  --ink:#E6EAF0; --muted:#8B97A8; --faint:#5A6575;
+  --rule:#1F2733; --rule-strong:#2C3746;
+  --lit:#E8A33D; --lit-dim:#8A6526; --lit-soft:#2A1F0E;
+  --open:#C9D8E8; --half:#5D7086;
+  --risk:#E06C60; --risk-soft:#3A211E;
+  --ok:#5FB894; --ok-soft:#163023;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
+}
+:root[data-theme="dark"][data-regime="WEEKNIGHT"]{ --ground:#0A0E14; }
+:root[data-theme="dark"][data-regime="BLACKOUT"]{
+  --ground:var(--void); --surface:#0C1118; --raised:#131923; --rule:#161D27;
+}
+
+/* The regime cross-fade carries the thesis, so it is the one ambient
+   transition on the page. Text never animates. */
+body,.panel,.timeline,.verdict{transition:background-color .4s ease,border-color .4s ease}
+@media (prefers-reduced-motion:reduce){
+  body,.panel,.timeline,.verdict{transition:none}
 }
 
 *{box-sizing:border-box}
@@ -49,36 +84,49 @@ h1,h2,h3{text-wrap:balance;margin:0}
 .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
   text-transform:uppercase;color:var(--faint)}
 
-header{border-bottom:1px solid var(--rule);padding-block:28px 22px;margin-bottom:34px}
-.masthead{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;
+header{padding-block:40px 26px}
+.masthead{display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-end;
   justify-content:space-between}
-.brand h1{font-family:var(--display);font-size:38px;font-weight:500;
-  letter-spacing:-.015em;line-height:1.05}
-.brand p{margin:6px 0 0;color:var(--muted);max-width:44ch}
-.status{display:flex;flex-direction:column;align-items:flex-end;gap:6px;
-  text-align:right}
-.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;
-  border-radius:999px;font-family:var(--mono);font-size:12px;font-weight:500;
-  border:1px solid var(--rule-strong);background:var(--surface-2);color:var(--ink)}
-.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
-.chip[data-state="blackout"]{background:var(--blackout);color:#EDF0F4;
-  border-color:transparent}
-.chip[data-state="blackout"] .dot{background:var(--risk)}
-.countdown{font-family:var(--mono);font-size:26px;font-weight:500;
-  letter-spacing:-.02em}
-.countdown small{font-size:12px;color:var(--muted);font-weight:400}
+.brand h1{font-family:var(--display);font-size:56px;font-weight:400;
+  letter-spacing:-.02em;line-height:.98}
+.brand p{margin:12px 0 0;color:var(--muted);max-width:42ch;font-size:15.5px}
+.status{display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+  text-align:right;flex:0 0 auto}
 
-.timeline{background:var(--surface);border:1px solid var(--rule);
-  border-radius:10px;padding:22px 24px 18px;box-shadow:var(--shadow)}
-.timeline-head{display:flex;flex-wrap:wrap;gap:12px;
-  justify-content:space-between;align-items:baseline;margin-bottom:18px}
-.timeline-head h2{font-family:var(--display);font-size:19px;font-weight:500}
-.tl-scroll{overflow-x:auto}
-.tl-svg{display:block;width:100%;min-width:640px;height:auto}
-.legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px;
-  font-size:12px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:7px}
-.swatch{width:14px;height:9px;border-radius:2px;display:inline-block}
+/* The lamp: lit while a reference price exists, dark once it does not. */
+.chip{display:inline-flex;align-items:center;gap:9px;padding:7px 14px;
+  border-radius:999px;font-family:var(--mono);font-size:11.5px;font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid var(--rule-strong);background:var(--surface);color:var(--muted)}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--open);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--open) 22%,transparent)}
+.chip[data-state="blackout"]{background:var(--void);color:#E6EAF0;
+  border-color:transparent}
+.chip[data-state="blackout"] .dot{background:var(--lit);
+  box-shadow:0 0 10px 1px color-mix(in srgb,var(--lit) 60%,transparent)}
+
+.countdown{font-family:var(--display);font-size:64px;font-weight:400;
+  line-height:.9;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+  color:var(--ink)}
+.countdown small{font-family:var(--body);font-size:15px;color:var(--faint);
+  font-weight:400;letter-spacing:0;margin-inline:1px 8px}
+.countdown small:last-child{margin-right:0}
+:root[data-regime="BLACKOUT"] .countdown{color:var(--lit)}
+
+/* --- the week strip: the hero ------------------------------------------- */
+.week{margin-block:12px 0;border-block:1px solid var(--rule);
+  padding-block:26px 20px;background:transparent}
+.week-head{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:baseline;
+  justify-content:space-between;margin-bottom:20px}
+.week-head h2{font-family:var(--display);font-size:22px;font-weight:400;
+  letter-spacing:-.01em}
+.tl-scroll{overflow-x:auto;overflow-y:hidden}
+.tl-svg{display:block;width:100%;min-width:680px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;
+  font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.swatch{width:18px;height:8px;border-radius:1px;display:inline-block}
+.swatch.void{background:var(--void);outline:1px solid var(--rule)}
 
 section{margin-top:38px}
 .sec-head{margin-bottom:16px}
@@ -211,17 +259,18 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
 </header>
 
-<div class="timeline">
-  <div class="timeline-head">
-    <h2>The next three weeks, by who is quoting</h2>
-    <div class="eyebrow">UTC</div>
+<div class="week">
+  <div class="week-head">
+    <h2>Three weeks, by who is quoting</h2>
+    <div class="eyebrow" id="week-range">UTC</div>
   </div>
-  <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 960 168"
-       role="img" aria-label="Trading venue availability over the next 21 days"></svg></div>
+  <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 1000 236"
+       role="img" aria-label="Which trading venues are open across the next 21 days"></svg></div>
   <div class="legend">
-    <span><i class="swatch" style="background:var(--accent)"></i>NYSE cash session</span>
-    <span><i class="swatch" style="background:var(--blackout-soft)"></i>Globex only &mdash; a futures reference exists</span>
-    <span><i class="swatch" style="background:var(--blackout)"></i>Blackout &mdash; rToken alone, no reference price</span>
+    <span><i class="swatch" style="background:var(--open)"></i>NYSE cash session</span>
+    <span><i class="swatch" style="background:var(--half)"></i>Globex only &mdash; a futures reference exists</span>
+    <span><i class="swatch void"></i>Blackout &mdash; no reference price anywhere</span>
+    <span><i class="swatch" style="background:var(--lit)"></i>rToken &mdash; quoting throughout</span>
   </div>
 </div>
 
@@ -370,6 +419,20 @@ var NAME = {
   WEEKEND_BLACKOUT: "Blackout", HOLIDAY_BLACKOUT: "Holiday blackout"
 };
 
+/* ---- the page carries the closure state ------------------------------- */
+/* Regime is stamped on the root element and CSS responds through tokens only.
+   It never changes a hue: panels dim, rules recede, --lit stays exactly as it
+   is, because the whole point is that one thing stays on. Driven by the same
+   currentRun() the countdown uses, so what the page looks like and what it says
+   cannot disagree. */
+function applyRegime(regime){
+  var root = document.documentElement;
+  var next = regime ? (isBlackout(regime) ? "BLACKOUT" : regime) : "";
+  if (root.getAttribute("data-regime") === next) return;   // avoid needless repaint
+  if (next) root.setAttribute("data-regime", next);
+  else root.removeAttribute("data-regime");
+}
+
 /* ---- live clock ------------------------------------------------------- */
 function currentRun(now){
   for (var i = 0; i < D.regime_runs.length; i++){
@@ -398,11 +461,12 @@ function tick(){
   var label = document.getElementById("regime-label");
   var cd = document.getElementById("countdown");
   var cdl = document.getElementById("countdown-label");
-  if (!run){ label.textContent = "schedule out of range"; return; }
+  if (!run){ label.textContent = "schedule out of range"; applyRegime(null); return; }
 
   var dark = isBlackout(run.regime);
   label.textContent = NAME[run.regime] || run.regime;
   chip.setAttribute("data-state", dark ? "blackout" : "open");
+  applyRegime(run.regime);
 
   var target = dark ? nextReferenceAt(now) : nextBlackoutAt(now);
   var caption = dark ? "until a reference price returns" : "until the next blackout";
@@ -417,54 +481,90 @@ function tick(){
 /* ---- timeline --------------------------------------------------------- */
 function drawTimeline(){
   var svg = document.getElementById("timeline");
-  var W = 960, H = 168, L = 8, R = 8, top = 26, rowH = 30, gap = 12;
   var runs = D.regime_runs;
   if (!runs.length) return;
-  var t0 = runs[0].start, t1 = runs[runs.length-1].end;
-  function X(t){ return L + (t - t0)/(t1 - t0) * (W - L - R); }
 
-  var rows = [
-    { key: "NYSE",   shows: function(r){ return r.regime === "US_CASH"; } },
-    { key: "GLOBEX", shows: function(r){ return r.regime === "US_CASH" || r.regime === "WEEKNIGHT"; } },
-    { key: "RTOKEN", shows: function(){ return true; } }
+  var W = 1000, H = 236, GUT = 76, R = 10;
+  var TOP = 34, LANE = 44, GAP = 14;
+  var t0 = runs[0].start, t1 = runs[runs.length - 1].end;
+  function X(t){ return GUT + (t - t0) / (t1 - t0) * (W - GUT - R); }
+  var laneY = [TOP, TOP + LANE + GAP, TOP + 2 * (LANE + GAP)];
+  var STACK_TOP = TOP, STACK_BOT = laneY[2] + LANE;
+
+  var lanes = [
+    { key: "NYSE",   fill: "var(--open)", shows: function(r){ return r.regime === "US_CASH"; } },
+    { key: "GLOBEX", fill: "var(--half)", shows: function(r){ return !isBlackout(r.regime); } },
+    { key: "RTOKEN", fill: "var(--lit)",  shows: function(){ return true; } }
   ];
-  var out = "";
-  rows.forEach(function(row, i){
-    var y = top + i*(rowH + gap);
-    out += '<text x="' + L + '" y="' + (y - 7) + '" font-family="var(--mono)" font-size="10.5" ' +
-           'letter-spacing="1.4" fill="var(--faint)">' + row.key + '</text>';
-    out += '<rect x="' + L + '" y="' + y + '" width="' + (W-L-R) + '" height="' + rowH +
-           '" rx="3" fill="var(--surface-2)"></rect>';
-    runs.forEach(function(r){
-      if (!row.shows(r)) return;
-      var fill = row.key === "RTOKEN"
-        ? (isBlackout(r.regime) ? "var(--blackout)" : "var(--accent)")
-        : FILL[r.regime];
-      var w = Math.max(X(r.end) - X(r.start), 0.7);
-      out += '<rect x="' + X(r.start) + '" y="' + y + '" width="' + w + '" height="' + rowH +
-             '" fill="' + fill + '"></rect>';
-    });
+
+  // A soft bloom, applied only to the lane that stays lit. It is the one
+  // decorative effect on the page and it exists to make the point that
+  // something is still burning while everything around it is dark.
+  var out = '<defs><filter id="bloom" x="-6%" y="-60%" width="112%" height="220%">' +
+            '<feGaussianBlur stdDeviation="3.2" result="b"/>' +
+            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+            '</filter></defs>';
+
+  // 1. Empty tracks, so a lane that is shut still reads as a lane.
+  lanes.forEach(function(lane, i){
+    out += '<rect x="' + GUT + '" y="' + laneY[i] + '" width="' + (W - GUT - R) +
+           '" height="' + LANE + '" rx="2" fill="var(--raised)"></rect>';
   });
 
-  var bottom = top + 3*(rowH + gap) - gap;
-  for (var t = Math.ceil(t0/86400)*86400; t < t1; t += 86400){
-    var dt = new Date(t*1000);
+  // 2. The void: drawn through the whole stack, before anything is lit, so the
+  //    blackout is a column of genuine absence rather than a shade of grey.
+  runs.forEach(function(r){
+    if (!isBlackout(r.regime)) return;
+    out += '<rect x="' + X(r.start) + '" y="' + STACK_TOP + '" width="' +
+           Math.max(X(r.end) - X(r.start), 1) + '" height="' + (STACK_BOT - STACK_TOP) +
+           '" fill="var(--void)"></rect>';
+  });
+
+  // 3. What is actually quoting, rToken last so it sits above the void.
+  lanes.forEach(function(lane, i){
+    var segs = "";
+    runs.forEach(function(r){
+      if (!lane.shows(r)) return;
+      segs += '<rect x="' + X(r.start) + '" y="' + laneY[i] + '" width="' +
+              Math.max(X(r.end) - X(r.start), 0.8) + '" height="' + LANE +
+              '" fill="' + lane.fill + '"></rect>';
+    });
+    out += lane.key === "RTOKEN" ? '<g filter="url(#bloom)">' + segs + '</g>' : segs;
+
+    out += '<text x="' + (GUT - 12) + '" y="' + (laneY[i] + LANE / 2 + 4) +
+           '" text-anchor="end" font-family="var(--mono)" font-size="11" ' +
+           'letter-spacing="1.3" fill="var(--faint)">' + lane.key + '</text>';
+  });
+
+  // 4. Day boundaries, with Mondays named.
+  for (var t = Math.ceil(t0 / 86400) * 86400; t < t1; t += 86400){
+    var dt = new Date(t * 1000);
     var monday = dt.getUTCDay() === 1;
-    out += '<line x1="' + X(t) + '" y1="' + (top-4) + '" x2="' + X(t) + '" y2="' + (bottom+4) +
-           '" stroke="var(--rule)" stroke-width="' + (monday ? 1.2 : 0.6) + '"></line>';
+    out += '<line x1="' + X(t) + '" y1="' + (STACK_TOP - 6) + '" x2="' + X(t) +
+           '" y2="' + (STACK_BOT + 6) + '" stroke="var(--rule)" stroke-width="' +
+           (monday ? 1 : 0.5) + '" opacity="' + (monday ? 0.9 : 0.45) + '"></line>';
     if (monday){
-      out += '<text x="' + (X(t)+4) + '" y="' + (H-8) + '" font-family="var(--mono)" ' +
-             'font-size="10" fill="var(--faint)">' + dt.toUTCString().slice(5,11) + '</text>';
+      out += '<text x="' + (X(t) + 5) + '" y="' + (H - 10) + '" font-family="var(--mono)" ' +
+             'font-size="10.5" fill="var(--faint)">' + dt.toUTCString().slice(5, 11) + '</text>';
     }
   }
-  var now = Math.floor(Date.now()/1000);
+
+  // 5. Now.
+  var now = Math.floor(Date.now() / 1000);
   if (now > t0 && now < t1){
-    out += '<line x1="' + X(now) + '" y1="' + (top-12) + '" x2="' + X(now) + '" y2="' + (bottom+6) +
-           '" stroke="var(--risk)" stroke-width="1.6"></line>';
-    out += '<text x="' + (X(now)+5) + '" y="' + (top-15) + '" font-family="var(--mono)" ' +
-           'font-size="10" fill="var(--risk)">NOW</text>';
+    out += '<line x1="' + X(now) + '" y1="' + (STACK_TOP - 18) + '" x2="' + X(now) +
+           '" y2="' + (STACK_BOT + 8) + '" stroke="var(--ink)" stroke-width="1.4"></line>';
+    out += '<text x="' + (X(now) + 6) + '" y="' + (STACK_TOP - 21) + '" font-family="var(--mono)" ' +
+           'font-size="10" letter-spacing="1.2" fill="var(--ink)">NOW</text>';
   }
+
   svg.innerHTML = out;
+
+  var range = document.getElementById("week-range");
+  if (range){
+    range.textContent = new Date(t0 * 1000).toUTCString().slice(5, 11) + " - " +
+      new Date(t1 * 1000).toUTCString().slice(5, 11) + " UTC";
+  }
 }
 
 /* ---- evidence --------------------------------------------------------- */

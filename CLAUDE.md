@@ -29,7 +29,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 99 tests
+python -m pytest -q                     # 110 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -146,6 +146,11 @@ quoting. Regime and theme are separate axes — the viewer's theme picks the
 palette, the regime modulates illumination inside it, and regime never changes a
 hue. **Do not adopt Bitget's brand identity**; a page wearing it reads as an
 official product of theirs, which this is not.
+
+Steps 1-4 are built: token layer, masthead, the full-bleed week strip, and
+`applyRegime` wiring. `tests/test_page_style.py` holds the visual invariants and
+`test_js_parity.py` pins the regime stamp to the calendar. Still to build:
+the time scrubber, the verdict pull-quote, and an editable position size.
 
 ## Submission
 
