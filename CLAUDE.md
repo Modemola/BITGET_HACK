@@ -90,9 +90,10 @@ web/
   `allow_nan=False`. The page's formatters render null as an em dash.
 - **Prose goes stale when the data refreshes.** `tests/test_doc_figures.py` pins
   every figure quoted in the docs to the payload field it came from and fails
-  naming the file and sentence. It also blocks copy that calls the premium an
-  arbitrage opportunity. Add a CLAIMS entry whenever a doc starts quoting a new
-  number; don't delete entries to make a failure go away.
+  naming the file and sentence. It also rejects copy that frames the premium as
+  free money, the one claim the product exists to prevent. Add a CLAIMS entry
+  whenever a doc starts quoting a new number; don't delete entries to make a
+  failure go away.
 - **Retrieval exists twice**, in `analogues.py` and again in JS on the page.
   `test_js_parity.py` extracts the real functions from the template and runs
   them under node against the shipped payload, requiring identical ordering and
