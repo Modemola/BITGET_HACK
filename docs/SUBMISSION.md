@@ -110,8 +110,8 @@ no nulls. Reproduce with `python scripts/analyse_basis.py`.
 | Hit rate fading the premium | 46.4% | observed |
 | Net per weekend at 10bp round-trip | −0.083% | observed |
 | Scheduled rate decisions inside a blackout | 0 of 22, across 134 windows | observed |
-| BTC hedge: correlation / variance removed | +0.71 / 29% | observed |
-| BTC hedge: rolling correlation range | −0.51 to +0.89, sign-flipping | observed |
+| BTC hedge: correlation / variance removed | +0.66 / 25% | observed |
+| BTC hedge: rolling correlation range | -0.51 to +0.89, sign-flipping | observed |
 
 **Stated limitations.** The honest sample is **28 weekends** — thin, and reported
 beside every distribution on the page rather than hidden behind an hourly bar

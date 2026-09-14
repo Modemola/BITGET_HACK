@@ -86,6 +86,16 @@ CLAIMS: list[tuple[str, str, str, str, float]] = [
     ("docs/FINDINGS.md", r"The sample is (\d+) weekends", "summary.n_windows", "int", 0),
 ]
 
+#: Hedge figures live in a list, not at a fixed path, so they get their own
+#: check. The data refresh on 2026-09-14 moved BTC's correlation and the
+#: submission kept quoting the old one - exactly the drift CLAIMS exists to stop.
+HEDGE_CLAIMS = [
+    ("docs/SUBMISSION.md", r"BTC hedge: correlation / variance removed \| \+([\d.]+) /",
+     "BTC-USD", "correlation", 0.01),
+    ("docs/SUBMISSION.md", r"BTC hedge: correlation / variance removed \| \+[\d.]+ / (\d+)%",
+     "BTC-USD", "risk_reduction", 1.0),
+]
+
 
 def _expected(kind: str, raw) -> float:
     if kind == "int":
@@ -172,4 +182,20 @@ def test_docs_do_not_call_the_premium_an_arbitrage():
     assert not offenders, (
         "copy describes the weekend premium as an arbitrage opportunity:\n  "
         + "\n  ".join(offenders)
+    )
+
+
+@pytest.mark.parametrize("doc,pattern,instrument,field,tol", HEDGE_CLAIMS,
+                         ids=[f"{i}:{f}" for _, _, i, f, _ in HEDGE_CLAIMS])
+def test_documented_hedge_figure_matches_the_data(data, doc, pattern, instrument, field, tol):
+    row = next((h for h in data["hedges"] if h["instrument"] == instrument), None)
+    assert row, f"{instrument} is no longer priced in the payload"
+
+    match = re.search(pattern, (ROOT / doc).read_text(encoding="utf-8"))
+    assert match, f"{doc} no longer contains the hedge sentence this guard anchors on"
+
+    documented = float(match.group(1))
+    expected = row[field] * (100 if field == "risk_reduction" else 1)
+    assert documented == pytest.approx(expected, abs=tol), (
+        f"{doc} says {match.group(0)!r} but {instrument}.{field} is now {expected:.4g}"
     )
