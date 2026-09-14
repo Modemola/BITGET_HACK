@@ -29,7 +29,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 111 tests
+python -m pytest -q                     # 121 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -157,6 +157,24 @@ input's clamping.
 value is what the scrubber moves, so dragging recomputes real analytics for that
 moment rather than animating a mock-up. Adding a panel that reads the clock
 directly breaks the scrubber silently.
+
+## CI
+
+`.github/workflows/ci.yml` runs on every push: the suite on Ubuntu **and
+Windows** (the cp1252 console has broken this project three times), a check that
+`web/desk.html` still matches template + payload, and a printout of the
+canonical figures. The suite is hermetic — it passes with every socket blocked —
+so CI never flakes on a third-party API.
+
+`.github/workflows/refresh.yml` runs Mondays 06:00 UTC and on demand: pulls new
+data, rebuilds, and opens a PR showing which figures moved. **Expect
+`test_doc_figures` to fail in that PR** — prose is the one thing the job cannot
+rewrite, and that failure names the sentences to fix. Fix the prose; never
+weaken the guard. **CI cannot republish the artifact**, so the live demo serves
+the old numbers until someone does it by hand.
+
+`scripts/figures.py` prints the canonical figures in a stable, diffable form —
+run it after any refresh to see what the prose has to be brought in line with.
 
 ## Submission
 

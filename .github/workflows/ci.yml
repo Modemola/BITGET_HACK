@@ -1,0 +1,101 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# A superseded run tells you nothing useful, and the deadline is close.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows is not redundant here. The development machine is Windows, its
+        # console defaults to cp1252, and that has broken this project three
+        # times - mangled script output twice and a subprocess decode once. The
+        # only way that stays fixed is if a runner keeps checking.
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # test_js_parity.py runs the page's own JavaScript under Node and compares
+      # it to the Python it duplicates. Those tests skip themselves when Node is
+      # absent, which would quietly remove the only thing stopping the two
+      # implementations drifting - so Node is installed deliberately and the
+      # step below fails if they end up skipped anyway.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+
+      - name: Test
+        run: python -m pytest -q
+
+      - name: The JS/Python parity tests must actually have run
+        shell: bash
+        run: |
+          skipped=$(python -m pytest tests/test_js_parity.py -q 2>&1 | grep -c "skipped" || true)
+          if [ "$skipped" != "0" ]; then
+            echo "parity tests were skipped - Node is missing and the page's copy"
+            echo "of the retrieval algorithm is no longer being checked."
+            exit 1
+          fi
+          echo "parity tests ran"
+
+  page-in-sync:
+    name: published page matches its payload
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+
+      # web/desk.html is generated from the template plus the payload and that
+      # step is deterministic, so a diff here means someone hand-edited the
+      # built page - which would be silently undone by the next build.
+      # The payload itself is anchored on "now" and is deliberately not checked.
+      - name: Rebuild the page from the committed payload
+        run: python scripts/build_page.py
+
+      - name: It must be byte-identical to what is committed
+        run: |
+          if ! git diff --quiet -- web/desk.html; then
+            echo "::error::web/desk.html does not match template + payload."
+            echo "Edit web/desk.template.html and run scripts/build_page.py; never edit desk.html."
+            git --no-pager diff --stat -- web/desk.html
+            exit 1
+          fi
+          echo "page is in sync with its payload"
+
+  figures:
+    name: documented figures
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+
+      # Surfaced in the log even when green, so a reviewer can eyeball the
+      # numbers the documents are claiming without opening the payload.
+      - name: Canonical figures
+        run: python scripts/figures.py

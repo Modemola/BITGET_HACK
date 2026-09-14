@@ -1,0 +1,147 @@
+name: Refresh market data
+
+# The rToken sample grows by one weekend every week, and on 2026-09-14 a
+# four-day-old dataset was silently missing the blackout that had just happened.
+# This pulls the new data, rebuilds, and opens a pull request describing exactly
+# which figures moved.
+#
+# Monday 06:00 UTC: after the Sunday 22:00 UTC reopen, so the weekend blackout
+# is complete and its bars have settled.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+
+      - name: Figures before
+        run: python scripts/figures.py > /tmp/figures-before.txt
+
+      # Each source is allowed to fail on its own. A rate-limited Yahoo should
+      # not throw away a good rToken pull, and the tests below judge whatever
+      # actually landed. probe_sources.py writes after every page, so a partial
+      # fetch keeps what it already retrieved.
+      - name: rToken hourly (GeckoTerminal)
+        id: rtoken
+        continue-on-error: true
+        run: python scripts/probe_sources.py
+
+      - name: Reference legs (Yahoo)
+        id: reference
+        continue-on-error: true
+        run: python scripts/fetch_reference.py
+
+      - name: Scheduled events (federalreserve.gov)
+        id: events
+        continue-on-error: true
+        run: python scripts/fetch_events.py
+
+      - name: Rebuild payload and page
+        run: |
+          python -m blackout.build
+          python scripts/build_page.py
+
+      - name: Figures after
+        run: python scripts/figures.py > /tmp/figures-after.txt
+
+      # Expected to fail after a real refresh: test_doc_figures.py pins the
+      # prose to the data, and prose is the one thing this job cannot rewrite.
+      # That failure is the point - it names the sentences a human must fix.
+      - name: Test
+        id: tests
+        continue-on-error: true
+        run: python -m pytest -q 2>&1 | tail -40 | tee /tmp/tests.txt
+
+      - name: Assemble the report
+        id: report
+        run: |
+          {
+            echo "## What moved"
+            echo
+            if diff -q /tmp/figures-before.txt /tmp/figures-after.txt > /dev/null; then
+              echo "Nothing. Every canonical figure is unchanged."
+            else
+              echo '```diff'
+              diff /tmp/figures-before.txt /tmp/figures-after.txt || true
+              echo '```'
+            fi
+            echo
+            echo "## Sources"
+            echo
+            echo "| source | outcome |"
+            echo "| --- | --- |"
+            echo "| rToken hourly | ${{ steps.rtoken.outcome }} |"
+            echo "| reference legs | ${{ steps.reference.outcome }} |"
+            echo "| scheduled events | ${{ steps.events.outcome }} |"
+            echo
+            echo "## Tests: ${{ steps.tests.outcome }}"
+            echo
+            echo '```'
+            cat /tmp/tests.txt 2>/dev/null || echo "(no output)"
+            echo '```'
+            echo
+            if [ "${{ steps.tests.outcome }}" != "success" ]; then
+              echo "> A \`test_doc_figures\` failure is expected when the data moves: it names"
+              echo "> the sentences whose numbers are now stale. Fix the prose, do not weaken"
+              echo "> the guard. Any *other* failure is a real regression."
+              echo
+            fi
+            echo "## Before merging"
+            echo
+            echo "- [ ] Prose updated wherever \`test_doc_figures\` points"
+            echo "- [ ] \`python -m pytest -q\` green locally"
+            echo "- [ ] **Republish the artifact** - CI cannot do this, and the live demo"
+            echo "      keeps serving the old numbers until someone does"
+          } > /tmp/body.md
+          cat /tmp/body.md
+
+      - name: Open a pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "No change to commit; nothing to review."
+            exit 0
+          fi
+
+          BRANCH="data/refresh-$(date -u +%Y-%m-%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add -A
+          SUBJECT="data: weekly refresh $(date -u +%Y-%m-%d)"
+          BODY="Automated pull of rToken hourly bars, the reference legs and the"
+          BODY="$BODY scheduled event calendar, followed by a rebuild. See the pull"
+          BODY="$BODY request for which figures moved and which sentences need updating."
+          git commit -m "$SUBJECT" -m "$BODY"
+          git push -u origin "$BRANCH"
+
+          gh pr create \
+            --title "data: weekly refresh $(date -u +%Y-%m-%d)" \
+            --body-file /tmp/body.md \
+            --base "${{ github.ref_name }}" \
+            --head "$BRANCH"
