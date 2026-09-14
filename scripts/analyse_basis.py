@@ -43,7 +43,7 @@ def main() -> int:
     df = hourly_frame({"x": load("NVDAx"), "nvda": load("NVDA"), "nq": load("NQ_F")}, clock)
     df = add_premium(df, token="x", native="nvda")
     d = df[df.index >= START].dropna(subset=["prem"])
-    print(f"NVDAx vs NVDA/NQ — {len(d)} hourly bars, "
+    print(f"NVDAx vs NVDA/NQ - {len(d)} hourly bars, "
           f"{d.index.min():%Y-%m-%d} to {d.index.max():%Y-%m-%d}, beta={df.attrs['beta']:.2f}\n")
 
     print("=== 1. Premium dispersion by regime ===")

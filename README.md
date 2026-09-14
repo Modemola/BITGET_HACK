@@ -8,10 +8,10 @@ position, you cannot watch it, and no arbitrageur stands behind the price.
 Blackout Desk tells you what you are exposed to before that window opens.
 
 Its central claim is counterintuitive and measured, not assumed: the weekend
-premium on rToken is **not an arbitrage opportunity**. Across 210 days of hourly
-data, 87–92% of the gap closes because the stale reference catches up, not
-because the token corrects. Trading against it is a coin flip that dies at 10bp
-costs. See [`docs/FINDINGS.md`](docs/FINDINGS.md).
+premium on rToken is **not an arbitrage opportunity**. Across 197 days of hourly
+data, 78–98% of the gap closes because the stale reference catches up, not
+because the token corrects. Trading against it is a 46% coin flip that dies at 10bp
+costs, measured across 28 weekend blackouts. See [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
 ## Documentation
 
@@ -27,7 +27,7 @@ costs. See [`docs/FINDINGS.md`](docs/FINDINGS.md).
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest -q                     # 74 tests
+python -m pytest -q                     # 99 tests
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 ```

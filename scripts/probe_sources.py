@@ -153,46 +153,90 @@ def discover(refresh: bool) -> list[Candidate]:
     return out
 
 
-def fetch_ohlcv(c: Candidate, max_pages: int, refresh: bool) -> pd.DataFrame:
-    """Page hourly bars backwards, writing after every page so progress survives.
+COLUMNS = ["ts", "open", "high", "low", "close", "volume"]
 
-    Resumes from whatever is already on disk: only pages older than the earliest
-    cached bar are requested.
+
+def _page(pool: str, before: int | None) -> pd.DataFrame:
+    """One page of hourly bars, ending before `before` (or the newest if None)."""
+    params = {"limit": PAGE_LIMIT}
+    if before is not None:
+        params["before_timestamp"] = int(before)
+    rows = api_get(f"/networks/solana/pools/{pool}/ohlcv/hour", params) \
+        ["data"]["attributes"]["ohlcv_list"]
+    return pd.DataFrame(rows, columns=COLUMNS)
+
+
+def _merge(df: pd.DataFrame, page: pd.DataFrame, path: Path) -> tuple[pd.DataFrame, int]:
+    """Union the page into the frame and persist, so a later failure costs nothing."""
+    before = len(df)
+    df = pd.concat([df, page]).drop_duplicates("ts").sort_values("ts").reset_index(drop=True)
+    df.to_csv(path, index=False)
+    return df, len(df) - before
+
+
+def fetch_ohlcv(c: Candidate, max_pages: int, refresh: bool) -> pd.DataFrame:
+    """Bring a symbol's hourly history up to date, then extend it backwards.
+
+    The API only pages backwards from a timestamp, so catching up and going
+    deeper are the same mechanism anchored at different points. Both are needed
+    and the order matters:
+
+      1. Catch up. Start at the newest bar and walk back until the page overlaps
+         what is already cached. Without this the fetcher can never reach the
+         present -- it was previously anchored only at the cache's *oldest* bar,
+         so a stale file stayed stale no matter how often it ran, and every new
+         weekend was silently missed.
+      2. Extend. Page back from the oldest cached bar until MIN_DAYS of history
+         exists. Skipped once the span is long enough.
+
+    Every page is written before the next request, so a throttle midway through
+    costs only the page in flight.
     """
     RAW.mkdir(parents=True, exist_ok=True)
     path = RAW / f"{c.symbol}_hour.csv"
 
-    df = pd.DataFrame(columns=["ts", "open", "high", "low", "close", "volume"])
+    df = pd.DataFrame(columns=COLUMNS)
     if path.exists() and not refresh:
         df = pd.read_csv(path)
-        print(f"      resuming from {len(df)} cached bars", flush=True)
+        print(f"      cached: {len(df)} bars, newest {_stamp(df.get('ts'))}", flush=True)
 
-    for page in range(max_pages):
-        span = _span_days(df)
-        if span >= MIN_DAYS:
+    # --- 1. catch up to the present ---------------------------------------
+    if len(df):
+        newest_cached = int(df["ts"].max())
+        before = None
+        for page_n in range(max_pages):
+            page = _page(c.pool, before)
+            if page.empty:
+                break
+            df, gained = _merge(df, page, path)
+            oldest_in_page = int(page["ts"].min())
+            print(f"      catch-up {page_n + 1}: +{gained} bars", flush=True)
+            if oldest_in_page <= newest_cached or gained == 0 or len(page) < PAGE_LIMIT:
+                break                  # reached the cache, or ran out of data
+            before = oldest_in_page
+
+    # --- 2. extend history backwards --------------------------------------
+    for page_n in range(max_pages):
+        if _span_days(df) >= MIN_DAYS:
             break
-        params = {"limit": PAGE_LIMIT}
-        if len(df):
-            params["before_timestamp"] = int(df["ts"].min())
-
-        rows = api_get(f"/networks/solana/pools/{c.pool}/ohlcv/hour", params) \
-            ["data"]["attributes"]["ohlcv_list"]
-        if not rows:
+        page = _page(c.pool, int(df["ts"].min()) if len(df) else None)
+        if page.empty:
             break
-
-        page_df = pd.DataFrame(rows, columns=["ts", "open", "high", "low", "close", "volume"])
-        before = len(df)
-        df = pd.concat([df, page_df]).drop_duplicates("ts").sort_values("ts")
-        df.to_csv(path, index=False)
-        gained = len(df) - before
-        print(f"      page {page + 1}: +{gained} bars, {_span_days(df):.0f}d total", flush=True)
-
-        if gained == 0 or len(rows) < PAGE_LIMIT:
-            break                      # history exhausted, or the API replayed a page
+        df, gained = _merge(df, page, path)
+        print(f"      history {page_n + 1}: +{gained} bars, "
+              f"{_span_days(df):.0f}d total", flush=True)
+        if gained == 0 or len(page) < PAGE_LIMIT:
+            break
     else:
         c.hit_page_limit = True
 
     return df
+
+
+def _stamp(ts) -> str:
+    if ts is None or not len(ts):
+        return "none"
+    return pd.to_datetime(int(ts.max()), unit="s", utc=True).strftime("%Y-%m-%d %H:%M")
 
 
 def _span_days(df: pd.DataFrame) -> float:
@@ -243,24 +287,24 @@ def main() -> int:
     ap.add_argument("--refresh", action="store_true", help="ignore cached data")
     args = ap.parse_args()
 
-    print("Blackout Basis — rToken data ingestion")
+    print("Blackout Basis - rToken data ingestion")
     print(f"bar: >={MIN_DAYS}d hourly, >={MIN_WEEKEND_SHARE:.0%} weekend bars, "
           f">=${MIN_LIQUIDITY_USD:,} liquidity")
     print(f"rate limit: one call per {MIN_INTERVAL_S}s with backoff; cached under data/\n")
 
-    print("Phase 1 — pool discovery")
+    print("Phase 1 - pool discovery")
     found = discover(args.refresh)
     live = sorted([c for c in found if c.pool], key=lambda c: -c.liquidity)
     for c in found:
         if not c.pool:
-            print(f"  {c.symbol:<8} — {c.error}")
+            print(f"  {c.symbol:<8} - {c.error}")
     print()
     print(f"{'symbol':<8}{'liquidity':>14}{'vol 24h':>14}")
     for c in live:
         print(f"{c.symbol:<8}${c.liquidity:>13,.0f}${c.volume_24h:>13,.0f}")
 
     deep = live[: args.symbols]
-    print(f"\nPhase 2 — hourly history for the {len(deep)} deepest\n")
+    print(f"\nPhase 2 - hourly history for the {len(deep)} deepest\n")
     for c in deep:
         print(f"  {c.symbol} ({c.pool[:12]}...)", flush=True)
         try:
@@ -272,7 +316,7 @@ def main() -> int:
     print("-" * 46)
     for c in deep:
         if c.error and not c.bars:
-            print(f"{c.symbol:<8}{'—':>7}{'—':>8}{'—':>7}  {c.error}")
+            print(f"{c.symbol:<8}{'-':>7}{'-':>8}{'-':>7}  {c.error}")
             continue
         cap = "+" if c.hit_page_limit else " "
         print(f"{c.symbol:<8}{c.bars:>7}{c.span_days:>7.0f}d{cap}{c.weekend_share:>6.0%}"
@@ -293,20 +337,20 @@ def main() -> int:
     print("\n" + "=" * 78)
     if passing:
         best = max(passing, key=lambda c: c.liquidity)
-        print(f"VERDICT: GO. {best.symbol} — {best.span_days:.0f}d hourly, "
+        print(f"VERDICT: GO. {best.symbol} - {best.span_days:.0f}d hourly, "
               f"{best.weekend_share:.0%} weekend bars, ${best.liquidity:,.0f} liquidity.")
     elif seven_by_24:
         best = max(seven_by_24, key=lambda c: c.liquidity)
         print(f"VERDICT: PARTIAL. 7x24 confirmed ({best.symbol}: {best.weekend_share:.0%} "
               f"weekend bars, {best.span_days:.0f}d) but not every bar was met.")
         print("Depth or history is the constraint, not weekend coverage. That is a scope")
-        print("decision — shorten the window or accept lower capacity — not a stop.")
+        print("decision - shorten the window or accept lower capacity - not a stop.")
     else:
         print("VERDICT: NO-GO on this run. Check whether the failures above are throttling")
-        print("(429/401) rather than missing data; if so, re-run — the cache resumes.")
+        print("(429/401) rather than missing data; if so, re-run - the cache resumes.")
         return 1
 
-    print(f"\nData cached under {RAW.relative_to(ROOT)}/ — re-runs resume from it.")
+    print(f"\nData cached under {RAW.relative_to(ROOT)}/ - re-runs resume from it.")
     return 0
 
 

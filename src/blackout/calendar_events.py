@@ -73,21 +73,44 @@ def events_after_reopen(clock: ClosureClock, as_of: pd.Timestamp,
     return events_in_window(reopen, reopen + pd.Timedelta(hours=hours), events)
 
 
+def events_before_window(clock: ClosureClock, as_of: pd.Timestamp,
+                         events: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Scheduled events between now and the next blackout opening.
+
+    A trader standing on a Monday is not only exposed to the weekend ahead.
+    Omitting this made the tool silent about a rate decision three days away
+    simply because it fell before the window rather than inside it, which is the
+    one event they could still act on.
+    """
+    window = next_blackout(clock, as_of)
+    if window is None:
+        return (load_events() if events is None else events).iloc[0:0]
+    return events_in_window(as_of, window["start"], events)
+
+
 def assess(clock: ClosureClock, as_of: pd.Timestamp,
            events: pd.DataFrame | None = None) -> dict:
     """What the calendar says about the window ahead, stated plainly.
 
-    Reports the empty case as a finding rather than as missing data, because a
-    blackout with nothing scheduled in it is the normal state and the reason the
-    empirical distribution matters more than the calendar does.
+    Covers three spans, because a position exists across all of them: between
+    now and the window opening, inside the window, and in the days following the
+    reopen. Reports the empty case as a finding rather than as missing data,
+    since a blackout with nothing scheduled in it is the normal state and the
+    reason the empirical distribution matters more than the calendar does.
     """
     ev = load_events() if events is None else events
     window = next_blackout(clock, as_of)
     if window is None:
-        return {"has_window": False, "events_inside": 0, "events_after": 0}
+        return {"has_window": False, "events_before": 0,
+                "events_inside": 0, "events_after": 0}
 
+    before = events_before_window(clock, as_of, ev)
     inside = events_in_window(window["start"], window["end"], ev)
     after = events_after_reopen(clock, as_of, events=ev)
+
+    # Chronological order: the soonest thing a trader must think about first.
+    upcoming = pd.concat([before, inside, after]) if len(ev) else ev
+    upcoming = upcoming.sort_values("ts_utc") if len(upcoming) else upcoming
 
     return {
         "has_window": True,
@@ -95,12 +118,11 @@ def assess(clock: ClosureClock, as_of: pd.Timestamp,
         "window_end": window["end"],
         "window_hours": float(window["hours"]),
         "regime": window["regime"],
+        "events_before": int(len(before)),
         "events_inside": int(len(inside)),
         "events_after": int(len(after)),
-        "next_event": (after.iloc[0]["label"] if len(after)
-                       else (inside.iloc[0]["label"] if len(inside) else None)),
-        "next_event_ts": (after.iloc[0]["ts_utc"] if len(after)
-                          else (inside.iloc[0]["ts_utc"] if len(inside) else None)),
+        "next_event": upcoming.iloc[0]["label"] if len(upcoming) else None,
+        "next_event_ts": upcoming.iloc[0]["ts_utc"] if len(upcoming) else None,
         "calendar_populated": bool(len(ev)),
     }
 
