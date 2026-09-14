@@ -284,13 +284,13 @@ Each step ships independently, so we are never mid-refactor with a broken demo.
 
 | Step | Work | Why first |
 |---|---|---|
-| 1 | Token layer: new palette, `[data-regime]` blocks, fonts | Everything else reads from it |
-| 2 | Masthead + countdown at full scale | Highest impact per line changed |
-| 3 | WeekStrip full-bleed with true void | The hero; the thing judges screenshot |
-| 4 | `applyRegime` wiring | Turns the design into the thesis |
-| 5 | Scrubber | Makes the page demo itself |
-| 6 | Verdict pull-quote | The sentence we want remembered |
-| 7 | Editable position size | Makes it the judge's own number |
+| 1 ✅ | Token layer: new palette, `[data-regime]` blocks, fonts | Everything else reads from it |
+| 2 ✅ | Masthead + countdown at full scale | Highest impact per line changed |
+| 3 ✅ | WeekStrip full-bleed with true void | The hero; the thing judges screenshot |
+| 4 ✅ | `applyRegime` wiring | Turns the design into the thesis |
+| 5 ✅ | Scrubber | Makes the page demo itself |
+| 6 ✅ | Verdict pull-quote | The sentence we want remembered |
+| 7 ✅ | Editable position size | Makes it the judge's own number |
 | 8 | Restyle drift / analogues / hedges to the new tokens | Consistency pass |
 | 9 | Mobile + reduced-motion + both-theme audit | Never optional |
 

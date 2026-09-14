@@ -372,3 +372,42 @@ console.log(JSON.stringify({ during, after: attrs['data-regime'] ?? null }));
 """))
     assert out["during"] == "BLACKOUT"
     assert out["after"] is None, "a stale regime stamp survived leaving the calendar"
+
+
+# --- the viewer's own position ----------------------------------------------
+
+def test_position_input_never_yields_a_nonsense_figure():
+    """Whatever is typed, the desk must quote a defensible number.
+
+    The value multiplies every dollar figure on the page, so a stray character
+    or a pasted symbol must degrade to the default rather than propagate into a
+    risk estimate.
+    """
+    src = TEMPLATE.read_text(encoding="utf-8")
+    block = src[src.index("var MIN_POSITION"):src.index("/* ---- one clock")]
+    js = f"""
+let current = '';
+const documentStub = {{ getElementById: id => (id === 'position' ? {{ value: current }} : null) }};
+const D = {{ demo: {{ exposure_usd: 250000 }} }};
+const api = new Function('document', 'D', `
+  {block.replace(BACKTICK, ESCAPED_BACKTICK)}
+  return {{ positionUsd, MIN: MIN_POSITION, MAX: MAX_POSITION }};
+`)(documentStub, D);
+const out = {{ MIN: api.MIN, MAX: api.MAX, results: {{}} }};
+for (const v of ['250,000', '1000000', '$42,500.50', '', 'abc', '0', '-5000', '12', '9'.repeat(12)]) {{
+  current = v;
+  out.results[v] = api.positionUsd();
+}}
+console.log(JSON.stringify(out));
+"""
+    out = _run_node(js)
+    r, lo, hi = out["results"], out["MIN"], out["MAX"]
+
+    assert r["250,000"] == 250000, "comma-formatted input must parse"
+    assert r["$42,500.50"] == pytest.approx(42500.5), "stray symbols must be stripped"
+    for junk in ("", "abc", "0"):
+        assert r[junk] == 250000, f"{junk!r} should fall back to the default, got {r[junk]}"
+    assert r["12"] == lo, "a value below the floor must clamp up"
+    assert r["9" * 12] == hi, "a value above the ceiling must clamp down"
+    for value in r.values():
+        assert lo <= value <= hi, f"{value} escaped the clamp"
