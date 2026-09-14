@@ -1,5 +1,7 @@
 # Blackout Desk
 
+**Live:** https://blackout-desk-eight.vercel.app
+
 **Bitget AI Base Camp Hackathon S2** — 🟧 AI Trading Desk · Decision Stress Testing
 
 A closure-window risk desk for traders holding tokenized US stocks. It is Friday
