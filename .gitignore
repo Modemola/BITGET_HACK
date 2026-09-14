@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.egg-info/
+.vercel/
 
 # Data is committed on purpose. The Claude Code sandbox cannot reach any market
 # data host, so the repo is the only way these series travel between the machine

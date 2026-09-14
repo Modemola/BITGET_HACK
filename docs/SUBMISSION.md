@@ -200,7 +200,8 @@ Everything is in the repository linked as **Submission Materials**:
 
 | Deliverable | Where |
 |---|---|
-| **Accessible demo** (required) | https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 |
+| **Accessible demo** (required) | *(Vercel URL — plain link, no account needed)* |
+| Full version, with the natural-language layer | https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 |
 | **Complete research task** (required) | `docs/RESEARCH_TASK.md` — question to actionable insight, end to end |
 | Research finding and every variant tested | `docs/FINDINGS.md` |
 | Reproduce the finding from raw data | `scripts/analyse_basis.py` |

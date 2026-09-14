@@ -270,6 +270,9 @@ button:disabled{opacity:.55;cursor:default}
 .suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .suggest button{background:transparent;color:var(--muted);
   border-color:var(--rule-strong);font-size:12.5px;padding:6px 12px}
+.ask-elsewhere{margin:0;color:var(--muted);max-width:64ch}
+.ask-elsewhere a{color:var(--lit);text-decoration:underline;
+  text-underline-offset:3px}
 .answer{margin-top:18px;padding-top:18px;border-top:1px solid var(--rule);
   white-space:pre-wrap;line-height:1.65}
 .answer:empty{display:none}
@@ -453,6 +456,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 (function(){
 "use strict";
 var D = JSON.parse(document.getElementById("desk-data").textContent);
+var ARTIFACT_URL = "https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461";
 
 /* A value the build could not compute arrives as null (see _json_safe in
    blackout/build.py). Every formatter renders that as an em dash rather than
@@ -999,8 +1003,20 @@ var QUESTIONS = [
   "How bad was the worst weekend in the sample?"
 ];
 
+function showAskElsewhere(){
+  var panel = document.getElementById("ask");
+  var box = panel.querySelector(".panel");
+  panel.classList.add("on");
+  box.innerHTML = '<p class="ask-elsewhere">Asking the desk in natural language runs ' +
+    'inside the Claude artifact runtime, which a static host cannot provide. ' +
+    'Every measurement on this page is already complete without it — the ' +
+    'conversational layer is an addition, not a dependency. ' +
+    '<a href="' + ARTIFACT_URL + '">Open the conversational version</a>.</p>';
+}
+
 function initAsk(){
-  if (!window.claude || !window.claude.use) return;
+  // No runtime at all means this is the static deployment.
+  if (!window.claude || !window.claude.use){ showAskElsewhere(); return; }
   window.claude.use("sample").then(function(sample){
     if (!sample) return;                    // page is complete without it
     document.getElementById("ask").classList.add("on");
