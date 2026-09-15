@@ -133,3 +133,26 @@ def test_the_beacon_is_attached_to_the_rendered_lane(rendered):
         f"expected exactly one lit lane carrying the beacon, found {beacon['lanes']}"
     assert beacon["segments"] > 10, \
         "the lit lane carries the beacon class but has no segments inside it"
+
+
+def test_the_interactions_actually_respond(rendered):
+    """Markup being present proves nothing; a handler that throws looks identical.
+
+    Every static check stayed green through a syntax error that left the whole
+    page dead, so the pointer handlers are dispatched here rather than inspected.
+    """
+    inter = rendered["interactions"]
+    assert "error" not in inter, f"an interaction threw: {inter.get('error')}"
+
+    strip = inter["stripHover"]
+    assert strip["cursorShown"], "hovering the week strip shows no crosshair"
+    assert strip["tipShown"], "hovering the week strip shows no readout"
+    assert strip["regimeNamed"], \
+        "the readout says 'outside the calendar' for a point inside the strip"
+
+    drift = inter["driftHover"]
+    assert drift["tipShown"], "hovering the drift chart shows no readout"
+    assert drift["quotesQuantiles"], "the drift readout does not quote the distribution"
+
+    assert inter["clickToScrub"], "clicking the week strip does not move the desk"
+    assert inter["positionRecomputes"], "editing the position changes nothing"

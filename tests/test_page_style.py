@@ -41,10 +41,21 @@ def _bare_root(style: str) -> set[str]:
     return set(re.findall(r"(--[\w-]+)\s*:", block.group(1)))
 
 
-def test_every_token_is_defined_in_the_base_root(style, page):
-    """A token defined only inside a dark block is the classic unreadable page."""
-    missing = set(re.findall(r"var\((--[\w-]+)", page)) - _bare_root(style)
-    assert not missing, f"used but never defined in bare :root: {sorted(missing)}"
+def test_every_token_is_defined_or_has_a_fallback(style, page):
+    """A token with neither a definition nor a fallback renders as nothing.
+
+    `var(--i, 0)` is fine and deliberate: the stagger index is set per element as
+    an inline style, so the fallback is what makes the rule safe when it is not.
+    A bare `var(--x)` with no definition is the classic unreadable-page bug.
+    """
+    bare = _bare_root(style)
+    missing = [
+        name for name, fallback in re.findall(r"var\(\s*(--[\w-]+)\s*(,)?", page)
+        if not fallback and name not in bare
+    ]
+    assert not missing, (
+        f"used with neither a :root definition nor a fallback: {sorted(set(missing))}"
+    )
 
 
 def test_the_single_theme_is_a_choice_not_an_omission(style):
@@ -137,10 +148,63 @@ def test_regime_states_are_actually_defined(style):
         assert f'[data-regime="{regime}"]' in style, f"no styling for {regime}"
 
 
-def test_the_page_is_complete_at_rest(page):
-    """Nothing may be parked invisible waiting on a scroll observer."""
-    assert "opacity:0" not in page.replace(" ", ""), \
-        "an element starts invisible; the first still frame must be complete"
+def test_nothing_rests_invisible(style):
+    """A resting state must be the visible one.
+
+    Entrance animations legitimately start from opacity 0 — but only inside a
+    keyframe, never as a base style. The difference matters: a keyframe start
+    still leaves content on screen if the animation never runs, whereas a rule
+    that sets opacity 0 and waits for something hides it permanently when that
+    something fails.
+    """
+    without_keyframes = re.sub(
+        r"@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}", "", style, flags=re.S)
+
+    offenders = []
+    for rule in re.finditer(r"([^{}]+)\{([^{}]*)\}", without_keyframes):
+        selector, body = rule.group(1).strip(), rule.group(2).replace(" ", "")
+        if "opacity:0" not in body:
+            continue
+        # A ::before / ::after is decoration by construction — it holds no
+        # readable content, so hiding it until hover conceals nothing.
+        if "::before" in selector or "::after" in selector:
+            continue
+        offenders.append(selector.splitlines()[-1].strip())
+    assert not offenders, (
+        "these rules hide real content at rest; if the animation never runs it "
+        f"stays hidden: {offenders}"
+    )
+
+
+def test_entrance_animations_hold_their_end_state(style):
+    """Without `both` an element can snap back to its pre-animation state."""
+    entrances = re.findall(r"\.enter[\w-]*\{animation:([^}]*)\}", style)
+    assert entrances, "the entrance sequence is gone"
+    for decl in entrances:
+        assert "both" in decl or "forwards" in decl, \
+            f"entrance animation does not hold its end state: {decl.strip()}"
+
+
+def test_the_entrance_is_over_quickly(style):
+    """The first still frame is what a thumbnail and a skimming reader get.
+
+    Measures the entrance only. The beacon is an infinite ambient loop with a
+    deliberately slow cycle and has nothing to do with how long the page takes
+    to settle.
+    """
+    entrance = re.findall(
+        r"\.(?:enter[\w-]*|drift-line)\{[^}]*?animation:\s*[\w-]+\s+([\d.]+)s[^}]*\}",
+        style)
+    assert entrance, "the entrance sequence is gone"
+    delays = [float(d) for d in re.findall(r"animation-delay:\s*([\d.]+)s", style)]
+    # The staggered rail delay is expressed in calc(); its worst case is the
+    # last of seven items.
+    stagger = re.search(r"calc\(var\(--i,\s*0\)\s*\*\s*(\d+)ms\s*\+\s*(\d+)ms\)", style)
+    if stagger:
+        delays.append((6 * int(stagger.group(1)) + int(stagger.group(2))) / 1000)
+
+    worst = (max(delays) if delays else 0) + max(float(d) for d in entrance)
+    assert worst <= 2.4, f"the entrance still runs at {worst:.2f}s; keep it brief"
 
 
 def test_ui_transitions_stay_brief(style):

@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 146 tests
+python -m pytest -q                     # 149 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -184,6 +184,16 @@ Steps 1-7 are built: token layer, masthead, the full-bleed week strip,
 position size. `tests/test_page_style.py` holds the visual invariants;
 `test_js_parity.py` pins the regime stamp to the calendar and the position
 input's clamping.
+
+**A resting state is always the visible one.** Entrance animations start from
+opacity 0 *inside a keyframe*, never as a base style, so a failure to animate
+leaves content on screen. `test_page_style.py` enforces that, allows it on
+`::before`/`::after` decoration, and caps the whole entrance under 2.4s.
+
+**Interactions are dispatched in tests, not inspected.** Markup being present
+proves nothing — a handler that throws looks identical in the source. The smoke
+test fires real pointer events at the week strip and drift chart and asserts the
+readouts respond.
 
 **Motion is meaning, not decoration.** The rToken lane carries a slow beacon:
 faint while other venues are open, insistent during a blackout, because that is
