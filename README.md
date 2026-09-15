@@ -31,8 +31,9 @@ costs, measured across 28 weekend blackouts. See [`docs/FINDINGS.md`](docs/FINDI
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest -q                     # 166 tests
+python -m pytest -q                     # 184 tests
 python scripts/analyse_basis.py         # reproduce the research finding
+python scripts/cross_venue.py           # re-run it on Bitget's own book
 python -m blackout.tools                # list the seven tools; add a name to run one
 python scripts/blackout_stats.py        # closure-window calendar structure
 python scripts/figures.py               # canonical figures, stable and diffable

@@ -41,12 +41,13 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 166 tests
+python -m pytest -q                     # 184 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 python scripts/research_task.py         # the required demo task, all 7 tools end to end
+python scripts/cross_venue.py           # the same test on Bitget's book vs Solana's
 python -m blackout.tools                # list the seven tools; add a name to run one
 ```
 
@@ -261,11 +262,25 @@ by running `scripts/research_task.py` so its figures cannot go stale.
 
 ## Cross-venue data
 
-`scripts/fetch_bitget.py` pulls rToken candles from Bitget's own spot market
-(`RNVDAUSDT`, `RTSLAUSDT`) so the finding is not measured on one venue alone.
-**Bitget's rTokens only traded 7×24 from around June–July 2026** — before that
-the weekend share is 0–1% and the series is session-only, so only the recent
-window is comparable. See `docs/FINDINGS.md`.
+`scripts/fetch_bitget.py` pulls rToken candles from Bitget's own spot market;
+`scripts/cross_venue.py` runs the decisive test on both venues and prints them
+side by side, so the cross-venue figures in the docs are reproducible rather
+than transcribed.
+
+- **Bitget's rTokens only traded 7×24 from June 2026.** Before that the weekend
+  share of hourly bars is under 1%: the series ran on the native equity clock
+  and has no closure window in it to measure. The script derives the cutover
+  rather than hardcoding it.
+- **Both window rows must be the same weekends.** Deriving the qualifying set
+  per venue gave 15 and 13 and still called them "the same window", which folds
+  a sample difference into what reads as a venue difference. `cross_venue.py`
+  intersects them.
+- **Report `n` per horizon.** A weekend missing the bar at close+h drops out of
+  that horizon alone, so one row's horizons can rest on different counts — the
+  Bitget +1h figure is 8 weekends, not 13.
+- **Only +1h replicates.** At +6h and +12h thirteen weekends measure nothing:
+  the same venue moves 22% → 54% at +6h purely by shortening the window. Don't
+  quote the short-window figures as if they confirmed the headline ones.
 
 ## Open items
 
