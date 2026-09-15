@@ -41,12 +41,13 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 152 tests
+python -m pytest -q                     # 166 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 python scripts/research_task.py         # the required demo task, all 7 tools end to end
+python -m blackout.tools                # list the seven tools; add a name to run one
 ```
 
 Refreshing market data (needs open network):
@@ -68,11 +69,23 @@ src/blackout/
   hedges.py          what still trades during a blackout, and whether it helps
   analogues.py       causal feature table + weighted kNN over past windows
   calendar_events.py scheduled events vs a closure window (FOMC, from the Fed)
+  tools.py           the 7 tools behind one contract: Desk + TOOLS registry
   build.py           precompute -> web/data/desk.json
 web/
   desk.template.html page source, with a __DESK_JSON__ placeholder
   desk.html          GENERATED - never hand-edit, rebuild instead
 ```
+
+## The tool contract
+
+`tools.py` is a façade over the analytics modules, not a second implementation:
+`Desk` loads each series once, every tool is a function over it returning a plain
+dict, and `TOOLS` carries the question each answers. Its only value is returning
+*the same numbers* the analysis does, so `test_tools.py` pins each one against
+the shipped payload. That parity check immediately earned itself — the first
+version counted a blackout still in progress as a completed one, giving 29
+weekends where every other path counts 28, and every decomposition figure moved
+with it. **Only completed windows have a close.**
 
 ## Conventions
 

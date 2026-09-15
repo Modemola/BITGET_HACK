@@ -26,7 +26,6 @@ from .basis import add_premium, decompose_closure, hourly_frame
 from .calendar_events import historical_overlap, load_events
 from .clock import ClosureClock, Regime
 from .distributions import drift_by_elapsed_hour, summarise, terminal_gap, window_paths
-from .exposure import Position, horizon_breakdown, unhedgeable_exposure
 from .hedges import hedge_menu, window_returns
 
 ROOT = Path(__file__).resolve().parents[2]

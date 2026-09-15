@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-14T11:42:10+00:00",
+ "generated_at": "2026-09-15T14:17:05+00:00",
  "coverage": {
   "symbol": "NVDAx",
   "start": "2026-03-01T00:00:00+00:00",
@@ -642,12 +642,6 @@
  ],
  "blackout_windows": [
   {
-   "start": 1788796800,
-   "end": 1788818400,
-   "hours": 6.0,
-   "regime": "HOLIDAY_BLACKOUT"
-  },
-  {
    "start": 1789160400,
    "end": 1789336800,
    "hours": 49.0,
@@ -1034,21 +1028,6 @@
  ],
  "regime_runs": [
   {
-   "start": 1789383600,
-   "end": 1789394400,
-   "regime": "WEEKNIGHT"
-  },
-  {
-   "start": 1789394400,
-   "end": 1789416000,
-   "regime": "US_CASH"
-  },
-  {
-   "start": 1789416000,
-   "end": 1789480800,
-   "regime": "WEEKNIGHT"
-  },
-  {
    "start": 1789480800,
    "end": 1789502400,
    "regime": "US_CASH"
@@ -1215,7 +1194,17 @@
   },
   {
    "start": 1791151200,
-   "end": 1791198000,
+   "end": 1791208800,
+   "regime": "WEEKNIGHT"
+  },
+  {
+   "start": 1791208800,
+   "end": 1791230400,
+   "regime": "US_CASH"
+  },
+  {
+   "start": 1791230400,
+   "end": 1791295200,
    "regime": "WEEKNIGHT"
   }
  ],

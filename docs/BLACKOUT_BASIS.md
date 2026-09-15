@@ -71,7 +71,7 @@ market data host tested returned a 403 at the proxy CONNECT stage:
 The kill-criterion test therefore has to run elsewhere:
 
 ```bash
-pip install -r requirements.txt
+pip install -e ".[dev]"
 python3 scripts/probe_sources.py     # exit 0 = Blackout Basis is GO
 ```
 
