@@ -232,7 +232,8 @@ header{padding-block:40px 26px}
 .week{margin-block:12px 0;border-block:1px solid var(--rule);
   padding-block:26px 20px;background:transparent}
 .week-head{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:baseline;
-  justify-content:space-between;margin-bottom:20px}
+  justify-content:space-between;margin-bottom:20px;position:relative}
+.week-head .sec-n{top:4px}
 .week-head h2{font-family:var(--display);font-size:22px;font-weight:400;
   letter-spacing:-.01em}
 .tl-stage{position:relative}
@@ -311,6 +312,17 @@ header{padding-block:40px 26px}
 .swatch{width:18px;height:8px;border-radius:1px;display:inline-block}
 .swatch.void{background:var(--void);outline:1px solid var(--rule)}
 
+section{margin-top:52px}
+.sec-head{margin-bottom:18px;position:relative;padding-top:16px;
+  border-top:1px solid var(--rule)}
+.sec-n{position:absolute;top:16px;left:0;font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.16em;color:var(--lit);opacity:.85}
+.sec-head h2,.week-head h2{padding-left:34px}
+.sec-head p{padding-left:34px}
+@media (max-width:640px){
+  .sec-head h2,.week-head h2,.sec-head p{padding-left:0}
+  .sec-n{position:static;display:block;margin-bottom:6px}
+}
 section{margin-top:38px}
 .sec-head{margin-bottom:16px}
 .sec-head h2{font-family:var(--display);font-size:24px;font-weight:500;
@@ -338,8 +350,12 @@ section{margin-top:38px}
 .evidence div:hover::before{opacity:1;width:44px}
 .evidence dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:5px}
-.evidence dd{margin:0;font-family:var(--display);font-size:30px;font-weight:400;
-  font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.02em}
+.evidence dd{margin:0;font-family:var(--display);font-size:38px;font-weight:400;
+  font-variant-numeric:tabular-nums;line-height:.98;letter-spacing:-.025em;
+  color:var(--ink)}
+.evidence div:first-child dd{color:var(--lit)}
+.evidence dd.ev-note{font-family:var(--body);font-size:11.5px;color:var(--faint);
+  letter-spacing:0;line-height:1.35;margin-top:7px;max-width:20ch}
 
 .panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;
   padding:22px 24px;box-shadow:var(--shadow)}
@@ -385,6 +401,11 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   color:var(--muted)}
 .expo-key span{display:inline-flex;align-items:center;gap:7px}
 
+.cal-head{position:relative;margin-bottom:16px}
+.cal-head h3{font-family:var(--display);font-size:19px;font-weight:400;
+  padding-left:34px}
+.cal-head .sec-n{top:3px}
+@media (max-width:640px){ .cal-head h3{padding-left:0} }
 .cal-strip{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule)}
 #cal-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
 .cal-item dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
@@ -430,6 +451,20 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   text-transform:uppercase;color:var(--faint);margin-bottom:5px}
 .analogue-summary dd{margin:0;font-family:var(--mono);font-size:19px;
   font-weight:500;font-variant-numeric:tabular-nums}
+/* Magnitude read at a glance. A diverging bar for anything signed, because the
+   distance from zero is the claim and the side is only its direction; a plain
+   left-to-right bar for anything that can only grow. */
+td .val{display:block}
+.dvbar,.mbar{display:block;position:relative;height:3px;margin-top:6px;
+  min-width:64px;background:var(--raised);border-radius:2px;overflow:hidden}
+.dvbar::before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;
+  width:1px;background:var(--rule-strong)}
+.dvbar i,.mbar i{position:absolute;top:0;bottom:0;background:var(--lit);
+  border-radius:2px;transition:width var(--t-mid) var(--ease-out)}
+.dvbar i.pos{left:50%}
+.dvbar i.neg{right:50%}
+.mbar i{left:0;opacity:.8}
+
 .match-bar{display:inline-block;height:5px;border-radius:3px;
   background:var(--accent);vertical-align:middle;min-width:2px}
 
@@ -517,7 +552,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 
 <div class="week" id="closure">
   <div class="week-head">
-    <h2>Three weeks, by who is quoting</h2>
+    <span class="sec-n">01</span><h2>Three weeks, by who is quoting</h2>
     <div class="eyebrow" id="week-range">UTC</div>
   </div>
   <div class="tl-stage">
@@ -552,7 +587,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 
 <section id="verdict">
   <div class="sec-head">
-    <h2>Before you trade the premium</h2>
+    <span class="sec-n">02</span><h2>Before you trade the premium</h2>
   </div>
   <div class="verdict">
     <h3 class="enter-soft">That weekend premium is <em>not</em> free money.</h3>
@@ -569,7 +604,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 
 <section id="drift">
   <div class="sec-head">
-    <h2>How far it drifts, hour by hour</h2>
+    <span class="sec-n">03</span><h2>How far it drifts, hour by hour</h2>
     <p>Divergence accumulated from where the premium sat when the blackout opened.
        The inner band is the middle half of outcomes; the outer band spans the 5th to
        95th percentile.</p>
@@ -586,7 +621,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 
 <section id="analogues">
   <div class="sec-head">
-    <h2>Weekends that looked like this one</h2>
+    <span class="sec-n">04</span><h2>Weekends that looked like this one</h2>
     <p>Set the conditions you are walking into. The desk retrieves the closest
        matches from <span class="num" id="an-total">27</span> past blackouts and shows
        how each resolved &mdash; not a forecast, a distribution you can read yourself.</p>
@@ -620,7 +655,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 
 <section id="exposure">
   <div class="sec-head">
-    <h2>A position of
+    <span class="sec-n">05</span><h2>A position of
       <span class="money"><span class="sym">$</span><input id="position" type="text"
         inputmode="numeric" value="250,000" aria-label="Position size in US dollars"
         size="7"></span>
@@ -630,19 +665,19 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   <div class="panel">
     <div class="expo" id="expo-bar"></div>
     <div class="expo-key" id="expo-key"></div>
-    <div class="cal-strip" id="calendar"><div id="cal-strip"></div></div>
+    <div class="cal-strip" id="calendar"><div class="cal-head"><span class="sec-n">06</span><h3>Is anything scheduled?</h3></div><div id="cal-strip"></div></div>
   </div>
 </section>
 
 <section id="hedges">
   <div class="sec-head">
-    <h2>What you can actually hedge with</h2>
+    <span class="sec-n">07</span><h2>What you can actually hedge with</h2>
     <p>Equities, futures and options are all shut. These are the instruments still
        quoting, measured against your exposure over the same blackout windows.</p>
   </div>
   <div class="panel">
     <div class="table-scroll"><table>
-      <thead><tr><th>Instrument</th><th>Corr.</th><th>Ratio</th>
+      <thead><tr><th>Instrument</th><th>Correlation</th><th>Variance cut</th>
         <th>Short</th><th>Cost</th><th>Assessment</th></tr></thead>
       <tbody id="hedge-body"></tbody>
     </table></div>
@@ -1081,8 +1116,11 @@ function drawEvidence(){
     ["Net at 10bp cost", sgn(v.net_at_10bp, 3), "per weekend"],
     ["Weekends beyond 1%", pct(s.share_exceeding_1pct, 0), "of " + s.n_windows]
   ];
+  // Each tile already carried a qualifier that was never rendered; without it
+  // a figure like "22%" sits on the page with nothing saying 22% of what.
   document.getElementById("evidence").innerHTML = tiles.map(function(t){
-    return '<div><dt>' + t[0] + '</dt><dd>' + t[1] + '</dd></div>';
+    return '<div><dt>' + t[0] + '</dt><dd>' + t[1] + '</dd>' +
+           '<dd class="ev-note">' + t[2] + '</dd></div>';
   }).join("");
   document.getElementById("v-weekends").textContent = s.n_windows;
   document.getElementById("cov-range").textContent =
@@ -1310,15 +1348,27 @@ function drawAnalogues(){
     var matches = findAnalogues(rows, q, 5);
     var maxDist = matches.length ? matches[matches.length-1].distance || 1 : 1;
 
+    // Scale the bars to the widest outcome in the retrieved set, so the row a
+    // reader should worry about is the one that visibly runs furthest.
+    var span = Math.max.apply(null, matches.map(function(m){
+      return Math.max(Math.abs(m.terminal_drift) || 0, m.max_abs_drift || 0);
+    })) || 0.01;
+
     document.getElementById("an-body").innerHTML = matches.map(function(m){
       var when = new Date(m.window_start).toISOString().slice(0,10);
       var strength = Math.max(4, 46 * (1 - (m.distance/(maxDist*1.25))));
+      var ended = m.terminal_drift || 0;
+      var reach = Math.min(Math.abs(ended) / span, 1) * 50;
       return '<tr>' +
         '<td class="n">' + when + '</td>' +
         '<td class="n">' + pct(m.realised_vol_5d, 0) + '</td>' +
         '<td class="n">' + sgn(m.premium_at_close) + '</td>' +
-        '<td class="n" style="font-weight:500">' + sgn(m.terminal_drift) + '</td>' +
-        '<td class="n">' + pct(m.max_abs_drift) + '</td>' +
+        '<td class="n"><span class="val">' + sgn(ended) + '</span>' +
+          '<span class="dvbar"><i class="' + (ended < 0 ? "neg" : "pos") +
+          '" style="width:' + reach.toFixed(1) + '%"></i></span></td>' +
+        '<td class="n"><span class="val">' + pct(m.max_abs_drift) + '</span>' +
+          '<span class="mbar"><i style="width:' +
+          (Math.min((m.max_abs_drift || 0) / span, 1) * 100).toFixed(1) + '%"></i></span></td>' +
         '<td><span class="match-bar" style="width:' + strength + 'px"></span>' +
           '<span class="num" style="color:var(--faint);font-size:11.5px;margin-left:8px">' +
           fix(m.distance, 2) + '</span></td>' +
@@ -1483,10 +1533,17 @@ function drawHedges(){
   document.getElementById("hedge-body").innerHTML = D.hedges.map(function(h){
     var notional = has(h.hedge_ratio) ? pos * Math.abs(h.hedge_ratio) : null;
     var cost = has(notional) && has(h.cost_pct) ? notional * h.cost_pct : null;
+    // Correlation runs -1 to +1, so it gets a bar that reads from the centre:
+    // the distance from zero is the claim, and the side is its sign.
+    var corr = has(h.correlation) ? Math.max(-1, Math.min(1, h.correlation)) : 0;
+    var cut = has(h.risk_reduction) ? Math.max(0, Math.min(1, h.risk_reduction)) : 0;
     return '<tr>' +
       '<td class="n" style="font-weight:500">' + h.instrument + '</td>' +
-      '<td class="n">' + fix(h.correlation, 2) + '</td>' +
-      '<td class="n">' + fix(h.hedge_ratio, 2) + '</td>' +
+      '<td class="n"><span class="val">' + fix(h.correlation, 2) + '</span>' +
+        '<span class="dvbar"><i class="' + (corr < 0 ? "neg" : "pos") +
+        '" style="width:' + (Math.abs(corr) * 50).toFixed(1) + '%"></i></span></td>' +
+      '<td class="n"><span class="val">' + pct(h.risk_reduction, 0) + '</span>' +
+        '<span class="mbar"><i style="width:' + (cut * 100).toFixed(1) + '%"></i></span></td>' +
       '<td class="n">' + usd(notional) + '</td>' +
       '<td class="n">' + usd(cost) + '</td>' +
       '<td><span class="pill ' + (h.stable ? "good" : "bad") + '">' +

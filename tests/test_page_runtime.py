@@ -175,3 +175,26 @@ def test_the_lattice_is_decoration_that_stays_cheap_and_out_of_the_way(rendered)
     assert lattice["inHeader"], "the lattice escaped the masthead"
     assert not lattice["swallowsStrip"], \
         "the lattice contains the week strip's pointer target and would swallow it"
+
+
+def test_magnitude_bars_are_honest(rendered):
+    """A bar that overruns its track, or leans the wrong way, misreads the data.
+
+    These sit beside signed figures, so the side of centre is the sign and the
+    distance from it is the magnitude. Getting either wrong tells a trader the
+    opposite of what the number says.
+    """
+    bars = rendered["bars"]
+    assert bars["diverging"] > 0 and bars["magnitude"] > 0, "the bars did not render"
+    assert not bars["outOfTrack"], \
+        f"bars overrun their track: {bars['outOfTrack'][:4]}"
+    assert bars["signsMatchValues"], \
+        "a diverging bar leans opposite to the figure printed beside it"
+
+
+def test_every_tool_has_a_numbered_section(rendered):
+    """The rail and the page should reinforce each other, not disagree."""
+    assert rendered["sectionNumbers"] == rendered["tools"], (
+        f"{rendered['tools']} tools in the rail but "
+        f"{rendered['sectionNumbers']} numbered sections"
+    )

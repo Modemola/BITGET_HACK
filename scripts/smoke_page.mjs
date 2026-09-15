@@ -71,6 +71,26 @@ const report = {
     // decoration would swallow the interaction it sits behind.
     swallowsStrip: !!d.querySelector(".lattice #tl-hit"),
   },
+  // Magnitude bars: proportional, signed correctly, and inside their track.
+  bars: (() => {
+    const bad = [];
+    for (const i of d.querySelectorAll(".dvbar i, .mbar i")) {
+      const w = parseFloat(i.style.width);
+      const cap = i.parentElement.classList.contains("dvbar") ? 50 : 100;
+      if (!isFinite(w) || w < 0 || w > cap + 0.01) bad.push(i.style.width);
+    }
+    return {
+      diverging: count(".dvbar i"),
+      magnitude: count(".mbar i"),
+      outOfTrack: bad,
+      signsMatchValues: [...d.querySelectorAll("td .dvbar")].every((bar) => {
+        const val = bar.parentElement.querySelector(".val")?.textContent ?? "";
+        const negative = val.trim().startsWith("-");
+        return bar.querySelector("i").classList.contains(negative ? "neg" : "pos");
+      }),
+    };
+  })(),
+  sectionNumbers: count(".sec-n"),
   tools: count(".tools a"),
   deadLinks: [...d.querySelectorAll('.tools a[href^="#"]')]
     .filter((a) => !d.querySelector(a.getAttribute("href")))
