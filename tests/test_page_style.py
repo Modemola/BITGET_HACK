@@ -143,11 +143,51 @@ def test_the_page_is_complete_at_rest(page):
         "an element starts invisible; the first still frame must be complete"
 
 
-def test_motion_is_bounded_and_opt_out(style):
-    assert "prefers-reduced-motion" in style, "no reduced-motion escape hatch"
+def test_ui_transitions_stay_brief(style):
+    """A transition responds to something a person did; it must not lag behind them."""
     durations = [float(d) for d in re.findall(r"transition:[^;}]*?([\d.]+)s", style)]
     assert durations, "transitions declared nowhere"
     assert max(durations) <= 0.6, f"a transition runs {max(durations)}s; keep motion brief"
+
+
+def test_looping_animation_is_slow_enough_to_be_ambient(style):
+    """An infinite loop must read as breathing, never as flashing.
+
+    Three flashes a second is the seizure threshold, so anything looping forever
+    is held well below it — and well below that again, because the point of the
+    beacon is that the lane is alive, not that it is blinking for attention.
+    """
+    loops = re.findall(r"animation:\s*[\w-]+\s+([\d.]+)s[^;}]*infinite", style)
+    assert loops, "the beacon animation is gone"
+    slowest = min(float(d) for d in loops)
+    assert slowest >= 1.5, \
+        f"a looping animation cycles every {slowest}s; that reads as a flash"
+
+
+def test_all_motion_can_be_switched_off(style):
+    """Both kinds — the transitions and the infinite loop — must yield."""
+    assert "prefers-reduced-motion" in style, "no reduced-motion escape hatch"
+
+    # Brace matching across nested media queries is not worth a regex; reading a
+    # window after each declaration is enough to prove the opt-out is there.
+    reduced = "".join(
+        style[m.end():m.end() + 400]
+        for m in re.finditer(r"prefers-reduced-motion:\s*reduce", style)
+    ).replace(" ", "")
+    assert "animation:none" in reduced, \
+        "reduced motion does not stop the looping animation"
+    assert "transition:none" in reduced, \
+        "reduced motion does not stop transitions"
+
+
+def test_the_beacon_marks_the_lane_that_stays_lit(style):
+    """The animation has to carry the argument, not decorate the page.
+
+    It belongs to the rToken lane specifically, and it intensifies in a blackout
+    because that is the moment the lane is the only thing still transmitting.
+    """
+    assert ".lane-lit{animation:" in style.replace(" ", ""),         "the beacon is not attached to the lit lane"
+    assert re.search(r':root\[data-regime="BLACKOUT"\]\s*\.lane-lit\s*\{[^}]*animation:', style),         "the beacon does not change when the lane becomes the only one lit"
 
 
 def test_phone_width_is_handled(style):

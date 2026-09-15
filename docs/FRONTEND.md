@@ -214,6 +214,7 @@ Deliberately sparse — over-animation is itself a tell of generated design.
 | Regime cross-fade (400ms) | Carries the thesis |
 | Scrubber-driven recompute | Direct manipulation |
 | Chart draw-in on first paint (300ms, once) | Establishes the fan shape |
+| The rToken lane's beacon (4.5s idle, 2.6s in a blackout) | Carries the argument: the lane is faint among open venues and insistent when it is the only one lit |
 
 Everything else is static. No scroll-triggered reveals — the page must be
 complete in its first still frame, since that frame is what a thumbnail and a

@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 142 tests
+python -m pytest -q                     # 146 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -184,6 +184,14 @@ Steps 1-7 are built: token layer, masthead, the full-bleed week strip,
 position size. `tests/test_page_style.py` holds the visual invariants;
 `test_js_parity.py` pins the regime stamp to the calendar and the position
 input's clamping.
+
+**Motion is meaning, not decoration.** The rToken lane carries a slow beacon:
+faint while other venues are open, insistent during a blackout, because that is
+when it is the only thing still transmitting. The animation is CSS but the class
+it hooks is emitted by `drawTimeline` — a guard that only reads the stylesheet
+keeps passing while nothing animates, so `test_page_runtime.py` checks the
+rendered DOM instead. Looping animations stay above 1.5s and the global
+reduced-motion rule removes them.
 
 **Every time-dependent panel reads `viewTime()`, never `Date.now()`.** That one
 value is what the scrubber moves, so dragging recomputes real analytics for that

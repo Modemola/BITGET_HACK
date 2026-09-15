@@ -120,3 +120,16 @@ def test_the_live_clock_reports_a_real_state(rendered):
     assert live["countdown"] and live["countdown"] != "—", "the countdown never populated"
     assert live["regimeStamp"] in {"US_CASH", "WEEKNIGHT", "BLACKOUT"}, \
         f"unexpected regime stamp: {live['regimeStamp']}"
+
+
+def test_the_beacon_is_attached_to_the_rendered_lane(rendered):
+    """The animation is CSS, but the class it hooks is emitted by drawTimeline.
+
+    A guard that only reads the stylesheet keeps passing while nothing animates,
+    which is exactly what happened when this was first checked.
+    """
+    beacon = rendered["beacon"]
+    assert beacon["lanes"] == 1, \
+        f"expected exactly one lit lane carrying the beacon, found {beacon['lanes']}"
+    assert beacon["segments"] > 10, \
+        "the lit lane carries the beacon class but has no segments inside it"

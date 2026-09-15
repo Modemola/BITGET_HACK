@@ -58,6 +58,12 @@ const report = {
     position: d.getElementById("position")?.value ?? null,
     sliders: count(".ctrl input[type=range]"),
   },
+  // The beacon is CSS, but the class it hooks is emitted by drawTimeline. A
+  // guard that only reads the stylesheet passes while nothing animates.
+  beacon: {
+    lanes: count(".lane-lit"),
+    segments: count(".lane-lit rect"),
+  },
   tools: count(".tools a"),
   deadLinks: [...d.querySelectorAll('.tools a[href^="#"]')]
     .filter((a) => !d.querySelector(a.getAttribute("href")))
