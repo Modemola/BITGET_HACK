@@ -45,6 +45,7 @@ Claude Code web sandbox):
 python scripts/probe_sources.py         # rToken hourly, rate-limited, resumable
 python scripts/fetch_reference.py       # native equity, futures, crypto proxies
 python scripts/fetch_events.py          # FOMC decisions from federalreserve.gov
+python scripts/fetch_bitget.py          # rToken candles from Bitget spot
 ```
 
 **Deadline: 21 September 2026 (UTC+8).**

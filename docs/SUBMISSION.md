@@ -98,6 +98,15 @@ NVDAx and TSLAx (xStocks, Solana) joined to NVDA/TSLA native equity, NQ/ES index
 futures and BTC/ETH. 99% hourly coverage, 0% stale bars, no outliers beyond ±5%,
 no nulls. Reproduce with `python scripts/analyse_basis.py`.
 
+**Cross-venue replication (observed).** The finding was re-measured on Bitget's
+own rToken listings (`RNVDAUSDT`, `RTSLAUSDT`) rather than trusting a single
+venue. Bitget's rTokens only began trading 7×24 around June–July 2026, so the
+comparable window is 11 weekends. On those weekends the dispersion ordering
+replicates (blackout widest on both) and the leg decomposition agrees closely at
++1h (9% vs 9%) and +12h (27% vs 26%). It also showed the +6h horizon to be
+sample-sensitive — 22% over 28 weekends, 61% over 11 on the same venue — so the
+direction is robust and the decimal is not. Full table in `docs/FINDINGS.md`.
+
 | Metric | Value | Label |
 |---|---|---|
 | Weekend blackouts analysed | 28 | observed |
