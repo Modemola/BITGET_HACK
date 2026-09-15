@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 150 tests
+python -m pytest -q                     # 152 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -184,6 +184,11 @@ Steps 1-7 are built: token layer, masthead, the full-bleed week strip,
 position size. `tests/test_page_style.py` holds the visual invariants;
 `test_js_parity.py` pins the regime stamp to the calendar and the position
 input's clamping.
+
+**A signed figure gets a diverging bar.** Distance from centre is the magnitude,
+side of centre is the sign. `test_page_runtime.py` checks both against the number
+printed beside it — a bar leaning the wrong way tells a trader the opposite of
+what the figure says.
 
 **Decoration must stay cheap and out of the way.** The lattice behind the
 masthead is ~620 CSS-hovered cells, not the 15,000 Framer-animated nodes of the
