@@ -1,6 +1,6 @@
 """Fetch the reference leg: native equity and index futures, hourly.
 
-Blackout Basis prices the rToken band against a fair value that has to be
+The desk prices the rToken premium against a fair value that has to be
 reconstructed differently in each regime:
 
   US_CASH     the native stock trades, so fair value is observable directly.

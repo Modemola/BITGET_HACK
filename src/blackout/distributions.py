@@ -15,7 +15,6 @@ we care about is what the closure itself opened up.
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 
 from .clock import ClosureClock, Regime

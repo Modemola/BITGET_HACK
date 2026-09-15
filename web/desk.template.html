@@ -44,7 +44,7 @@
   --rule:#2C3849; --rule-strong:#3C4B5F;
 
   --lit:#E8A33D;       /* the signature. rToken, still quoting. 9.2:1 on void */
-  --lit-dim:#8A6526; --lit-soft:#2A1F0E;
+  --lit-soft:#2A1F0E;
   --open:#C9D8E8;      /* cash session -- full illumination */
   --half:#5D7086;      /* weeknight -- a futures reference exists */
   --risk:#E5786B; --risk-soft:#3A211E;
@@ -52,16 +52,11 @@
   --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
 
   --ease-out:cubic-bezier(.16,1,.3,1);
-  --ease-in-out:cubic-bezier(.65,0,.35,1);
-  --t-fast:.18s; --t-mid:.34s; --t-slow:.6s;
+  --t-mid:.34s;
 
   --display:"Instrument Serif",Georgia,"Times New Roman",serif;
   --body:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
-
-  /* aliases kept so component CSS written against the old names still resolves */
-  --accent:var(--lit); --accent-soft:var(--lit-soft);
-  --blackout:var(--void); --blackout-soft:var(--half); --surface-2:var(--raised);
 }
 
 /* Regime modulates illumination only; it never moves a hue. The lit lane stays
@@ -449,7 +444,7 @@ td .val{display:block}
 .mbar i{left:0;opacity:.8}
 
 .match-bar{display:inline-block;height:5px;border-radius:3px;
-  background:var(--accent);vertical-align:middle;min-width:2px}
+  background:var(--lit);vertical-align:middle;min-width:2px}
 
 #ask{display:none}
 #ask.on{display:block}
@@ -457,10 +452,10 @@ td .val{display:block}
 .ask-box input{flex:1 1 260px;min-width:0;padding:11px 14px;border-radius:6px;
   border:1px solid var(--rule-strong);background:var(--ground);color:var(--ink);
   font-family:var(--body);font-size:14px}
-.ask-box input:focus-visible,button:focus-visible{outline:2px solid var(--accent);
+.ask-box input:focus-visible,button:focus-visible{outline:2px solid var(--lit);
   outline-offset:2px}
 button{padding:11px 20px;border-radius:6px;border:1px solid transparent;
-  background:var(--accent);color:var(--ground);font-family:var(--body);
+  background:var(--lit);color:var(--ground);font-family:var(--body);
   font-size:14px;font-weight:500;cursor:pointer}
 button:hover{filter:brightness(1.08)}
 button:disabled{opacity:.55;cursor:default}
@@ -711,9 +706,12 @@ function usd(v){ return has(v) ? "$" + Math.round(v).toLocaleString("en-US") : "
 function fix(v, d){ return has(v) ? v.toFixed(d) : "—"; }
 function isBlackout(regime){ return regime.indexOf("BLACKOUT") >= 0; }
 
+/* One colour per regime, everywhere. The exposure bar previously painted the
+   cash session with the accent while the week strip painted it --open, so the
+   same hours were two different colours depending on where you looked. */
 var FILL = {
-  US_CASH: "var(--accent)", WEEKNIGHT: "var(--blackout-soft)",
-  WEEKEND_BLACKOUT: "var(--blackout)", HOLIDAY_BLACKOUT: "var(--blackout)"
+  US_CASH: "var(--open)", WEEKNIGHT: "var(--half)",
+  WEEKEND_BLACKOUT: "var(--void)", HOLIDAY_BLACKOUT: "var(--void)"
 };
 var NAME = {
   US_CASH: "NYSE open", WEEKNIGHT: "Globex only",
@@ -1419,7 +1417,8 @@ function drawExposure(){
     seg.style.flexGrow = String(share);
     seg.style.flexBasis = "0";
     seg.style.background = FILL[k];
-    seg.style.color = (k === "WEEKNIGHT") ? "var(--ink)" : "#F4F7FA";
+    // --open and --half are both light; only the void needs light text on it.
+    seg.style.color = isBlackout(k) ? "var(--ink)" : "var(--void)";
     seg.textContent = share > 0.09 ? hours + "h" : "";
     seg.title = (NAME[k] || k) + " — " + hours + "h";
     bar.appendChild(seg);

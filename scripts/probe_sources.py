@@ -1,11 +1,11 @@
-"""Fetch rToken history and judge whether it can back the Blackout Basis backtest.
+"""Fetch rToken history and judge whether it is enough to measure a desk on.
 
 This started as a throwaway probe and is now the ingestion step, because the
-data it pulls is the data the backtest needs. Everything it fetches is cached
-under data/, and a run resumes from that cache, so a rate-limit failure halfway
-through never costs the pages already retrieved.
+data it pulls is the data every panel is computed from. Everything it fetches is
+cached under data/, and a run resumes from that cache, so a rate-limit failure
+halfway through never costs the pages already retrieved.
 
-What the strategy needs, for at least one tokenized US stock:
+What the desk needs, for at least one tokenized US stock:
 
   * intraday (<=1h) history spanning >=180 days (a 60-day sample holds only nine
     blackout windows -- see scripts/blackout_stats.py),
@@ -47,7 +47,7 @@ CACHE = ROOT / "data" / "cache"
 RAW = ROOT / "data" / "raw"
 
 GT = "https://api.geckoterminal.com/api/v2"
-HEADERS = {"Accept": "application/json", "User-Agent": "blackout-basis-probe/1.0"}
+HEADERS = {"Accept": "application/json", "User-Agent": "blackout-desk-probe/1.0"}
 TIMEOUT = 30
 
 # 30 calls/min is the documented free-tier ceiling. 3.5s spacing leaves headroom
@@ -115,7 +115,7 @@ class Candidate:
             tail = "" if self.hit_page_limit else " (pool may be younger than that)"
             self.reasons.append(f"history {self.span_days:.0f}d < {MIN_DAYS}d{tail}")
         if self.weekend_share < MIN_WEEKEND_SHARE:
-            self.reasons.append(f"weekend share {self.weekend_share:.0%} — not 7x24")
+            self.reasons.append(f"weekend share {self.weekend_share:.0%} - not 7x24")
         if self.liquidity < MIN_LIQUIDITY_USD:
             self.reasons.append(f"liquidity ${self.liquidity:,.0f} < ${MIN_LIQUIDITY_USD:,}")
         return self
@@ -166,11 +166,18 @@ def _page(pool: str, before: int | None) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=COLUMNS)
 
 
+#: Below this a symbol is not a data source. SPYx carries $9.8M of liquidity and
+#: almost no volume, and returned a single bar; persisting that leaves a junk
+#: file in the repo for every refresh to rewrite.
+MIN_PERSIST_BARS = 24
+
+
 def _merge(df: pd.DataFrame, page: pd.DataFrame, path: Path) -> tuple[pd.DataFrame, int]:
     """Union the page into the frame and persist, so a later failure costs nothing."""
     before = len(df)
     df = pd.concat([df, page]).drop_duplicates("ts").sort_values("ts").reset_index(drop=True)
-    df.to_csv(path, index=False)
+    if len(df) >= MIN_PERSIST_BARS:
+        df.to_csv(path, index=False)
     return df, len(df) - before
 
 
@@ -287,7 +294,7 @@ def main() -> int:
     ap.add_argument("--refresh", action="store_true", help="ignore cached data")
     args = ap.parse_args()
 
-    print("Blackout Basis - rToken data ingestion")
+    print("Blackout Desk - rToken data ingestion")
     print(f"bar: >={MIN_DAYS}d hourly, >={MIN_WEEKEND_SHARE:.0%} weekend bars, "
           f">=${MIN_LIQUIDITY_USD:,} liquidity")
     print(f"rate limit: one call per {MIN_INTERVAL_S}s with backoff; cached under data/\n")

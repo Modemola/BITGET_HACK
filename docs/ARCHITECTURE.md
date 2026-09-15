@@ -122,17 +122,17 @@ Question to actionable insight, in one pass.
 src/blackout/
   clock.py              ✅ closure regimes + time-to-reopen        (8 tests)
   basis.py              ✅ fair value, premium, leg decomposition
-  exposure.py           ▢  positions → per-regime exposure
-  distributions.py      ▢  empirical drift by elapsed blackout hour
+  exposure.py           ✅ positions → per-regime exposure
+  distributions.py      ✅ empirical drift by elapsed blackout hour
   analogues.py          ✅ nearest-neighbour retrieval over past windows
   hedges.py             ✅ instruments live during blackout + cost model
   calendar_events.py    ✅ macro events inside a window
-  tools.py              ▢  the 7 typed tools; single source of truth
+  tools.py              ✅ the 7 tools behind one contract; Desk + TOOLS registry
   build.py              ✅ L1+L2 → web/data/desk.json
 web/
   desk.template.html    ✅ page source (static + LUI)
   desk.html             ✅ generated; published as the live demo
-  data/desk.json        ▢  generated; never hand-edited
+  data/desk.json        ✅ generated; never hand-edited
 scripts/
   probe_sources.py      ✅ rToken ingestion, rate-limited, resumable
   fetch_reference.py    ✅ native equity + index futures
@@ -142,7 +142,7 @@ docs/
   FINDINGS.md           ✅ the research result
   ARCHITECTURE.md       ✅ this file
   S2_BRIEF.md           ✅ competition rules
-  SUBMISSION.md         ▢  the six-part project description
+  SUBMISSION.md         ✅ the six-part project description
 ```
 
 ---

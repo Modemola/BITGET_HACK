@@ -1,5 +1,10 @@
 """Reproduce the Blackout Basis result end to end.
 
+Blackout Basis was the strategy this project began as. It does not work, and
+this script is the record of why -- the finding it produced is what the desk now
+reports. Keeping the old name here is deliberate: it names the thing that was
+falsified.
+
 Runs the three tests that decided the strategy, in the order they were run:
 
   1. Does the premium widen inside a blackout?      (yes)
