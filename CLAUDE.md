@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 149 tests
+python -m pytest -q                     # 150 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -184,6 +184,13 @@ Steps 1-7 are built: token layer, masthead, the full-bleed week strip,
 position size. `tests/test_page_style.py` holds the visual invariants;
 `test_js_parity.py` pins the regime stamp to the calendar and the position
 input's clamping.
+
+**Decoration must stay cheap and out of the way.** The lattice behind the
+masthead is ~620 CSS-hovered cells, not the 15,000 Framer-animated nodes of the
+component it borrows from, and it lights in `--lit` alone because a page arguing
+"one thing stays lit" cannot have a rainbow behind its headline. It is scoped to
+the header so it can never intercept the week strip's pointer handlers;
+`test_page_runtime.py` caps the node count and checks both.
 
 **A resting state is always the visible one.** Entrance animations start from
 opacity 0 *inside a keyframe*, never as a base style, so a failure to animate

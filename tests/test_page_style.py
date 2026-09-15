@@ -207,11 +207,33 @@ def test_the_entrance_is_over_quickly(style):
     assert worst <= 2.4, f"the entrance still runs at {worst:.2f}s; keep it brief"
 
 
+#: Selectors whose transitions are ambient rather than a response to input. A
+#: lattice cell cooling after the pointer leaves is meant to linger — that trail
+#: is the effect — but it still has to be bounded.
+DECORATIVE = ("lattice",)
+
+
 def test_ui_transitions_stay_brief(style):
-    """A transition responds to something a person did; it must not lag behind them."""
-    durations = [float(d) for d in re.findall(r"transition:[^;}]*?([\d.]+)s", style)]
-    assert durations, "transitions declared nowhere"
-    assert max(durations) <= 0.6, f"a transition runs {max(durations)}s; keep motion brief"
+    """A transition on a control must not lag behind the person using it.
+
+    Decoration is held to a looser bound: a cell fading back over a second reads
+    as cooling, where the same duration on a button reads as broken.
+    """
+    slow_controls, slow_decoration = [], []
+    for rule in re.finditer(r"([^{}]+)\{([^{}]*)\}", style):
+        selector, body = rule.group(1).strip(), rule.group(2)
+        for d in re.findall(r"transition:[^;}]*?([\d.]+)s", body):
+            seconds = float(d)
+            decorative = any(token in selector for token in DECORATIVE)
+            if decorative and seconds > 1.5:
+                slow_decoration.append((selector.splitlines()[-1].strip(), seconds))
+            elif not decorative and seconds > 0.6:
+                slow_controls.append((selector.splitlines()[-1].strip(), seconds))
+
+    assert not slow_controls, \
+        f"these transitions lag the person driving them: {slow_controls}"
+    assert not slow_decoration, \
+        f"ambient transitions are unbounded: {slow_decoration}"
 
 
 def test_looping_animation_is_slow_enough_to_be_ambient(style):

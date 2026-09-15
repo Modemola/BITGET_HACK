@@ -64,6 +64,13 @@ const report = {
     lanes: count(".lane-lit"),
     segments: count(".lane-lit rect"),
   },
+  lattice: {
+    cells: count(".lattice-cell"),
+    inHeader: !!d.querySelector("header .lattice"),
+    // The strip's own pointer target must never sit inside the lattice, or the
+    // decoration would swallow the interaction it sits behind.
+    swallowsStrip: !!d.querySelector(".lattice #tl-hit"),
+  },
   tools: count(".tools a"),
   deadLinks: [...d.querySelectorAll('.tools a[href^="#"]')]
     .filter((a) => !d.querySelector(a.getAttribute("href")))
