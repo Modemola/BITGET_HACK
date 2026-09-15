@@ -15,7 +15,7 @@ both from one template:
   `main` to go live.
 - `web/desk.html` — a **fragment** for the Claude artifact, which supplies its
   own doctype, charset and viewport. Carries the natural-language layer.
-  https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 —
+  https://claude.ai/artifact/3eKJskZZThj72zRwZjBpK2 —
   republish by calling the Artifact tool on that same path.
 
 Never give the artifact build a document shell, and never ship the fragment to a
@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 140 tests
+python -m pytest -q                     # 142 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -166,7 +166,17 @@ page carries the closure state: as venues shut it darkens and drops chrome while
 one amber accent stays lit, because the rToken lane is the only thing still
 quoting. Regime and theme are separate axes — the viewer's theme picks the
 palette, the regime modulates illumination inside it, and regime never changes a
-hue. **Do not adopt Bitget's brand identity**; a page wearing it reads as an
+hue.
+
+**The page is single-theme dark, by decision.** It does not follow the viewer's
+setting: the accent reads 9.2:1 against the void and 3.6:1 against white, where
+it degrades to ochre, so a light rendering is worse rather than merely
+different. `--ground` sits 9 L* above `--void` because an earlier palette put
+them 2.5 L* apart — below the threshold of noticing — which made the blackout
+column and the regime shift both invisible. Contrast ratios hide that (1.05:1
+reads like a rounding error); `test_page_style.py` measures L* instead.
+
+**Do not adopt Bitget's brand identity**; a page wearing it reads as an
 official product of theirs, which this is not.
 
 Steps 1-7 are built: token layer, masthead, the full-bleed week strip,

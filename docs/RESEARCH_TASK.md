@@ -153,6 +153,6 @@ python scripts/research_task.py
 ```
 
 The same seven tools back the published demo at
-https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 — the page
+https://claude.ai/artifact/3eKJskZZThj72zRwZjBpK2 — the page
 renders them for the window currently ahead, computed against a live clock, and
 its language layer answers questions grounded strictly in these measurements.

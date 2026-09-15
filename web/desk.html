@@ -15,15 +15,41 @@
    stays on. Legacy token names are aliased so existing component CSS keeps
    working against the new values.
 --------------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------------
+   Single theme, deliberately.
+
+   This page commits to one visual world rather than following the viewer's
+   light/dark setting, because the two are not equivalent renderings of the same
+   design. The accent is sodium-vapour amber -- a lit window in a dark street,
+   which is exactly what an rToken is during a blackout. It reads 9.2:1 against
+   the void and only 3.6:1 against white, where it degrades to ochre. On a light
+   ground the idea the palette exists to carry simply is not there.
+
+   The ground sits well above the void on purpose. An earlier dark palette put
+   them 2.5 L* apart, which is below the threshold of noticing: the blackout
+   column in the week strip, and the page darkening when a blackout begins, were
+   both invisible in the theme they were designed for. 9 L* of separation is
+   what makes either read.
+--------------------------------------------------------------------------- */
 :root{
-  --void:#161C26; --ground:#FAFAF8; --surface:#FFFFFF; --raised:#F2F4F7;
-  --ink:#11151B; --muted:#55606E; --faint:#8792A1;
-  --rule:#E4E7EC; --rule-strong:#CBD2DB;
-  --lit:#B87514; --lit-dim:#D8B98A; --lit-soft:#F7EEDF;
-  --open:#38506A; --half:#93A3B5;
-  --risk:#B4453A; --risk-soft:#F6E4E2;
-  --ok:#2F6B4F; --ok-soft:#DFEDE6;
-  --shadow:0 1px 2px rgba(17,21,27,.05), 0 10px 30px -20px rgba(17,21,27,.30);
+  color-scheme: dark;
+
+  --void:#07090D;      /* the blackout: true absence, never a fill */
+  --ground:#171F2A;    /* page  -- 9.0 L* above the void, so the void reads */
+  --surface:#1E2836;   /* panels */
+  --raised:#26303F;    /* inputs, hovered rows */
+  --ink:#E8ECF2;       /* 14.0:1 on ground */
+  --muted:#94A1B2;     /*  6.3:1 on ground */
+  --faint:#6D7B93;     /*  3.1:1 on raised, the tightest pairing on the page */
+  --rule:#2C3849; --rule-strong:#3C4B5F;
+
+  --lit:#E8A33D;       /* the signature. rToken, still quoting. 9.2:1 on void */
+  --lit-dim:#8A6526; --lit-soft:#2A1F0E;
+  --open:#C9D8E8;      /* cash session -- full illumination */
+  --half:#5D7086;      /* weeknight -- a futures reference exists */
+  --risk:#E5786B; --risk-soft:#3A211E;
+  --ok:#63BE9A; --ok-soft:#163023;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
 
   --display:"Instrument Serif",Georgia,"Times New Roman",serif;
   --body:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
@@ -33,39 +59,12 @@
   --accent:var(--lit); --accent-soft:var(--lit-soft);
   --blackout:var(--void); --blackout-soft:var(--half); --surface-2:var(--raised);
 }
-/* Light theme shows the regime through the lamp and the week strip rather than
-   by darkening the page, which would fight a viewer who chose light. */
-:root[data-regime="BLACKOUT"]{ --ground:#F0F2F5; --rule:#DEE2E8; }
 
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --void:#07090D; --ground:#0D1117; --surface:#141A22; --raised:#1B222C;
-    --ink:#E6EAF0; --muted:#8B97A8; --faint:#5A6575;
-    --rule:#1F2733; --rule-strong:#2C3746;
-    --lit:#E8A33D; --lit-dim:#8A6526; --lit-soft:#2A1F0E;
-    --open:#C9D8E8; --half:#5D7086;
-    --risk:#E06C60; --risk-soft:#3A211E;
-    --ok:#5FB894; --ok-soft:#163023;
-    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
-  }
-  :root:not([data-theme="light"])[data-regime="WEEKNIGHT"]{ --ground:#0A0E14; }
-  :root:not([data-theme="light"])[data-regime="BLACKOUT"]{
-    --ground:var(--void); --surface:#0C1118; --raised:#131923; --rule:#161D27;
-  }
-}
-:root[data-theme="dark"]{
-  --void:#07090D; --ground:#0D1117; --surface:#141A22; --raised:#1B222C;
-  --ink:#E6EAF0; --muted:#8B97A8; --faint:#5A6575;
-  --rule:#1F2733; --rule-strong:#2C3746;
-  --lit:#E8A33D; --lit-dim:#8A6526; --lit-soft:#2A1F0E;
-  --open:#C9D8E8; --half:#5D7086;
-  --risk:#E06C60; --risk-soft:#3A211E;
-  --ok:#5FB894; --ok-soft:#163023;
-  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
-}
-:root[data-theme="dark"][data-regime="WEEKNIGHT"]{ --ground:#0A0E14; }
-:root[data-theme="dark"][data-regime="BLACKOUT"]{
-  --ground:var(--void); --surface:#0C1118; --raised:#131923; --rule:#161D27;
+/* Regime modulates illumination only; it never moves a hue. The lit lane stays
+   exactly as bright while everything around it recedes. */
+:root[data-regime="WEEKNIGHT"]{ --ground:#121A26; }
+:root[data-regime="BLACKOUT"]{
+  --ground:var(--void); --surface:#101822; --raised:#18212C; --rule:#222C3A;
 }
 
 /* The regime cross-fade carries the thesis, so it is the one ambient
@@ -540,7 +539,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 (function(){
 "use strict";
 var D = JSON.parse(document.getElementById("desk-data").textContent);
-var ARTIFACT_URL = "https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461";
+var ARTIFACT_URL = "https://claude.ai/artifact/3eKJskZZThj72zRwZjBpK2";
 
 /* A value the build could not compute arrives as null (see _json_safe in
    blackout/build.py). Every formatter renders that as an em dash rather than
