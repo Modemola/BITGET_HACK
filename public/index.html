@@ -68,6 +68,10 @@
   --ok:#63BE9A; --ok-soft:#163023;
   --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -20px rgba(0,0,0,.9);
 
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+  --t-fast:.18s; --t-mid:.34s; --t-slow:.6s;
+
   --display:"Instrument Serif",Georgia,"Times New Roman",serif;
   --body:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
@@ -90,6 +94,27 @@ body,.panel,.week,.verdict{transition:background-color .4s ease,border-color .4s
 @media (prefers-reduced-motion:reduce){
   body,.panel,.week,.verdict{transition:none}
 }
+
+/* ---------------------------------------------------------------------------
+   Motion system.
+
+   One rule governs all of it: a resting state is always the visible one.
+   Entrance animations start from opacity 0 *inside a keyframe*, never as a base
+   style, so a failure to run the animation leaves the content on screen rather
+   than hiding it. Nothing waits on a scroll observer; the whole sequence
+   completes in under a second and a half, because the first still frame is what
+   a thumbnail and a skimming reader get.
+--------------------------------------------------------------------------- */
+@keyframes rise{ from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+@keyframes settle{ from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+@keyframes wipe{ from{clip-path:inset(0 100% 0 0)} to{clip-path:inset(0 0 0 0)} }
+@keyframes glow-in{ from{opacity:0} to{opacity:1} }
+
+.enter{animation:rise .7s var(--ease-out) both}
+.enter-soft{animation:settle .55s var(--ease-out) both;
+  animation-delay:calc(var(--i,0) * 55ms + 320ms)}
+.enter-wipe{animation:wipe .9s var(--ease-out) both;animation-delay:.18s}
+.enter-glow{animation:glow-in .8s ease both;animation-delay:.5s}
 
 /* The rToken lane breathes, because it is the one venue still transmitting.
    It is faint while other venues are open and the lane is merely one of three;
@@ -177,6 +202,31 @@ header{padding-block:40px 26px}
   justify-content:space-between;margin-bottom:20px}
 .week-head h2{font-family:var(--display);font-size:22px;font-weight:400;
   letter-spacing:-.01em}
+.tl-stage{position:relative}
+.tl-tip{position:absolute;top:-6px;transform:translateX(-50%);z-index:3;
+  pointer-events:none;display:flex;flex-direction:column;gap:2px;
+  padding:9px 12px;border-radius:7px;white-space:nowrap;
+  background:var(--surface);border:1px solid var(--rule-strong);
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.85)}
+.tl-tip[data-dark="true"]{border-color:var(--lit);background:var(--void)}
+.tip-when{font-family:var(--mono);font-size:11.5px;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.tip-what{font-size:12px;font-weight:600;color:var(--muted)}
+.tl-tip[data-dark="true"] .tip-what{color:var(--lit)}
+.dr-tip{top:8px}
+.tip-rows{display:grid;grid-template-columns:auto auto;gap:1px 10px;
+  align-items:baseline;margin-top:5px}
+.tip-rows b{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--lit);
+  font-variant-numeric:tabular-nums;text-align:right}
+.tip-rows i{font-style:normal;font-size:11px;color:var(--muted)}
+
+/* The median draws itself in once, left to right. The dash length is generous
+   so any path length is covered without measuring it. */
+@keyframes draw{ from{stroke-dashoffset:4000} to{stroke-dashoffset:0} }
+.drift-line{stroke-dasharray:4000;animation:draw 1.5s var(--ease-out) both;
+  animation-delay:.35s}
+.tip-hint{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-top:2px}
 .tl-scroll{overflow-x:auto;overflow-y:hidden}
 .tl-svg{display:block;width:100%;min-width:680px;height:auto}
 /* The scrubber: drag the week past a fixed present. Every frame is real
@@ -243,10 +293,16 @@ section{margin-top:38px}
 .verdict h3 em{font-style:normal;color:var(--lit)}
 .verdict p{margin:0 0 26px;color:var(--muted);max-width:64ch;font-size:15.5px}
 @media (max-width:640px){ .verdict h3{font-size:32px;max-width:none} }
-.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
+.evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(156px,1fr));
   gap:0;border-top:1px solid var(--rule);background:transparent}
-.evidence div{padding:16px 20px 16px 0;border-right:1px solid var(--rule)}
+.evidence div{position:relative;padding:20px 22px 20px 0;
+  border-right:1px solid var(--rule)}
 .evidence div:last-child{border-right:none}
+.evidence div::before{content:"";position:absolute;top:-1px;left:0;width:26px;height:2px;
+  background:var(--lit);opacity:0;transition:opacity var(--t-mid) var(--ease-out),
+  width var(--t-mid) var(--ease-out)}
+.evidence div:first-child::before{opacity:1}
+.evidence div:hover::before{opacity:1;width:44px}
 .evidence dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:5px}
 .evidence dd{margin:0;font-family:var(--display);font-size:30px;font-weight:400;
@@ -270,6 +326,8 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   font-family:var(--mono);font-weight:500;white-space:nowrap}
 .pill.bad{background:var(--risk-soft);color:var(--risk)}
 .pill.good{background:var(--ok-soft);color:var(--ok)}
+@keyframes flash{ 0%{background:var(--lit-soft)} 100%{background:transparent} }
+.flash{animation:flash .9s var(--ease-out)}
 .note{font-size:12.5px;color:var(--faint);margin-top:14px;max-width:70ch}
 
 /* An editable figure that reads as part of the sentence, not as a form. */
@@ -380,8 +438,14 @@ button:disabled{opacity:.55;cursor:default}
 
 footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   color:var(--faint);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px 28px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;
-  transition:none!important}}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  /* keyframes cancelled mid-flight would leave `both` fill applied, so restore
+     the resting state explicitly */
+  .enter,.enter-soft,.enter-wipe,.enter-glow{opacity:1!important;transform:none!important;
+    clip-path:none!important}
+  .drift-line{stroke-dasharray:none!important;stroke-dashoffset:0!important}
+}
 @media (max-width:640px){
   .brand h1{font-size:30px}
   .masthead{flex-direction:column;align-items:flex-start}
@@ -393,13 +457,13 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 <div class="wrap">
 <header>
   <div class="masthead">
-    <div class="brand">
+    <div class="brand enter">
       <div class="eyebrow">Closure-window risk</div>
       <h1>Blackout Desk</h1>
       <p>For <span class="num">49</span> hours each weekend, one venue on earth
          quotes your tokenized US stock. This is what you are exposed to.</p>
     </div>
-    <div class="status">
+    <div class="status enter" style="animation-delay:.12s">
       <div class="chip" id="regime-chip"><span class="dot"></span><span id="regime-label">loading</span></div>
       <div class="countdown" id="countdown">&mdash;</div>
       <div class="eyebrow" id="countdown-label"></div>
@@ -408,13 +472,13 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 </header>
 
 <nav class="tools" aria-label="The seven tools on this desk">
-  <a href="#closure"><span class="tn">01</span><span class="th">Closure window</span><span class="tq">Which venues are open, and for how long?</span></a>
-  <a href="#verdict"><span class="tn">02</span><span class="th">Premium verdict</span><span class="tq">Is the premium in front of me tradeable?</span></a>
-  <a href="#drift"><span class="tn">03</span><span class="th">Drift distribution</span><span class="tq">How far does price typically travel?</span></a>
-  <a href="#analogues"><span class="tn">04</span><span class="th">Historical analogues</span><span class="tq">What happened in weekends like this?</span></a>
-  <a href="#exposure"><span class="tn">05</span><span class="th">Exposure</span><span class="tq">What is my book carrying through it?</span></a>
-  <a href="#calendar"><span class="tn">06</span><span class="th">Scheduled events</span><span class="tq">Is anything scheduled to explain a move?</span></a>
-  <a href="#hedges"><span class="tn">07</span><span class="th">Hedge menu</span><span class="tq">What can I trade, and at what cost?</span></a>
+  <a class="enter-soft" style="--i:0" href="#closure"><span class="tn">01</span><span class="th">Closure window</span><span class="tq">Which venues are open, and for how long?</span></a>
+  <a class="enter-soft" style="--i:1" href="#verdict"><span class="tn">02</span><span class="th">Premium verdict</span><span class="tq">Is the premium in front of me tradeable?</span></a>
+  <a class="enter-soft" style="--i:2" href="#drift"><span class="tn">03</span><span class="th">Drift distribution</span><span class="tq">How far does price typically travel?</span></a>
+  <a class="enter-soft" style="--i:3" href="#analogues"><span class="tn">04</span><span class="th">Historical analogues</span><span class="tq">What happened in weekends like this?</span></a>
+  <a class="enter-soft" style="--i:4" href="#exposure"><span class="tn">05</span><span class="th">Exposure</span><span class="tq">What is my book carrying through it?</span></a>
+  <a class="enter-soft" style="--i:5" href="#calendar"><span class="tn">06</span><span class="th">Scheduled events</span><span class="tq">Is anything scheduled to explain a move?</span></a>
+  <a class="enter-soft" style="--i:6" href="#hedges"><span class="tn">07</span><span class="th">Hedge menu</span><span class="tq">What can I trade, and at what cost?</span></a>
 </nav>
 
 <div class="week" id="closure">
@@ -422,8 +486,11 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
     <h2>Three weeks, by who is quoting</h2>
     <div class="eyebrow" id="week-range">UTC</div>
   </div>
-  <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 1000 236"
-       role="img" aria-label="Which trading venues are open across the next 21 days"></svg></div>
+  <div class="tl-stage">
+    <div class="tl-scroll"><svg class="tl-svg" id="timeline" viewBox="0 0 1000 286"
+         role="img" aria-label="Which trading venues are open across the next 21 days"></svg></div>
+    <div class="tl-tip" id="tl-tip" hidden aria-hidden="true"></div>
+  </div>
   <div class="scrub-wrap">
     <label class="scrub-hint" for="scrub">
       <span class="grab">&#8596;</span>
@@ -454,7 +521,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
     <h2>Before you trade the premium</h2>
   </div>
   <div class="verdict">
-    <h3>That weekend premium is <em>not</em> free money.</h3>
+    <h3 class="enter-soft">That weekend premium is <em>not</em> free money.</h3>
     <p>Across <span class="num" id="v-weekends">27</span> weekend blackouts, the gap between
        rToken and fair value closed almost entirely because the <em>reference</em> caught up
        once futures reopened &mdash; not because the token corrected. The token leg, the only
@@ -474,8 +541,11 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
        95th percentile.</p>
   </div>
   <div class="panel">
-    <div class="chart-scroll"><svg class="chart" id="drift-chart" viewBox="0 0 900 330"
-         role="img" aria-label="Premium drift by hours elapsed into a blackout"></svg></div>
+    <div class="tl-stage">
+      <div class="chart-scroll"><svg class="chart" id="drift-chart" viewBox="0 0 900 330"
+           role="img" aria-label="Premium drift by hours elapsed into a blackout"></svg></div>
+      <div class="tl-tip dr-tip" id="dr-tip" hidden aria-hidden="true"></div>
+    </div>
     <p class="note" id="drift-note"></p>
   </div>
 </section>
@@ -693,45 +763,173 @@ function tick(){
 }
 
 /* ---- timeline --------------------------------------------------------- */
+/* Briefly mark what just changed. Restarting the animation needs the class off
+   for a frame, or a second edit inside the first second does nothing visible. */
+function flash(ids){
+  ids.forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  });
+}
+
+/* Geometry of the last strip drawn, so the pointer handlers can map a screen
+   position back to a moment in time without recomputing the layout. */
+var TL = null;
+
+function bindStripPointer(svg){
+  var hit = svg.querySelector("#tl-hit");
+  var cursor = svg.querySelector("#tl-cursor");
+  var line = svg.querySelector("#tl-cursor-line");
+  var tip = document.getElementById("tl-tip");
+  if (!hit || !cursor || !line || !TL) return;
+
+  function svgX(evt){
+    // getScreenCTM is the only reliable mapping once the strip can scroll
+    // horizontally; fall back to the bounding box where it is unavailable.
+    if (svg.createSVGPoint && svg.getScreenCTM){
+      var pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      var ctm = svg.getScreenCTM();
+      if (ctm) return pt.matrixTransform(ctm.inverse()).x;
+    }
+    var box = svg.getBoundingClientRect();
+    return (evt.clientX - box.left) / box.width * TL.W;
+  }
+
+  function timeAt(x){
+    var span = TL.W - TL.GUT - TL.R;
+    var f = Math.min(Math.max((x - TL.GUT) / span, 0), 1);
+    // The last run ends exclusively at t1, so landing exactly on it resolves to
+    // no regime at all and the readout would say "outside the calendar" at the
+    // very edge of the strip it is describing.
+    return Math.min(Math.round(TL.t0 + f * (TL.t1 - TL.t0)), TL.t1 - 1);
+  }
+
+  function move(evt){
+    var x = svgX(evt);
+    var t = timeAt(x);
+    line.setAttribute("x1", x);
+    line.setAttribute("x2", x);
+    cursor.setAttribute("opacity", "1");
+    if (!tip) return;
+
+    var run = currentRun(t);
+    var regime = run ? run.regime : null;
+    var name = regime ? (NAME[regime] || regime) : "outside the calendar";
+    tip.hidden = false;
+    tip.setAttribute("data-dark", regime && isBlackout(regime) ? "true" : "false");
+    tip.innerHTML =
+      '<span class="tip-when">' + new Date(t * 1000).toUTCString().slice(5, 22) + ' UTC</span>' +
+      '<span class="tip-what">' + name + '</span>' +
+      '<span class="tip-hint">click to move the desk here</span>';
+
+    var box = svg.getBoundingClientRect();
+    var wrap = tip.offsetParent || tip.parentNode;
+    var wrapBox = wrap.getBoundingClientRect();
+    var px = box.left - wrapBox.left + (x / TL.W) * box.width;
+    tip.style.left = Math.round(px) + "px";
+  }
+
+  function leave(){
+    cursor.setAttribute("opacity", "0");
+    if (tip) tip.hidden = true;
+  }
+
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerleave", leave);
+  hit.addEventListener("click", function(evt){
+    // Clicking the strip is the most direct way to say "show me that moment".
+    scrubTs = timeAt(svgX(evt));
+    var range = document.getElementById("scrub");
+    if (range) range.value = String(scrubTs);
+    renderTimeDependent();
+    var live = document.getElementById("scrub-live");
+    if (live){
+      live.setAttribute("data-live", "false");
+      var label = document.getElementById("scrub-live-label");
+      if (label) label.textContent = "Back to now";
+    }
+    var read = document.getElementById("scrub-read");
+    if (read) read.textContent = new Date(scrubTs * 1000).toUTCString().slice(0, 22) + " UTC";
+  });
+}
+
 function drawTimeline(){
   var svg = document.getElementById("timeline");
   var runs = D.regime_runs;
   if (!runs.length) return;
 
-  var W = 1000, H = 236, GUT = 76, R = 10;
-  var TOP = 34, LANE = 44, GAP = 14;
+  var W = 1000, H = 286, GUT = 84, R = 14;
+  var TOP = 42, LANE = 54, GAP = 11;
   var t0 = runs[0].start, t1 = runs[runs.length - 1].end;
   function X(t){ return GUT + (t - t0) / (t1 - t0) * (W - GUT - R); }
   var laneY = [TOP, TOP + LANE + GAP, TOP + 2 * (LANE + GAP)];
   var STACK_TOP = TOP, STACK_BOT = laneY[2] + LANE;
+  TL = { W: W, H: H, GUT: GUT, R: R, t0: t0, t1: t1,
+         top: STACK_TOP, bottom: STACK_BOT };
 
   var lanes = [
-    { key: "NYSE",   fill: "var(--open)", shows: function(r){ return r.regime === "US_CASH"; } },
-    { key: "GLOBEX", fill: "var(--half)", shows: function(r){ return !isBlackout(r.regime); } },
-    { key: "RTOKEN", fill: "var(--lit)",  shows: function(){ return true; } }
+    { key: "NYSE",   grad: "gOpen", shows: function(r){ return r.regime === "US_CASH"; } },
+    { key: "GLOBEX", grad: "gHalf", shows: function(r){ return !isBlackout(r.regime); } },
+    { key: "RTOKEN", grad: "gLit",  shows: function(){ return true; } }
   ];
 
-  // A soft bloom, applied only to the lane that stays lit. It is the one
-  // decorative effect on the page and it exists to make the point that
-  // something is still burning while everything around it is dark.
-  var out = '<defs><filter id="bloom" x="-6%" y="-60%" width="112%" height="220%">' +
-            '<feGaussianBlur stdDeviation="3.2" result="b"/>' +
-            '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
-            '</filter></defs>';
+  function vgrad(id, top, bottom, o1, o2){
+    return '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="' + top + '" stop-opacity="' + o1 + '"/>' +
+      '<stop offset="1" stop-color="' + bottom + '" stop-opacity="' + o2 + '"/>' +
+      '</linearGradient>';
+  }
+
+  var out = '<defs>' +
+    // Lanes are lit surfaces, not flat fills: a little vertical falloff gives
+    // them body without inventing a colour that is not in the palette.
+    vgrad("gOpen", "var(--open)", "var(--open)", 1, .72) +
+    vgrad("gHalf", "var(--half)", "var(--half)", 1, .68) +
+    vgrad("gLit",  "var(--lit)",  "var(--lit)",  1, .78) +
+    vgrad("gVoid", "var(--void)", "var(--void)", 1, .92) +
+    // The bed the lit lane appears to rest on. Very low alpha, so it reads as
+    // spill rather than as a shape.
+    '<radialGradient id="bed" cx="50%" cy="50%" r="50%">' +
+      '<stop offset="0" stop-color="var(--lit)" stop-opacity=".17"/>' +
+      '<stop offset="55%" stop-color="var(--lit)" stop-opacity=".055"/>' +
+      '<stop offset="100%" stop-color="var(--lit)" stop-opacity="0"/>' +
+    '</radialGradient>' +
+    '<filter id="bloom" x="-8%" y="-70%" width="116%" height="240%">' +
+      '<feGaussianBlur stdDeviation="3.4" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+    '</filter>' +
+    '<filter id="softbed" x="-20%" y="-60%" width="140%" height="220%">' +
+      '<feGaussianBlur stdDeviation="12"/>' +
+    '</filter>' +
+    '</defs>';
+
+  // 0. Light spilling from the lane that never goes out.
+  out += '<ellipse class="enter-glow" cx="' + ((GUT + W - R) / 2) + '" cy="' +
+         (laneY[2] + LANE / 2) + '" rx="' + ((W - GUT - R) / 2) + '" ry="' + (LANE * 1.5) +
+         '" fill="url(#bed)" filter="url(#softbed)"></ellipse>';
 
   // 1. Empty tracks, so a lane that is shut still reads as a lane.
   lanes.forEach(function(lane, i){
     out += '<rect x="' + GUT + '" y="' + laneY[i] + '" width="' + (W - GUT - R) +
-           '" height="' + LANE + '" rx="2" fill="var(--raised)"></rect>';
+           '" height="' + LANE + '" rx="3" fill="var(--raised)" opacity=".55"></rect>';
   });
 
   // 2. The void: drawn through the whole stack, before anything is lit, so the
   //    blackout is a column of genuine absence rather than a shade of grey.
   runs.forEach(function(r){
     if (!isBlackout(r.regime)) return;
-    out += '<rect x="' + X(r.start) + '" y="' + STACK_TOP + '" width="' +
-           Math.max(X(r.end) - X(r.start), 1) + '" height="' + (STACK_BOT - STACK_TOP) +
-           '" fill="var(--void)"></rect>';
+    var x = X(r.start), w = Math.max(X(r.end) - X(r.start), 1);
+    out += '<rect x="' + x + '" y="' + (STACK_TOP - 7) + '" width="' + w +
+           '" height="' + (STACK_BOT - STACK_TOP + 14) + '" rx="2" fill="url(#gVoid)"></rect>';
+    // A hairline at each edge, where the dark meets what is still lit.
+    out += '<line x1="' + x + '" y1="' + (STACK_TOP - 7) + '" x2="' + x + '" y2="' +
+           (STACK_BOT + 7) + '" stroke="var(--rule-strong)" stroke-width=".6" opacity=".7"></line>' +
+           '<line x1="' + (x + w) + '" y1="' + (STACK_TOP - 7) + '" x2="' + (x + w) + '" y2="' +
+           (STACK_BOT + 7) + '" stroke="var(--rule-strong)" stroke-width=".6" opacity=".7"></line>';
   });
 
   // 3. What is actually quoting, rToken last so it sits above the void.
@@ -741,42 +939,73 @@ function drawTimeline(){
       if (!lane.shows(r)) return;
       segs += '<rect x="' + X(r.start) + '" y="' + laneY[i] + '" width="' +
               Math.max(X(r.end) - X(r.start), 0.8) + '" height="' + LANE +
-              '" fill="' + lane.fill + '"></rect>';
+              '" fill="url(#' + lane.grad + ')"></rect>';
     });
-    out += lane.key === "RTOKEN"
-      ? '<g class="lane-lit" filter="url(#bloom)">' + segs + '</g>'
-      : segs;
 
-    out += '<text x="' + (GUT - 12) + '" y="' + (laneY[i] + LANE / 2 + 4) +
-           '" text-anchor="end" font-family="var(--mono)" font-size="11" ' +
-           'letter-spacing="1.3" fill="var(--faint)">' + lane.key + '</text>';
+    if (lane.key === "RTOKEN"){
+      // A brighter core running the length of the lane: a filament, so the lane
+      // reads as something emitting rather than something coloured in.
+      var core = '<rect x="' + GUT + '" y="' + (laneY[i] + LANE / 2 - 1) + '" width="' +
+                 (W - GUT - R) + '" height="2" fill="var(--lit)" opacity=".95"></rect>';
+      out += '<g class="lane-lit enter-wipe" filter="url(#bloom)">' + segs + core + '</g>';
+    } else {
+      out += '<g class="enter-wipe" style="animation-delay:' + (0.18 + i * 0.09) + 's">' +
+             segs + '</g>';
+    }
+
+    out += '<text x="' + (GUT - 14) + '" y="' + (laneY[i] + LANE / 2 + 4) +
+           '" text-anchor="end" font-family="var(--mono)" font-size="10.5" ' +
+           'letter-spacing="1.4" fill="var(--faint)">' + lane.key + '</text>';
   });
 
-  // 4. Day boundaries, with Mondays named.
+  // 4. Six-hour ticks under the stack, so the strip reads as an instrument.
+  for (var h = Math.ceil(t0 / 21600) * 21600; h < t1; h += 21600){
+    if (h % 86400 === 0) continue;
+    out += '<line x1="' + X(h) + '" y1="' + (STACK_BOT + 8) + '" x2="' + X(h) +
+           '" y2="' + (STACK_BOT + 12) + '" stroke="var(--rule)" stroke-width=".6"></line>';
+  }
+
+  // 5. Day boundaries, with Mondays named.
   for (var t = Math.ceil(t0 / 86400) * 86400; t < t1; t += 86400){
     var dt = new Date(t * 1000);
     var monday = dt.getUTCDay() === 1;
-    out += '<line x1="' + X(t) + '" y1="' + (STACK_TOP - 6) + '" x2="' + X(t) +
-           '" y2="' + (STACK_BOT + 6) + '" stroke="var(--rule)" stroke-width="' +
-           (monday ? 1 : 0.5) + '" opacity="' + (monday ? 0.9 : 0.45) + '"></line>';
+    out += '<line x1="' + X(t) + '" y1="' + (STACK_TOP - 10) + '" x2="' + X(t) +
+           '" y2="' + (STACK_BOT + (monday ? 18 : 14)) + '" stroke="var(--rule' +
+           (monday ? "-strong" : "") + ')" stroke-width="' + (monday ? 1 : .6) +
+           '" opacity="' + (monday ? .85 : .4) + '"></line>';
     if (monday){
-      out += '<text x="' + (X(t) + 5) + '" y="' + (H - 10) + '" font-family="var(--mono)" ' +
-             'font-size="10.5" fill="var(--faint)">' + dt.toUTCString().slice(5, 11) + '</text>';
+      out += '<text x="' + (X(t) + 6) + '" y="' + (H - 9) + '" font-family="var(--mono)" ' +
+             'font-size="10.5" letter-spacing=".06em" fill="var(--faint)">' +
+             dt.toUTCString().slice(5, 11).toUpperCase() + '</text>';
     }
   }
 
-  // 5. Now.
+  // 6. Now: a marker with a cap, not a bare hairline.
   var now = viewTime();
   if (now > t0 && now < t1){
-    out += '<line x1="' + X(now) + '" y1="' + (STACK_TOP - 18) + '" x2="' + X(now) +
-           '" y2="' + (STACK_BOT + 8) + '" stroke="var(--ink)" stroke-width="1.4"></line>';
-    out += '<text x="' + (X(now) + 6) + '" y="' + (STACK_TOP - 21) + '" font-family="var(--mono)" ' +
-           'font-size="10" letter-spacing="1.2" fill="var(--ink)">' +
-           (isLive() ? "NOW" : new Date(now * 1000).toUTCString().slice(0, 16).toUpperCase()) +
-           '</text>';
+    var nx = X(now), live = isLive();
+    var col = live ? "var(--ink)" : "var(--lit)";
+    var label = live ? "NOW" : new Date(now * 1000).toUTCString().slice(5, 17).toUpperCase();
+    out += '<g class="enter-glow" style="animation-delay:.62s">' +
+      '<line x1="' + nx + '" y1="' + (STACK_TOP - 22) + '" x2="' + nx + '" y2="' +
+        (STACK_BOT + 12) + '" stroke="' + col + '" stroke-width="1.5"></line>' +
+      '<circle cx="' + nx + '" cy="' + (STACK_TOP - 22) + '" r="3.2" fill="' + col + '"></circle>' +
+      '<text x="' + (nx + 8) + '" y="' + (STACK_TOP - 18) + '" font-family="var(--mono)" ' +
+        'font-size="10" letter-spacing="1.3" fill="' + col + '">' + label + '</text>' +
+      '</g>';
   }
 
+  // 7. Hover crosshair, moved by JS and hidden until the pointer arrives.
+  out += '<g id="tl-cursor" opacity="0" pointer-events="none">' +
+    '<line id="tl-cursor-line" x1="0" y1="' + (STACK_TOP - 10) + '" x2="0" y2="' +
+      (STACK_BOT + 14) + '" stroke="var(--ink)" stroke-width="1" opacity=".55"></line>' +
+    '</g>';
+  out += '<rect id="tl-hit" x="' + GUT + '" y="' + (STACK_TOP - 22) + '" width="' +
+    (W - GUT - R) + '" height="' + (STACK_BOT - STACK_TOP + 40) +
+    '" fill="transparent" style="cursor:crosshair"></rect>';
+
   svg.innerHTML = out;
+  bindStripPointer(svg);
 
   var range = document.getElementById("week-range");
   if (range){
@@ -803,6 +1032,65 @@ function drawEvidence(){
 }
 
 /* ---- drift fan chart -------------------------------------------------- */
+var DRIFT = null;
+
+function bindDriftPointer(svg){
+  var hit = svg.querySelector("#dr-hit");
+  var cursor = svg.querySelector("#dr-cursor");
+  var line = svg.querySelector("#dr-cursor-line");
+  var tip = document.getElementById("dr-tip");
+  if (!hit || !cursor || !line || !DRIFT) return;
+
+  function svgX(evt){
+    if (svg.createSVGPoint && svg.getScreenCTM){
+      var pt = svg.createSVGPoint();
+      pt.x = evt.clientX; pt.y = evt.clientY;
+      var ctm = svg.getScreenCTM();
+      if (ctm) return pt.matrixTransform(ctm.inverse()).x;
+    }
+    var box = svg.getBoundingClientRect();
+    return (evt.clientX - box.left) / box.width * DRIFT.W;
+  }
+
+  hit.addEventListener("pointermove", function(evt){
+    var span = DRIFT.W - DRIFT.L - DRIFT.R;
+    var hours = Math.min(Math.max((svgX(evt) - DRIFT.L) / span, 0), 1) * DRIFT.xmax;
+
+    // Snap to the bucket under the pointer: the data is bucketed, and a readout
+    // that interpolated between buckets would be inventing precision.
+    var row = DRIFT.rows.reduce(function(best, r){
+      return Math.abs(r.elapsed_h_from + 3 - hours) <
+             Math.abs(best.elapsed_h_from + 3 - hours) ? r : best;
+    }, DRIFT.rows[0]);
+
+    var x = DRIFT.L + (row.elapsed_h_from + 3) / DRIFT.xmax * span;
+    line.setAttribute("x1", x);
+    line.setAttribute("x2", x);
+    cursor.setAttribute("opacity", "1");
+    if (!tip) return;
+
+    tip.hidden = false;
+    tip.innerHTML =
+      '<span class="tip-when">hour ' + row.elapsed_h_from + '&ndash;' +
+        (row.elapsed_h_from + 6) + ' of the blackout</span>' +
+      '<span class="tip-rows">' +
+        '<b>' + sgn(row.q75) + '</b><i>75th</i>' +
+        '<b>' + sgn(row.q50) + '</b><i>median</i>' +
+        '<b>' + sgn(row.q25) + '</b><i>25th</i>' +
+      '</span>' +
+      '<span class="tip-hint">' + row.n_windows + ' weekends in this bucket</span>';
+
+    var box = svg.getBoundingClientRect();
+    var wrapBox = (tip.offsetParent || tip.parentNode).getBoundingClientRect();
+    tip.style.left = Math.round(box.left - wrapBox.left + (x / DRIFT.W) * box.width) + "px";
+  });
+
+  hit.addEventListener("pointerleave", function(){
+    cursor.setAttribute("opacity", "0");
+    if (tip) tip.hidden = true;
+  });
+}
+
 function drawDrift(){
   var svg = document.getElementById("drift-chart");
   var rows = D.drift;
@@ -822,29 +1110,67 @@ function drawDrift(){
     return up.concat(dn).join(" ");
   }
 
-  var out = "";
+  DRIFT = { W: W, L: L, R: R, xmax: xmax, rows: rows, top: T, bottom: H - B };
+
+  // Bands fade toward the far edge of the horizon: the distribution is widest
+  // and thinnest-evidenced there, and the fill should not claim otherwise.
+  var out = '<defs>' +
+    '<linearGradient id="dOuter" x1="0" y1="0" x2="1" y2="0">' +
+      '<stop offset="0" stop-color="var(--lit)" stop-opacity=".07"/>' +
+      '<stop offset="1" stop-color="var(--lit)" stop-opacity=".18"/></linearGradient>' +
+    '<linearGradient id="dInner" x1="0" y1="0" x2="1" y2="0">' +
+      '<stop offset="0" stop-color="var(--lit)" stop-opacity=".18"/>' +
+      '<stop offset="1" stop-color="var(--lit)" stop-opacity=".34"/></linearGradient>' +
+    '<filter id="dGlow" x="-10%" y="-40%" width="120%" height="180%">' +
+      '<feGaussianBlur stdDeviation="2.6" result="b"/>' +
+      '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>' +
+    '</filter></defs>';
+
   for (var i = 0; i <= 4; i++){
     var v = ymin + i*(ymax - ymin)/4;
     out += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + (W-R) + '" y2="' + Y(v) +
-           '" stroke="var(--rule)" stroke-width="0.8"></line>';
+           '" stroke="var(--rule)" stroke-width="0.8" opacity=".7"></line>';
     out += '<text x="' + (L-9) + '" y="' + (Y(v)+3.5) + '" text-anchor="end" ' +
            'font-family="var(--mono)" font-size="10.5" fill="var(--faint)">' + sgn(v,1) + '</text>';
   }
-  out += '<polygon points="' + band("q05","q95") + '" fill="var(--accent)" opacity="0.13"></polygon>';
-  out += '<polygon points="' + band("q25","q75") + '" fill="var(--accent)" opacity="0.26"></polygon>';
+
+  out += '<g class="enter-glow" style="animation-delay:.25s">' +
+    '<polygon points="' + band("q05","q95") + '" fill="url(#dOuter)"></polygon>' +
+    '<polygon points="' + band("q25","q75") + '" fill="url(#dInner)"></polygon></g>';
+
   out += '<line x1="' + L + '" y1="' + Y(0) + '" x2="' + (W-R) + '" y2="' + Y(0) +
          '" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 3"></line>';
-  out += '<polyline points="' + rows.map(function(r){ return X(mid(r)) + "," + Y(r.q50); }).join(" ") +
-         '" fill="none" stroke="var(--accent)" stroke-width="2"></polyline>';
-  rows.forEach(function(r){
-    out += '<circle cx="' + X(mid(r)) + '" cy="' + Y(r.q50) + '" r="3" fill="var(--accent)"></circle>';
+
+  // The median draws itself in, left to right, once.
+  var pts = rows.map(function(r){ return X(mid(r)) + "," + Y(r.q50); }).join(" ");
+  out += '<polyline class="drift-line" points="' + pts + '" fill="none" ' +
+         'stroke="var(--lit)" stroke-width="2.25" stroke-linecap="round" ' +
+         'stroke-linejoin="round" filter="url(#dGlow)"></polyline>';
+
+  rows.forEach(function(r, n){
+    var last = n === rows.length - 1;
+    out += '<circle cx="' + X(mid(r)) + '" cy="' + Y(r.q50) + '" r="' + (last ? 5 : 3) +
+           '" fill="var(--lit)"' + (last ? ' filter="url(#dGlow)"' : '') + '></circle>';
+    if (last){
+      out += '<circle cx="' + X(mid(r)) + '" cy="' + Y(r.q50) + '" r="9" fill="none" ' +
+             'stroke="var(--lit)" stroke-width="1" opacity=".45"></circle>';
+    }
     out += '<text x="' + X(mid(r)) + '" y="' + (H-26) + '" text-anchor="middle" ' +
            'font-family="var(--mono)" font-size="10.5" fill="var(--faint)">' + r.elapsed_h_from + '</text>';
   });
+
   out += '<text x="' + ((L + W - R)/2) + '" y="' + (H-6) + '" text-anchor="middle" ' +
          'font-family="var(--mono)" font-size="10.5" letter-spacing="1.2" ' +
          'fill="var(--faint)">HOURS INTO THE BLACKOUT</text>';
+
+  out += '<g id="dr-cursor" opacity="0" pointer-events="none">' +
+    '<line id="dr-cursor-line" x1="0" y1="' + T + '" x2="0" y2="' + (H-B) +
+      '" stroke="var(--ink)" stroke-width="1" opacity=".5"></line></g>';
+  out += '<rect id="dr-hit" x="' + L + '" y="' + T + '" width="' + (W-L-R) +
+    '" height="' + (H-B-T) + '" fill="transparent" style="cursor:crosshair"></rect>';
+
   svg.innerHTML = out;
+  bindDriftPointer(svg);
 
   var last = rows[rows.length-1];
   document.getElementById("drift-note").textContent =
@@ -1348,6 +1674,9 @@ function initPosition(){
     drawHedges();
     // The static answers quote the position, so they move with it too.
     if (document.querySelector("#ask .qa")) showAskElsewhere();
+    // Say which figures just moved, briefly. Without it a recomputed table is
+    // indistinguishable from one that did not respond.
+    flash(["expo-caption", "hedge-body"]);
   }
   el.addEventListener("input", refresh);
   el.addEventListener("blur", function(){

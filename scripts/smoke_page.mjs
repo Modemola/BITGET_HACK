@@ -76,5 +76,49 @@ const report = {
   },
 };
 
+// Interactions, exercised rather than merely present. A handler that throws
+// leaves the markup intact and every static check green.
+function fire(sel, type, x) {
+  const el = d.querySelector(sel);
+  if (!el) return false;
+  el.dispatchEvent(new dom.window.MouseEvent(type, { clientX: x, clientY: 80, bubbles: true }));
+  return true;
+}
+
+report.interactions = {};
+try {
+  fire("#tl-hit", "pointermove", 420);
+  const tip = d.getElementById("tl-tip");
+  report.interactions.stripHover = {
+    cursorShown: d.querySelector("#tl-cursor")?.getAttribute("opacity") === "1",
+    tipShown: tip ? !tip.hidden : false,
+    regimeNamed: !/outside the calendar/.test(tip?.textContent ?? ""),
+  };
+
+  fire("#dr-hit", "pointermove", 360);
+  const dtip = d.getElementById("dr-tip");
+  report.interactions.driftHover = {
+    tipShown: dtip ? !dtip.hidden : false,
+    quotesQuantiles: /median/.test(dtip?.textContent ?? ""),
+  };
+
+  const before = d.getElementById("scrub")?.value;
+  fire("#tl-hit", "click", 640);
+  report.interactions.clickToScrub =
+    before !== undefined && before !== d.getElementById("scrub")?.value;
+
+  const pos = d.getElementById("position");
+  if (pos) {
+    pos.value = "1,000,000";
+    pos.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+    report.interactions.positionRecomputes =
+      /\$1,000,000|\$8,/.test(d.getElementById("expo-caption")?.textContent ?? "") ||
+      d.getElementById("expo-caption")?.classList.contains("flash") === true;
+  }
+} catch (e) {
+  report.interactions.error = e.message;
+}
+report.errors = errors;
+
 console.log(JSON.stringify(report, null, 1));
 process.exit(0);
