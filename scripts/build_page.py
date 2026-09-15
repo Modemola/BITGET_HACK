@@ -36,22 +36,29 @@ DESCRIPTION = (
     "stock. Blackout Desk measures what that exposes you to."
 )
 
-#: Mirrors the artifact runtime's own wrapper: charset, viewport, a light
-#: color-scheme, zero body margin and the two resets it applies. Anything beyond
-#: this would make the static build diverge from the artifact.
+#: The page's own ground colour. Declared here as well so the browser paints it
+#: before any stylesheet arrives: a light default would flash white in front of
+#: a page whose entire subject is darkness.
+GROUND = "#171F2A"
+
+#: Mirrors the artifact runtime's own wrapper -- charset, viewport, color-scheme,
+#: zero body margin and the two resets it applies -- with the scheme set to dark
+#: because the page commits to a single theme. Anything beyond this would make
+#: the static build diverge from the artifact.
 SHELL = """<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="{description}">
-<meta name="color-scheme" content="light dark">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="{ground}">
 <meta property="og:title" content="Blackout Desk">
 <meta property="og:description" content="{description}">
 <meta property="og:type" content="website">
 <style>
-  :root {{ color-scheme: light dark; }}
-  body {{ margin: 0; font: 14px system-ui, sans-serif; background: #fafaf9; }}
+  :root {{ color-scheme: dark; }}
+  body {{ margin: 0; font: 14px system-ui, sans-serif; background: {ground}; color: #E8ECF2; }}
   img {{ max-width: 100%; }}
   [hidden] {{ display: none !important; }}
 </style>
@@ -95,7 +102,7 @@ def main() -> int:
     head, body = split_head_and_body(page)
     STANDALONE.parent.mkdir(parents=True, exist_ok=True)
     STANDALONE.write_text(
-        SHELL.format(description=DESCRIPTION, page=head, body=body), encoding="utf-8")
+        SHELL.format(description=DESCRIPTION, ground=GROUND, page=head, body=body), encoding="utf-8")
     print(f"wrote {STANDALONE.relative_to(ROOT)}  ({STANDALONE.stat().st_size / 1024:.1f} KB)  standalone, for the static host")
     print(f"  payload inlined: {len(blob) / 1024:.1f} KB")
     return 0

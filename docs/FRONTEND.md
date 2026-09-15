@@ -61,59 +61,44 @@ honest because every frame is real computed state, not an animation.
 
 ## 2. Colour
 
-Dark-first, because the subject is darkness. The viewer's theme still wins — we
-never override it — so light theme is a genuine second design, not an inversion.
-
-**Regime and theme are separate axes.** Theme sets the palette; regime modulates
-illumination within it. A blackout in light theme is a deep charcoal band on a
-pale ground; in dark theme it is near-black with one lit lane. Both read as "the
-lights went out" without fighting the viewer's preference.
-
-### Dark (primary)
+**One theme, deliberately.** The page does not follow the viewer's light/dark
+setting, because the two are not equivalent renderings of the same design. The
+accent is sodium-vapour amber — a lit window in a dark street, which is exactly
+what an rToken is during a blackout. It reads **9.2:1 against the void and 3.6:1
+against white**, where it degrades from a lit lamp to ochre. On a light ground
+the idea the palette exists to carry simply is not present.
 
 | Token | Hex | Role |
 |---|---|---|
-| `--void` | `#07090D` | the blackout itself — true negative space, not a fill |
-| `--ground` | `#0D1117` | page |
-| `--surface` | `#141A22` | panels |
-| `--raised` | `#1B222C` | inputs, hovered rows |
-| `--ink` | `#E6EAF0` | primary text |
-| `--muted` | `#8B97A8` | secondary |
-| `--faint` | `#5A6575` | labels, axes |
-| `--rule` | `#1F2733` | hairlines |
+| `--void` | `#07090D` | the blackout itself — true absence, never a fill |
+| `--ground` | `#171F2A` | page |
+| `--surface` | `#1E2836` | panels |
+| `--raised` | `#26303F` | inputs, hovered rows |
+| `--ink` | `#E8ECF2` | 14.0:1 on ground |
+| `--muted` | `#94A1B2` | 6.3:1 |
+| `--faint` | `#6D7B93` | 3.1:1 on raised — the tightest pairing on the page |
+| `--rule` / `--rule-strong` | `#2C3849` / `#3C4B5F` | hairlines |
 | `--lit` | `#E8A33D` | **the signature.** rToken, still quoting |
-| `--lit-dim` | `#8A6526` | the same lane, de-emphasised |
 | `--open` | `#C9D8E8` | cash session — full illumination |
-| `--half` | `#5D7086` | weeknight — futures reference only |
-| `--risk` | `#E06C60` | danger states only, never decorative |
-| `--ok` | `#5FB894` | stable / usable |
+| `--half` | `#5D7086` | weeknight — a futures reference exists |
+| `--risk` | `#E5786B` | danger states only, never decorative |
+| `--ok` | `#63BE9A` | stable / usable |
 
-### Light
+### The ground sits well above the void, on purpose
 
-| Token | Hex |
-|---|---|
-| `--void` | `#161C26` |
-| `--ground` | `#FAFAF8` |
-| `--surface` | `#FFFFFF` |
-| `--raised` | `#F2F4F7` |
-| `--ink` | `#11151B` |
-| `--muted` | `#55606E` |
-| `--faint` | `#8792A1` |
-| `--rule` | `#E4E7EC` |
-| `--lit` | `#B87514` |
-| `--open` | `#38506A` |
-| `--half` | `#93A3B5` |
-| `--risk` | `#B4453A` |
-| `--ok` | `#2F6B4F` |
+An earlier palette put `--ground` at `#0D1117`, **2.5 L\* from the void**. That is
+below the threshold of noticing, and it meant the two most important things in
+the design were invisible in the only theme that ships: the blackout column in
+the week strip, and the page darkening when a blackout begins.
 
-**Why amber.** Sodium-vapour warmth against cold blue-black is the visual of a
-lit window in a dark street — exactly what an rToken is during a blackout. It
-also avoids every current AI-design default: no acid green, no vermilion pop, no
-cyan crypto glow, no purple gradient.
+Contrast ratios hide this — the same pair reads 1.05:1, which sounds like a
+rounding error rather than the design failing. Perceptual lightness is the right
+measure for adjacent large blocks, and **9 L\* of separation** is what makes
+either read. `tests/test_page_style.py` now enforces it.
 
 **One accent, spent in one place.** `--lit` appears on the rToken lane, the
-countdown, and the single primary action. Nowhere else. Semantic colours are
-separate from it and are never used for emphasis.
+countdown, and the single primary action. Semantic colours are separate from it
+and are never used for emphasis.
 
 ---
 
