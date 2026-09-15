@@ -100,46 +100,69 @@ have no data to say.
 
 Everything above is measured on one venue — xStocks pools on Solana. A result
 from a single venue is a result about that venue until someone checks another,
-so it was checked against Bitget's own spot listings (`RNVDAUSDT`, `RTSLAUSDT`),
-pulled with `scripts/fetch_bitget.py`.
+so it was checked against Bitget's own spot listing of the same underlying
+(`RNVDAUSDT`), pulled with `scripts/fetch_bitget.py`. Reproduce the whole table
+with `python scripts/cross_venue.py`.
 
-**Bitget's rTokens only began trading 7×24 around June–July 2026.** Before that
-the weekend share of hourly bars is 0–1%: session-only, mirroring the native
-equity clock. From July it is 24–32%. That makes the comparable window recent
-and short — **11 weekends** against the 28 on Solana — and it is also worth
-saying on its own: continuous trading of these instruments is a 2026
-development, not an established regime.
+**Bitget's rToken only began trading 7×24 in June 2026.** Before that the
+weekend share of its hourly bars sits between 0% and 1.1%: it ran on the native
+equity clock, which means there is no closure window in it to measure at all.
+From June the share is 17%, then 24%, 32%, 27%. That is worth stating on its
+own — continuous trading of these instruments is a 2026 development, not an
+established regime — and it caps the comparable sample at **13 weekends** that
+both venues cover end to end, against 28 on Solana.
 
-On those same 11 weekends:
+The two window rows below are the *same thirteen weekends*. Deriving the set
+per venue gave 15 and 13 and would have folded a sample difference into what
+gets read as a venue difference.
+
+### Premium dispersion by regime, from June 2026
 
 | | US_CASH | WEEKNIGHT | WEEKEND_BLACKOUT |
 |---|---|---|---|
-| Solana (NVDAx) | 0.45% | 0.45% | **0.53%** |
-| Bitget (RNVDAUSDT) | 0.39% | 0.42% | **0.52%** |
+| Solana (NVDAx) | 0.44% | 0.47% | **0.53%** |
+| Bitget (RNVDAUSDT) | 0.39% | 0.45% | **0.60%** |
 
-The dispersion ordering replicates: the blackout is the widest regime on both.
+**The dispersion ordering replicates.** The blackout is the widest regime on
+both venues, and the cash session the narrowest. This is the structural claim
+the desk is built on, and it does not depend on where the token trades.
 
 ### Which leg closes the gap, by sample
 
+Share of closure attributable to the **token** leg; the remainder is the
+reference catching up. `n` is the weekends with a usable bar at that horizon —
+a weekend missing the bar at close+h drops out of that horizon alone.
+
 | Sample | weekends | +1h | +6h | +12h |
 |---|---|---|---|---|
-| NVDAx, full history | 28 | 6% | 22% | 2% |
-| NVDAx, Bitget-comparable window | 11 | 9% | 61% | 27% |
-| RNVDAUSDT, same window | 11 | 9% | 81% | 26% |
+| NVDAx, full history | 28 | 6% (n=28) | 22% (n=28) | 2% (n=28) |
+| NVDAx, same 13 weekends | 13 | 11% (n=13) | 54% (n=13) | 19% (n=13) |
+| RNVDAUSDT, same 13 weekends | 13 | 9% (n=8) | 97% (n=13) | 60% (n=13) |
 
-Figures are the share of closure attributable to the **token** leg; the
-remainder is the reference catching up.
+Read the middle row against the bottom one first. Same venue, shorter window is
+the sample effect; different venue, same window is the venue effect.
 
-Two things follow, and the second is a caveat on our own headline.
+**At +1h the venues agree and both are small** — 11% and 9%. The token leg is a
+single-digit minority of closure on both books. That is the finding, and it
+replicates.
 
-**The finding replicates.** On the same weekends the two venues agree closely at
-+1h (9% and 9%) and +12h (27% and 26%). The token leg is a minority contributor
-at every horizon on both, which is the claim the product is built on.
+**Beyond +1h, thirteen weekends measure nothing.** The same venue moves from 22%
+to 54% at +6h purely by shortening the window, before any second venue is
+involved. Bitget then reads 97%. That last number is not a measurement: its
+fair-value leg moves +0.0137%, so the share is a ratio against a denominator
+that is essentially zero, and it would swing wildly on one weekend either way.
+The +12h pair (19% and 60%) disagrees for the same reason in weaker form.
 
-**The exact percentages are sample-sensitive, and +6h most of all.** It moves
-from 22% to 61% on the *same venue* purely by shortening the window, and to 81%
-on the other. Eleven weekends is not enough to pin a horizon down. The direction
-is robust; the decimal is not, and the page should not be read as though it were.
+So the check does two things, and the second is a limit on our own numbers.
+
+**It confirms the shortest horizon on a second venue.** Dispersion widens the
+same way and the token leg is a single-digit minority at +1h on both.
+
+**It shows that the longer horizons need the full sample to mean anything.** The
+figures the desk reports are the 28-weekend Solana measurements, labelled as
+such, and they should not be read as though a thirteen-weekend sample — on
+either venue — could confirm or refute them at +6h or +12h. The direction is
+robust across venues; the decimal is a property of the sample.
 
 ## Consequence
 

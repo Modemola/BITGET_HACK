@@ -99,13 +99,18 @@ futures and BTC/ETH. 99% hourly coverage, 0% stale bars, no outliers beyond ±5%
 no nulls. Reproduce with `python scripts/analyse_basis.py`.
 
 **Cross-venue replication (observed).** The finding was re-measured on Bitget's
-own rToken listings (`RNVDAUSDT`, `RTSLAUSDT`) rather than trusting a single
-venue. Bitget's rTokens only began trading 7×24 around June–July 2026, so the
-comparable window is 11 weekends. On those weekends the dispersion ordering
-replicates (blackout widest on both) and the leg decomposition agrees closely at
-+1h (9% vs 9%) and +12h (27% vs 26%). It also showed the +6h horizon to be
-sample-sensitive — 22% over 28 weekends, 61% over 11 on the same venue — so the
-direction is robust and the decimal is not. Full table in `docs/FINDINGS.md`.
+own rToken listing (`RNVDAUSDT`) rather than trusting a single venue. Two things
+came out of it. Bitget's rTokens only began trading 7×24 in June 2026 — before
+that the weekend share of hourly bars is under 1% — so continuous trading of
+these instruments is a 2026 development, and only 13 weekends are covered by
+both venues. On those same 13 weekends the dispersion ordering replicates (the
+blackout is the widest regime on both, 0.53% and 0.60%) and the token leg is a
+single-digit minority of closure at +1h on both (11% and 9%). It also bounds our
+own numbers: at +6h the same venue moves from 22% to 54% purely by shortening
+the window, so the longer horizons need the full 28-weekend sample and the
+13-weekend figures cannot confirm or refute them. The direction is robust across
+venues; the decimal is a property of the sample. Reproduce with
+`python scripts/cross_venue.py`; full table in `docs/FINDINGS.md`.
 
 | Metric | Value | Label |
 |---|---|---|
