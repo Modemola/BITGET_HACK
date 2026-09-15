@@ -96,6 +96,51 @@ rToken history allows and is thin for anything Sharpe-based. And the test is at
 hourly resolution — sub-hourly microstructure could behave differently, and we
 have no data to say.
 
+## Cross-venue check: Bitget's own rTokens
+
+Everything above is measured on one venue — xStocks pools on Solana. A result
+from a single venue is a result about that venue until someone checks another,
+so it was checked against Bitget's own spot listings (`RNVDAUSDT`, `RTSLAUSDT`),
+pulled with `scripts/fetch_bitget.py`.
+
+**Bitget's rTokens only began trading 7×24 around June–July 2026.** Before that
+the weekend share of hourly bars is 0–1%: session-only, mirroring the native
+equity clock. From July it is 24–32%. That makes the comparable window recent
+and short — **11 weekends** against the 28 on Solana — and it is also worth
+saying on its own: continuous trading of these instruments is a 2026
+development, not an established regime.
+
+On those same 11 weekends:
+
+| | US_CASH | WEEKNIGHT | WEEKEND_BLACKOUT |
+|---|---|---|---|
+| Solana (NVDAx) | 0.45% | 0.45% | **0.53%** |
+| Bitget (RNVDAUSDT) | 0.39% | 0.42% | **0.52%** |
+
+The dispersion ordering replicates: the blackout is the widest regime on both.
+
+### Which leg closes the gap, by sample
+
+| Sample | weekends | +1h | +6h | +12h |
+|---|---|---|---|---|
+| NVDAx, full history | 28 | 6% | 22% | 2% |
+| NVDAx, Bitget-comparable window | 11 | 9% | 61% | 27% |
+| RNVDAUSDT, same window | 11 | 9% | 81% | 26% |
+
+Figures are the share of closure attributable to the **token** leg; the
+remainder is the reference catching up.
+
+Two things follow, and the second is a caveat on our own headline.
+
+**The finding replicates.** On the same weekends the two venues agree closely at
++1h (9% and 9%) and +12h (27% and 26%). The token leg is a minority contributor
+at every horizon on both, which is the claim the product is built on.
+
+**The exact percentages are sample-sensitive, and +6h most of all.** It moves
+from 22% to 61% on the *same venue* purely by shortening the window, and to 81%
+on the other. Eleven weekends is not enough to pin a horizon down. The direction
+is robust; the decimal is not, and the page should not be read as though it were.
+
 ## Consequence
 
 Blackout Basis is not viable as an Alpha Factory entry. The finding itself —

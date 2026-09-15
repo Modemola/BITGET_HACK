@@ -56,6 +56,7 @@ Refreshing market data (needs open network):
 python scripts/probe_sources.py         # rToken hourly; rate-limited, resumable
 python scripts/fetch_reference.py       # native equity, futures, crypto proxies
 python scripts/fetch_events.py          # FOMC decisions, parsed from federalreserve.gov
+python scripts/fetch_bitget.py          # rToken candles from Bitget's own spot market
 ```
 
 ## Layout
@@ -258,6 +259,14 @@ of the project description, the LLM-role field, and the X post copy.
 `docs/RESEARCH_TASK.md` is the required research-task deliverable, regenerated
 by running `scripts/research_task.py` so its figures cannot go stale.
 
+## Cross-venue data
+
+`scripts/fetch_bitget.py` pulls rToken candles from Bitget's own spot market
+(`RNVDAUSDT`, `RTSLAUSDT`) so the finding is not measured on one venue alone.
+**Bitget's rTokens only traded 7×24 from around June–July 2026** — before that
+the weekend share is 0–1% and the series is session-only, so only the recent
+window is comparable. See `docs/FINDINGS.md`.
+
 ## Open items
 
 - All seven tools are built.
@@ -267,8 +276,13 @@ by running `scripts/research_task.py` so its figures cannot go stale.
 - The event calendar covers FOMC only. Anything added must come from its issuing
   authority; a scraped aggregator has no place in a tool whose argument is that
   its numbers are checkable.
-- Bitget API DNS fails on the operator's machine, blocking Agent Hub /
-  `bitget-signal` Skills integration (a scoring item — stretch goal).
+- **Bitget's API is reachable; only DNS is blocked.** Diagnosed 15 Sep: every
+  Bitget domain fails with `gaierror` locally while resolving fine through a
+  public resolver, and a direct TLS connection to the resolved address returns
+  `200 OK`. Switching the machine's DNS to 1.1.1.1 or 8.8.8.8 lifts it entirely;
+  no VPN is needed. `fetch_bitget.py` carries a documented DoH fallback so it
+  works either way. Agent Hub / `bitget-signal` Skills are therefore reachable
+  too, and remain the open scoring item.
 - The artifact is **private by default**. The Vercel URL is the accessible-demo
   answer, so sharing the artifact is now optional rather than a validity gate —
   but the language layer only exists there, and it is a scored feature.
