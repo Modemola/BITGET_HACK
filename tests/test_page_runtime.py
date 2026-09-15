@@ -156,3 +156,22 @@ def test_the_interactions_actually_respond(rendered):
 
     assert inter["clickToScrub"], "clicking the week strip does not move the desk"
     assert inter["positionRecomputes"], "editing the position changes nothing"
+
+
+def test_the_lattice_is_decoration_that_stays_cheap_and_out_of_the_way(rendered):
+    """Texture behind the masthead, not a second application.
+
+    The component this borrows from rendered 150x100 cells, each carrying an
+    animation listener — fifteen thousand nodes for a background. A page that
+    janks before it impresses has spent its budget badly, so the count is capped
+    here and the hover is pure CSS.
+    """
+    lattice = rendered["lattice"]
+    assert lattice["cells"] > 100, "the lattice did not build"
+    assert lattice["cells"] <= 1200, (
+        f"the lattice built {lattice['cells']} nodes; keep background decoration "
+        "cheap or it costs more than it returns"
+    )
+    assert lattice["inHeader"], "the lattice escaped the masthead"
+    assert not lattice["swallowsStrip"], \
+        "the lattice contains the week strip's pointer target and would swallow it"
