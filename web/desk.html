@@ -69,10 +69,30 @@
 
 /* The regime cross-fade carries the thesis, so it is the one ambient
    transition on the page. Text never animates. */
-body,.panel,.timeline,.verdict{transition:background-color .4s ease,border-color .4s ease}
+body,.panel,.week,.verdict{transition:background-color .4s ease,border-color .4s ease}
 @media (prefers-reduced-motion:reduce){
-  body,.panel,.timeline,.verdict{transition:none}
+  body,.panel,.week,.verdict{transition:none}
 }
+
+/* The rToken lane breathes, because it is the one venue still transmitting.
+   It is faint while other venues are open and the lane is merely one of three;
+   it becomes insistent during a blackout, when it is the only thing left lit.
+   The animation carries the argument rather than decorating it.
+
+   Slow on purpose: a 4.5s and a 2.6s cycle are far below any flash threshold,
+   and the global prefers-reduced-motion rule removes both. */
+@keyframes beacon-idle{
+  0%,100%{opacity:.92}
+  50%{opacity:1}
+}
+@keyframes beacon-alone{
+  0%{opacity:1}
+  18%{opacity:.72}
+  60%{opacity:.98}
+  100%{opacity:1}
+}
+.lane-lit{animation:beacon-idle 4.5s ease-in-out infinite;transform-origin:center}
+:root[data-regime="BLACKOUT"] .lane-lit{animation:beacon-alone 2.6s ease-out infinite}
 
 *{box-sizing:border-box}
 body{background:var(--ground);color:var(--ink);font-family:var(--body);
@@ -705,7 +725,9 @@ function drawTimeline(){
               Math.max(X(r.end) - X(r.start), 0.8) + '" height="' + LANE +
               '" fill="' + lane.fill + '"></rect>';
     });
-    out += lane.key === "RTOKEN" ? '<g filter="url(#bloom)">' + segs + '</g>' : segs;
+    out += lane.key === "RTOKEN"
+      ? '<g class="lane-lit" filter="url(#bloom)">' + segs + '</g>'
+      : segs;
 
     out += '<text x="' + (GUT - 12) + '" y="' + (laneY[i] + LANE / 2 + 4) +
            '" text-anchor="end" font-family="var(--mono)" font-size="11" ' +
