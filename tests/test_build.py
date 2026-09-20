@@ -14,6 +14,7 @@ Both are silent. Neither shows up as an error anyone would notice.
 from __future__ import annotations
 
 import json
+import re
 import math
 import pathlib
 import sys
@@ -167,3 +168,31 @@ def test_generated_page_matches_the_current_payload():
     assert embedded["verdict"] == current["verdict"], \
         "desk.html is stale - rebuild it with scripts/build_page.py"
     assert embedded["coverage"] == current["coverage"]
+
+
+def test_grounding_prompt_derives_its_sample_size():
+    """The language layer must not state a sample size the panels contradict.
+
+    The prompt sent to the model once hardcoded "27 weekend blackouts" while the
+    payload had moved to 28, so the conversational answer and every static panel
+    beside it disagreed -- on a product whose entire argument is that its figures
+    are checkable. Nothing about that fails loudly: the page renders, the model
+    answers, and only a reader comparing the two would notice.
+    """
+    template = (ROOT / "web" / "desk.template.html").read_text(encoding="utf-8")
+
+    assert 'D.summary.n_windows + " weekend blackouts' in template, (
+        "the grounding prompt must take the sample size from the payload"
+    )
+    stale = re.findall(r'"[^"]*\b(\d+) weekend blackouts', template)
+    assert not stale, (
+        f"grounding prompt hardcodes a sample size ({stale}); derive it from "
+        "D.summary.n_windows instead"
+    )
+
+
+def test_built_pages_carry_no_hardcoded_sample_size():
+    for built in ("web/desk.html", "public/index.html"):
+        text = (ROOT / built).read_text(encoding="utf-8")
+        stale = re.findall(r'"[^"]*\b(\d+) weekend blackouts', text)
+        assert not stale, f"{built} hardcodes a sample size: {stale}"

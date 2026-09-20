@@ -118,7 +118,7 @@ Research, all observed:
 - Hedges available during a blackout: BTC correlates +0.66 with blackout moves,
   ETH +0.60, TSLAx +0.78. None of the three is stable across the sample, and the
   tool reports the instability instead of recommending them.
-- 146 tests. Including ones that check the page's JavaScript returns the same
+- 148 tests. Including ones that check the page's JavaScript returns the same
   answers as the Python it duplicates, and one that fails if the prose in the
   documents drifts away from the numbers in the data.
 
