@@ -9,8 +9,7 @@ as the form requires; anything unlabelled is observed.
 - **Submission Materials Link:** see Part 5
 - **Apply for Demo Day:** Yes
 - **Apply for K3 Token Subsidy:** Yes
-- **University Name:** *(fill if applicable — see Chapter II; note it is mutually
-  exclusive with main-track prizes)*
+- **University Name:** Federal University of Technology, Akure
 
 ---
 
@@ -200,7 +199,7 @@ Everything is in the repository linked as **Submission Materials**:
 
 | Deliverable | Where |
 |---|---|
-| **Accessible demo** (required) | *(Vercel URL — plain link, no account needed)* |
+| **Accessible demo** (required) | https://blackout-desk-eight.vercel.app/ — plain link, no account, nothing to sign into |
 | Full version, with the natural-language layer | https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461 |
 | **Complete research task** (required) | `docs/RESEARCH_TASK.md` — question to actionable insight, end to end |
 | Research finding and every variant tested | `docs/FINDINGS.md` |

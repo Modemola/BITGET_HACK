@@ -4,7 +4,7 @@ The page ships to two places, and they are not redundant.
 
 | | URL | What it is | Language layer |
 |---|---|---|---|
-| **Vercel** | *(set on first deploy)* | The public demo. A plain URL, no account, no sharing step. | No — points to the artifact |
+| **Vercel** | [`blackout-desk-eight.vercel.app`](https://blackout-desk-eight.vercel.app/) | The public demo. A plain URL, no account, no sharing step. | No — points to the artifact |
 | **Claude Artifact** | [`…/artifact/15681462…`](https://claude.ai/code/artifact/15681462-d2cf-4c1c-afba-733d723bd461) | The full product, including "Ask the desk" | Yes, via the `sample` runtime capability |
 
 ## Why both
