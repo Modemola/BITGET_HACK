@@ -105,7 +105,7 @@ const report = {
   deadLinks: [...d.querySelectorAll('.tools a[href^="#"]')]
     .filter((a) => !d.querySelector(a.getAttribute("href")))
     .map((a) => a.getAttribute("href")),
-  answers: count("#ask details"),
+  answers: count("#ask .qa-item"),
   live: {
     regime: d.getElementById("regime-label")?.textContent ?? null,
     countdown: d.getElementById("countdown")?.textContent?.trim() ?? null,

@@ -506,3 +506,33 @@ def test_the_disclosure_is_a_real_disclosure(style):
     assert re.search(r'\.tool\[data-open="true"\]\s*\.tool-detail\{'
                      r"[^}]*grid-template-rows:1fr", style), \
         "nothing opens the disclosure"
+
+
+def test_the_answers_are_an_animated_disclosure(style, page):
+    """The panel used to be a native <details>, which cannot animate.
+
+    A closed `details` does not render its children at all, so there is no
+    height to transition from and the answer simply appeared. The replacement
+    has to keep the three properties that made the swap worth making, and the
+    one that made the original accessible.
+    """
+    # Assert the structure that replaced it, rather than the absence of the old
+    # tag: this file's own comment explains the swap and mentions <details>, so
+    # a negative check trips on the prose describing why it is gone.
+    assert "qa-item" in page and "aria-expanded" in page,         "the answers are no longer a button-and-region disclosure"
+
+    panel = re.search(r"\.qa-panel\{([^}]*)\}", style)
+    assert panel and "grid-template-rows:0fr" in panel.group(1).replace(" ", ""), \
+        "the answer no longer animates to its content height"
+    assert re.search(r'\.qa-item\[data-open="true"\]\s*\.qa-panel\{'
+                     r"[^}]*grid-template-rows:1fr", style), "nothing opens it"
+
+    inner = re.search(r"\.qa-panel-in\{([^}]*)\}", style)
+    assert inner and "visibility:hidden" in inner.group(1).replace(" ", ""), \
+        "a collapsed answer is still exposed to screen readers"
+
+    # The sign is two rules so it can morph; a text glyph can only be swapped.
+    assert ".qa-sign i" in style, "the plus/minus is no longer drawn"
+    assert re.search(r'\.qa-item\[data-open="true"\]\s*\.qa-sign\s*i:last-child\{'
+                     r"[^}]*scaleY\(0\)", style), \
+        "the upright no longer collapses, so the plus cannot become a minus"

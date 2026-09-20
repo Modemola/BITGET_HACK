@@ -655,22 +655,66 @@ button:disabled{opacity:.55;cursor:default}
 .suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .suggest button{background:transparent;color:var(--muted);
   border-color:var(--rule-strong);font-size:var(--t-small);padding:6px 12px}
-.qa{border-top:1px solid var(--rule);margin-bottom:20px}
-.qa details{border-bottom:1px solid var(--rule)}
-.qa summary{cursor:pointer;padding:15px 30px 15px 0;font-size:var(--t-body);font-weight:500;
-  list-style:none;position:relative}
-.qa summary::-webkit-details-marker{display:none}
-.qa summary::after{content:"+";position:absolute;right:4px;top:50%;
-  transform:translateY(-50%);font-family:var(--mono);color:var(--lit);font-size:var(--t-lead)}
-/* A real minus, not a CSS escape. An escaped 2212 was eaten in transit
-   once and left a U+0091 control character followed by a literal "2", so
-   every open accordion showed a stray digit where the toggle should be. */
-.qa details[open] summary::after{content:"−"}
-.qa summary:hover{color:var(--lit)}
-.qa summary:focus-visible{outline:2px solid var(--lit);outline-offset:2px}
-.qa-a{padding:0 0 6px;color:var(--muted);line-height:1.65;
+/* --- the answers ---------------------------------------------------------
+   Was a native <details>, which cannot animate: a closed details does not
+   render its children at all, so there is no height to transition from and
+   the panel simply appeared. Same button-and-region pattern as the tool rail,
+   which does animate, and the sign is drawn from two rules rather than set as
+   a glyph so it can morph from plus to minus instead of being swapped.
+
+   These toggle independently, unlike the rail. The rail is navigation and
+   stays scannable by keeping one card open; these are answers, and a reader
+   comparing two of them should not have the first one shut in their face.
+-------------------------------------------------------------------------- */
+.qa{border-top:1px solid var(--rule);margin-bottom:var(--s5)}
+.qa-item{border-bottom:1px solid var(--rule);position:relative}
+/* A rule that grows down the left edge while the answer is open, so an open
+   row is legible as a block rather than as loose text under a heading. */
+.qa-item::before{content:"";position:absolute;left:-14px;top:0;bottom:0;width:2px;
+  background:var(--lit);transform:scaleY(0);transform-origin:top;
+  transition:transform .4s var(--ease-out)}
+.qa-item[data-open="true"]::before{transform:scaleY(1)}
+
+.qa-q{display:flex;align-items:center;justify-content:space-between;gap:var(--s4);
+  width:100%;padding:var(--s4) var(--s1) var(--s4) 0;background:transparent;
+  border:0;border-radius:0;cursor:pointer;text-align:left;
+  font-family:var(--body);font-size:var(--t-body);font-weight:500;color:var(--ink);
+  transition:color .2s ease}
+.qa-q:hover,.qa-q:focus-visible{color:var(--lit)}
+.qa-q:focus-visible{outline:2px solid var(--lit);outline-offset:-2px}
+.qa-item[data-open="true"] .qa-q{color:var(--lit)}
+
+/* Plus to minus, by collapsing the upright. Two 2px rules rather than a glyph:
+   a text "+" swapped for a text "-" cannot move between the two. */
+.qa-sign{position:relative;width:14px;height:14px;flex:0 0 auto}
+.qa-sign i{position:absolute;inset:0;margin:auto;background:currentColor;
+  border-radius:1px;transition:transform .42s var(--ease-out)}
+.qa-sign i:first-child{width:14px;height:2px}
+.qa-sign i:last-child{width:2px;height:14px}
+.qa-item[data-open="true"] .qa-sign i:first-child{transform:rotate(180deg)}
+.qa-item[data-open="true"] .qa-sign i:last-child{transform:rotate(180deg) scaleY(0)}
+
+.qa-panel{display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .42s var(--ease-out)}
+.qa-panel-in{overflow:hidden;min-height:0;visibility:hidden;
+  transition:visibility 0s linear .42s}
+.qa-item[data-open="true"] .qa-panel{grid-template-rows:1fr}
+.qa-item[data-open="true"] .qa-panel-in{visibility:visible;transition-delay:0s}
+
+.qa-a{padding:0 0 var(--s4);color:var(--muted);line-height:1.65;
   max-width:var(--measure);font-size:var(--t-body)}
 .qa-a p{margin:0 0 13px}
+.qa-a p:last-child{margin-bottom:0}
+/* Paragraphs arrive in sequence rather than as a block. Delays stay well under
+   the entrance budget the whole page is held to. */
+.qa-item[data-open="true"] .qa-a p{animation:answer-in .44s var(--ease-out) both}
+.qa-item[data-open="true"] .qa-a p:nth-child(2){animation-delay:.07s}
+.qa-item[data-open="true"] .qa-a p:nth-child(3){animation-delay:.14s}
+.qa-item[data-open="true"] .qa-a p:nth-child(4){animation-delay:.21s}
+@keyframes answer-in{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:none}
+}
 .ask-elsewhere{margin:0;color:var(--muted);max-width:var(--measure)}
 .ask-elsewhere a{color:var(--lit);text-decoration:underline;
   text-underline-offset:3px}
@@ -1941,17 +1985,36 @@ function showAskElsewhere(){
   var items = cannedAnswers();
   box.innerHTML =
     '<div class="qa">' + items.map(function(item, i){
-      return '<details' + (i === 0 ? ' open' : '') + '>' +
-        '<summary>' + esc(item.q) + '</summary>' +
-        '<div class="qa-a">' +
-          item.a.map(function(para){ return '<p>' + esc(para) + '</p>'; }).join("") +
-        '</div></details>';
+      var open = i === 0;
+      return '<div class="qa-item" data-open="' + open + '">' +
+        '<button class="qa-q" type="button" aria-expanded="' + open + '" ' +
+                'aria-controls="qa-a' + i + '">' +
+          '<span>' + esc(item.q) + '</span>' +
+          '<span class="qa-sign" aria-hidden="true"><i></i><i></i></span>' +
+        '</button>' +
+        '<div class="qa-panel" id="qa-a' + i + '" role="region">' +
+          '<div class="qa-panel-in"><div class="qa-a">' +
+            item.a.map(function(para){ return '<p>' + esc(para) + '</p>'; }).join("") +
+          '</div></div>' +
+        '</div></div>';
     }).join("") + '</div>' +
     '<p class="ask-elsewhere">Those answers are computed directly from the ' +
     'measurements on this page, which is why they move when you change the ' +
     'position size above. Free-form questions need the model, and that runtime ' +
     'exists only inside the artifact — ' +
     '<a href="' + ARTIFACT_URL + '">open the conversational version</a>.</p>';
+
+  /* Independent toggles. These are answers, not navigation: a reader holding
+     two of them side by side to compare should not have the first shut on
+     them, which is the opposite of the rule the tool rail follows. */
+  box.querySelectorAll(".qa-item").forEach(function(item){
+    var button = item.querySelector(".qa-q");
+    button.addEventListener("click", function(){
+      var open = item.getAttribute("data-open") !== "true";
+      item.setAttribute("data-open", String(open));
+      button.setAttribute("aria-expanded", String(open));
+    });
+  });
 }
 
 function initAsk(){
