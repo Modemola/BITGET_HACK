@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 199 tests
+python -m pytest -q                     # 207 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/make_images.py           # public/icon.svg -> og.png + icon-180.png
@@ -50,6 +50,7 @@ python scripts/blackout_stats.py        # closure-window calendar structure
 python scripts/research_task.py         # the required demo task, all 7 tools end to end
 python scripts/cross_venue.py           # the same test on Bitget's book vs Solana's
 python -m blackout.tools                # list the seven tools; add a name to run one
+python -m blackout.mcp_server --list    # the same seven, as an agent sees them
 ```
 
 Refreshing market data (needs open network):
@@ -74,6 +75,7 @@ src/blackout/
   calendar_events.py scheduled events vs a closure window (FOMC, from the Fed)
   tools.py           the 7 tools behind one contract: Desk + TOOLS registry
   build.py           precompute -> web/data/desk.json
+  mcp_server.py      the same 7 tools over MCP, for an agent
 web/
   desk.template.html page source, with a __DESK_JSON__ placeholder
   desk.html          GENERATED - never hand-edit, rebuild instead
@@ -351,6 +353,18 @@ than transcribed.
 - The event calendar covers FOMC only. Anything added must come from its issuing
   authority; a scraped aggregator has no place in a tool whose argument is that
   its numbers are checkable.
+- **The desk is an MCP server** (`src/blackout/mcp_server.py`, `docs/AGENT.md`).
+  The tools are written out as typed wrappers rather than generated, because
+  the SDK derives each schema from the wrapper's annotations and that schema is
+  the contract an agent reads. Three things to know: the installed SDK is 2.x,
+  where the high-level class is `MCPServer` and not the `Server`/`@list_tools`
+  pattern most examples still show; its `Tool` field is `input_schema`, not
+  `inputSchema`; and no tool may require an argument, because an agent that has
+  to guess one on a first call usually guesses wrong. `test_mcp_server.py`
+  completes a real handshake over a subprocess and asserts the hit rate an
+  agent receives equals the shipped payload's — importing the module proves
+  nothing, and the first version imported cleanly while calling a decorator the
+  SDK does not have.
 - **Bitget's API is reachable; only DNS is blocked.** Diagnosed 15 Sep: every
   Bitget domain fails with `gaierror` locally while resolving fine through a
   public resolver, and a direct TLS connection to the resolved address returns

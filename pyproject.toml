@@ -16,7 +16,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pyyaml>=6.0"]
+# `agent` carries the MCP SDK, which only the agent-facing server needs. It is
+# in `dev` as well so CI exercises that server rather than skipping it: an
+# integration nobody runs is an integration that quietly stops working.
+agent = ["mcp>=2.0"]
+dev = ["pytest>=8.0", "pyyaml>=6.0", "mcp>=2.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -24,3 +28,6 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "scripts"]
+markers = [
+  "slow: spawns a subprocess; still run by default, marked so it can be deselected with -m 'not slow' while iterating",
+]

@@ -137,6 +137,7 @@ src/blackout/
   calendar_events.py    ✅ macro events inside a window
   tools.py              ✅ the 7 tools behind one contract; Desk + TOOLS registry
   build.py              ✅ L1+L2 → web/data/desk.json
+  mcp_server.py         ✅ the same 7 tools, over MCP, for an agent
 web/
   desk.template.html    ✅ page source (static + LUI)
   desk.html             ✅ generated; published as the live demo
@@ -158,6 +159,7 @@ docs/
   ARCHITECTURE.md       ✅ this file
   FRONTEND.md           ✅ the visual architecture
   DEPLOY.md             ✅ the two builds and why they differ
+  AGENT.md              ✅ the MCP server: install, register, limits
   RESEARCH_TASK.md      ✅ generated; the required deliverable
   BLACKOUT_BASIS.md     ✅ the original strategy spec, kept as the record
   S2_BRIEF.md           ✅ competition rules
@@ -175,7 +177,7 @@ docs/
 | **`sample` may be unavailable to a judge** | LUI silent | Static-first design + screen recording |
 | **28 weekends is a thin sample** | Distributions are wide | State it on the page beside every figure rather than hiding it |
 | ~~Bitget DNS fails on the operator's machine~~ | Diagnosed 15 Sep: the block is DNS alone. Every Bitget domain fails to resolve locally while resolving fine through a public resolver, and a direct TLS connection to the resolved address returns `200 OK`. `fetch_bitget.py` carries a DoH fallback so it works either way | Done |
-| **Agent Hub / `bitget-signal` Skills not integrated** | A scoring item left on the table | Unblocked by the DNS diagnosis but not built; stated rather than implied |
+| ~~Agent Hub integration not built~~ | Resolved 20 Sep. The seven tools are an MCP server (`src/blackout/mcp_server.py`), so Agent Hub, Claude Desktop or Cursor can call the desk. Read-only; `docs/AGENT.md` has the config | Done |
 | **Longer horizons do not replicate cross-venue** | +6h and +12h move by tens of points between venues and between samples | Only 13 weekends overlap the two venues. `docs/FINDINGS.md` reports the +1h agreement and says plainly that the rest is sample noise |
 | **No user testing** | Part 3's product metrics are unobserved | Labelled `targeted` throughout; no usage number is reported that was not measured |
 
