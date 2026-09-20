@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 190 tests
+python -m pytest -q                     # 192 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -110,7 +110,12 @@ with it. **Only completed windows have a close.**
 - **Never inline a figure into the page or the payload by hand.** `verdict` was
   once transcribed literals; a data refresh would have left the product's
   central claim contradicting the numbers printed beside it. `test_build.py`
-  now re-derives those four numbers and fails if they drift.
+  now re-derives those four numbers and fails if they drift. The rule was broken
+  again where it was hardest to see: the prompt sent to the language layer told
+  the model to state a sample size of 27 while the payload said 28, so the one
+  feature that speaks to a judge in sentences was instructed to misreport it.
+  The figure appears nowhere on screen; the model just repeats what it is told.
+  `test_page_style.py` now scans the template for transcribed figures.
 - **The payload must never carry NaN.** Python writes a bare `NaN` token, which
   `JSON.parse` rejects, which renders the page *entirely blank* with no error.
   `build._json_safe` maps non-finite values to null and both writers pass
@@ -146,7 +151,12 @@ with it. **Only completed windows have a close.**
   heredoc has silently turned `\n` into a real newline and dropped `\u2014`
   entirely, breaking a string literal. Build multi-line strings as arrays of
   paragraphs and use real characters; for edits to page JS, prefer the Edit tool
-  over shell-piped Python.
+  over shell-piped Python. It also has a *silent* variant: a CSS escape for the
+  minus sign became U+0091 followed by a literal `2`, so every open accordion
+  rendered a stray digit. Nothing could see it — the HTML validated, the CSS
+  parsed, jsdom rendered the element, the suite passed, and the character has no
+  width in an editor. `test_page_style.py` now rejects any control or format
+  character in any build.
 - **Windows defaults to cp1252, and it bites in two places.** Printed script
   output mangles em-dashes and arrows, so keep script output ASCII (the HTML
   page is UTF-8 and unaffected). And `subprocess.run(..., text=True)` decodes

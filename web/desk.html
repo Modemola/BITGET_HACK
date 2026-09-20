@@ -469,7 +469,10 @@ button:disabled{opacity:.55;cursor:default}
 .qa summary::-webkit-details-marker{display:none}
 .qa summary::after{content:"+";position:absolute;right:4px;top:50%;
   transform:translateY(-50%);font-family:var(--mono);color:var(--lit);font-size:17px}
-.qa details[open] summary::after{content:"2"}
+/* A real minus, not a CSS escape. An escaped 2212 was eaten in transit
+   once and left a U+0091 control character followed by a literal "2", so
+   every open accordion showed a stray digit where the toggle should be. */
+.qa details[open] summary::after{content:"−"}
 .qa summary:hover{color:var(--lit)}
 .qa summary:focus-visible{outline:2px solid var(--lit);outline-offset:2px}
 .qa-a{padding:0 0 6px;color:var(--muted);line-height:1.65;
@@ -568,7 +571,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   </div>
   <div class="verdict">
     <h3 class="enter-soft">That weekend premium is <em>not</em> free money.</h3>
-    <p>Across <span class="num" id="v-weekends">27</span> weekend blackouts, the gap between
+    <p>Across <span class="num" id="v-weekends">&mdash;</span> weekend blackouts, the gap between
        rToken and fair value closed almost entirely because the <em>reference</em> caught up
        once futures reopened &mdash; not because the token corrected. The token leg, the only
        one you can actually trade, contributes almost nothing. Fading it is a coin flip that
@@ -600,7 +603,7 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   <div class="sec-head">
     <span class="sec-n">04</span><h2>Weekends that looked like this one</h2>
     <p>Set the conditions you are walking into. The desk retrieves the closest
-       matches from <span class="num" id="an-total">27</span> past blackouts and shows
+       matches from <span class="num" id="an-total">&mdash;</span> past blackouts and shows
        how each resolved &mdash; not a forecast, a distribution you can read yourself.</p>
   </div>
   <div class="panel">
@@ -1681,7 +1684,8 @@ function initAsk(){
         "You are Blackout Desk, a closure-window risk desk for tokenized US stocks.",
         "Answer ONLY from the measurements in the JSON below. If it does not contain the",
         "answer, say so plainly rather than reasoning from general market knowledge.",
-        "State the sample size (27 weekend blackouts) whenever you quote a distribution.",
+        "State the sample size (" + D.summary.n_windows + " weekend blackouts) whenever " +
+          "you quote a distribution.",
         "Never call the weekend premium an arbitrage opportunity: the measurements show it",
         "is an information lead, and the token leg is not tradeable after costs.",
         "Be concise and concrete, use percentages and dollar figures, and leave the final",

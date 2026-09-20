@@ -280,3 +280,81 @@ def test_phone_width_is_handled(style):
     assert "max-width:640px" in style
     assert ".tl-scroll{overflow-x:auto" in style, \
         "the week strip must scroll in its own container, not the page body"
+
+
+def test_no_stray_control_characters_survive_into_a_build():
+    """The backslash-eating trap, caught at the only place it shows.
+
+    A CSS escape for the minus sign was eaten in transit and left U+0091 --
+    an invisible control character -- followed by a literal "2". Every open
+    accordion on the page rendered a stray digit where its toggle should be.
+
+    Nothing else could see it. The HTML validated, the stylesheet parsed, jsdom
+    rendered the element, and the whole suite passed; the character has no
+    visible width in an editor and greps for it do not occur to anyone. So the
+    check is mechanical: no control or format characters in any build, ever,
+    except the whitespace that belongs there.
+    """
+    import unicodedata
+
+    for name in ("web/desk.template.html", "web/desk.html", "public/index.html"):
+        path = ROOT / name
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        offenders = []
+        for index, char in enumerate(text):
+            if char in "\n\r\t":
+                continue
+            if unicodedata.category(char) in ("Cc", "Cf"):
+                line = text[:index].count("\n") + 1
+                offenders.append(
+                    f"{name}:{line}: U+{ord(char):04X} in "
+                    f"{text[max(0, index - 40):index + 20]!r}"
+                )
+        assert not offenders, (
+            "control characters in a shipped build -- almost always an escape "
+            "eaten in transit:\n  " + "\n  ".join(offenders)
+        )
+
+
+def test_no_payload_figure_is_hand_written_into_the_page():
+    """The convention that has been broken twice, now checked.
+
+    CLAUDE.md says never inline a figure into the page by hand, because a data
+    refresh leaves the literal contradicting the number beside it. The prompt
+    sent to the language layer told the model to "State the sample size (27
+    weekend blackouts)" while the payload said 28 -- so the one scored feature
+    that talks to a judge in sentences was instructed to misreport the sample.
+
+    Nothing caught it: the page renders, the figure appears nowhere on screen,
+    and the model dutifully repeats whatever the prompt says.
+    """
+    import json
+
+    payload = json.loads((ROOT / "web" / "data" / "desk.json").read_text(encoding="utf-8"))
+    template = (ROOT / "web" / "desk.template.html").read_text(encoding="utf-8")
+
+    # The figures most likely to be transcribed, and most damaging when stale.
+    watched = {
+        "summary.n_windows": payload["summary"]["n_windows"],
+        "coverage.bars": payload["coverage"]["bars"],
+    }
+    # A near-miss is the tell: the exact value could be coincidence, but the
+    # value the payload held *last* refresh appearing as a literal is a stale
+    # transcription. Check a small neighbourhood around each.
+    offenders = []
+    for path, value in watched.items():
+        for candidate in range(value - 3, value + 4):
+            if candidate <= 0:
+                continue
+            for line_no, line in enumerate(template.splitlines(), 1):
+                if "D." in line or "test" in line.lower():
+                    continue  # a line that reads the payload is the correct form
+                if re.search(rf"\b{candidate}\b\s*(weekend|weekends|hourly|bars)", line):
+                    offenders.append(f"desk.template.html:{line_no}: {line.strip()[:88]}")
+
+    assert not offenders, (
+        "a figure is hand-written into the page instead of read from the payload "
+        "(see CLAUDE.md):\n  " + "\n  ".join(offenders)
+    )
