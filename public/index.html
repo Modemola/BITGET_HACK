@@ -6,9 +6,20 @@
 <meta name="description" content="For 49 hours every weekend, one venue on earth quotes your tokenized US stock. Blackout Desk measures what that exposes you to.">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#171F2A">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <meta property="og:title" content="Blackout Desk">
 <meta property="og:description" content="For 49 hours every weekend, one venue on earth quotes your tokenized US stock. Blackout Desk measures what that exposes you to.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://blackout-desk-eight.vercel.app">
+<meta property="og:image" content="https://blackout-desk-eight.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Blackout Desk - three venue lanes, only the rToken lane unbroken">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Blackout Desk">
+<meta name="twitter:description" content="For 49 hours every weekend, one venue on earth quotes your tokenized US stock. Blackout Desk measures what that exposes you to.">
+<meta name="twitter:image" content="https://blackout-desk-eight.vercel.app/og.png">
 <style>
   :root { color-scheme: dark; }
   body { margin: 0; font: 14px system-ui, sans-serif; background: #171F2A; color: #E8ECF2; }
@@ -214,6 +225,14 @@ header{position:relative;isolation:isolate}
 header{padding-block:var(--s7) var(--s6)}
 .masthead{display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-end;
   justify-content:space-between}
+/* The mark is the week strip as a glyph: three lanes in three pieces, then
+   two, then one unbroken amber. It is painted from the same tokens as the
+   strip below it, so the regime shift that dims the page dims the mark's dead
+   lanes too while its lit lane stays exactly as bright -- the logo makes the
+   page's argument on its own. */
+.lockup{display:flex;align-items:center;gap:var(--s3)}
+.mark{width:46px;height:46px;flex:0 0 auto;display:block}
+:root[data-regime="BLACKOUT"] .mark-lit{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--lit) 65%,transparent))}
 .brand h1{font-family:var(--display);font-size:var(--d-2xl);font-weight:400;
   letter-spacing:var(--track-2xl);line-height:.98}
 .brand p{margin:var(--s3) 0 0;color:var(--muted);max-width:var(--measure-tight);
@@ -710,6 +729,8 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
      down together, and the masthead stacks, so they read as one block. */
   .brand h1{font-size:34px}
   .countdown{font-size:34px}
+  .mark{width:30px;height:30px}
+  .lockup{gap:var(--s2)}
   .masthead{flex-direction:column;align-items:flex-start;gap:var(--s5)}
   .status{align-items:flex-start;text-align:left}
   .wrap{padding-inline:var(--s4)}
@@ -723,7 +744,22 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
   <div class="masthead">
     <div class="brand enter">
       <div class="eyebrow">Closure-window risk</div>
-      <h1>Blackout Desk</h1>
+      <div class="lockup">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <rect width="32" height="32" rx="7" fill="var(--void)"/>
+          <g fill="var(--open)" opacity=".55">
+            <rect x="7.5" y="5" width="4.5" height="5" rx="2.5"/>
+            <rect x="14.5" y="5" width="4.5" height="5" rx="2.5"/>
+            <rect x="21.5" y="5" width="5" height="5" rx="2.5"/>
+          </g>
+          <g fill="var(--half)">
+            <rect x="7.5" y="13.5" width="11.5" height="5" rx="2.5"/>
+            <rect x="21.5" y="13.5" width="5" height="5" rx="2.5"/>
+          </g>
+          <rect class="mark-lit" x="4.5" y="22" width="23" height="5" rx="2.5" fill="var(--lit)"/>
+        </svg>
+        <h1>Blackout Desk</h1>
+      </div>
       <p>For <span class="num">49</span> hours each weekend, one venue on earth
          quotes your tokenized US stock. This is what you are exposed to.</p>
     </div>

@@ -151,6 +151,7 @@ scripts/
   blackout_stats.py     ✅ calendar structure
   research_task.py      ✅ the required demo task, all 7 tools end to end
   build_page.py         ✅ payload + template → both deployed builds
+  make_images.py        ✅ the mark → share card + touch icon
   figures.py            ✅ canonical figures, stable and diffable
 docs/
   FINDINGS.md           ✅ the research result, and the cross-venue check

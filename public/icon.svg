@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Blackout Desk">
+  <title>Blackout Desk</title>
+  <!--
+    The week strip, compressed to a glyph. Three lanes, read top to bottom, in
+    three pieces then two then one: NYSE breaks most, Globex runs longer and
+    still stops, and the rToken lane is unbroken and lit - reaching past both
+    of them on each side, because it is still quoting when they are not. The
+    whole argument of the product in one mark.
+
+    Two things were learned drawing it. Bars need 5 units on a 32 grid with 3.5
+    between or the dim lanes merge into a smudge at favicon size. And the first
+    version gave lanes 1 and 2 the same long-then-short rhythm, which at large
+    sizes read unmistakably as two eyes over a mouth; the 3-2-1 progression
+    breaks that symmetry and states the idea more plainly besides.
+  -->
+  <rect width="32" height="32" rx="7" fill="#07090D"/>
+  <g fill="#C9D8E8" opacity=".55">
+    <rect x="7.5" y="5" width="4.5" height="5" rx="2.5"/>
+    <rect x="14.5" y="5" width="4.5" height="5" rx="2.5"/>
+    <rect x="21.5" y="5" width="5" height="5" rx="2.5"/>
+  </g>
+  <g fill="#5D7086">
+    <rect x="7.5" y="13.5" width="11.5" height="5" rx="2.5"/>
+    <rect x="21.5" y="13.5" width="5" height="5" rx="2.5"/>
+  </g>
+  <rect x="4.5" y="22" width="23" height="5" rx="2.5" fill="#E8A33D"/>
+</svg>

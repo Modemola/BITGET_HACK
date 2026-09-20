@@ -41,6 +41,11 @@ DESCRIPTION = (
 #: a page whose entire subject is darkness.
 GROUND = "#171F2A"
 
+#: Absolute, because Open Graph scrapers do not resolve relative URLs -- a
+#: relative og:image is simply dropped, and the X post this project has to
+#: publish would render as a bare link with no preview card.
+SITE = "https://blackout-desk-eight.vercel.app"
+
 #: Mirrors the artifact runtime's own wrapper -- charset, viewport, color-scheme,
 #: zero body margin and the two resets it applies -- with the scheme set to dark
 #: because the page commits to a single theme. Anything beyond this would make
@@ -53,9 +58,20 @@ SHELL = """<!doctype html>
 <meta name="description" content="{description}">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="{ground}">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
 <meta property="og:title" content="Blackout Desk">
 <meta property="og:description" content="{description}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{site}">
+<meta property="og:image" content="{site}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Blackout Desk - three venue lanes, only the rToken lane unbroken">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Blackout Desk">
+<meta name="twitter:description" content="{description}">
+<meta name="twitter:image" content="{site}/og.png">
 <style>
   :root {{ color-scheme: dark; }}
   body {{ margin: 0; font: 14px system-ui, sans-serif; background: {ground}; color: #E8ECF2; }}
@@ -102,7 +118,8 @@ def main() -> int:
     head, body = split_head_and_body(page)
     STANDALONE.parent.mkdir(parents=True, exist_ok=True)
     STANDALONE.write_text(
-        SHELL.format(description=DESCRIPTION, ground=GROUND, page=head, body=body), encoding="utf-8")
+        SHELL.format(description=DESCRIPTION, ground=GROUND, site=SITE,
+                     page=head, body=body), encoding="utf-8")
     print(f"wrote {STANDALONE.relative_to(ROOT)}  ({STANDALONE.stat().st_size / 1024:.1f} KB)  standalone, for the static host")
     print(f"  payload inlined: {len(blob) / 1024:.1f} KB")
     return 0

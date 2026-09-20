@@ -44,6 +44,7 @@ pip install -e ".[dev]"                 # editable install; no sys.path hacks ne
 python -m pytest -q                     # 198 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
+python scripts/make_images.py           # public/icon.svg -> og.png + icon-180.png
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/blackout_stats.py        # closure-window calendar structure
 python scripts/research_task.py         # the required demo task, all 7 tools end to end
