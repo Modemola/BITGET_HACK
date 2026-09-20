@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "blackout-desk"
 version = "0.1.0"
 description = "Closure-window risk desk for tokenized US stocks"
+license = { file = "LICENSE" }
 requires-python = ">=3.11"
 dependencies = [
     "pandas>=2.0",

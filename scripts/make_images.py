@@ -109,14 +109,39 @@ TOUCH = """<!doctype html><meta charset="utf-8">
 svg{{display:block;width:180px;height:180px}}</style>{mark}
 """
 
+#: README screenshots: (file name, anchor to scroll to, viewport height).
+#: Driven through an iframe because a headless screenshot of a page that has
+#: been scrolled comes back black -- the capture is taken from the top of the
+#: layout viewport regardless of where the document actually sits.
+SCREENS = [
+    ("hero.png", None, 840),
+    ("verdict.png", "verdict", 720),
+    ("analogues.png", "analogues", 780),
+]
 
-def shoot(browser: str, html: str, out: Path, width: int, height: int) -> None:
+FRAME = """<!doctype html><meta charset="utf-8">
+<style>html,body{{margin:0;background:{void}}}
+iframe{{width:{w}px;height:{h}px;border:0;display:block}}</style>
+<iframe id="f" src="{src}"></iframe>
+<script>
+setTimeout(function(){{
+  var d = document.getElementById('f').contentDocument;
+  var id = {anchor};
+  if (id) d.getElementById(id).scrollIntoView({{behavior:'instant', block:'start'}});
+}}, 1100);
+</script>
+"""
+
+
+def shoot(browser: str, html: str, out: Path, width: int, height: int,
+          extra: list[str] | None = None) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         page = Path(tmp) / "card.html"
         page.write_text(html, encoding="utf-8")
         subprocess.run(
             [browser, "--headless", "--disable-gpu", "--hide-scrollbars",
              "--force-device-scale-factor=1", "--virtual-time-budget=6000",
+             *(extra or []),
              f"--window-size={width},{height}",
              f"--screenshot={out}", page.as_uri()],
             capture_output=True, check=False,
@@ -140,7 +165,23 @@ def main() -> int:
     print(f"Rendering with {browser}\n")
     shoot(browser, CARD.replace("{mark}", mark), PUBLIC / "og.png", 1200, 630)
     shoot(browser, TOUCH.format(mark=mark), PUBLIC / "icon-180.png", 180, 180)
-    print("\nBoth are referenced from the document shell in scripts/build_page.py.")
+
+    page = PUBLIC / "index.html"
+    if page.exists():
+        images = ROOT / "docs" / "images"
+        images.mkdir(parents=True, exist_ok=True)
+        print()
+        for name, anchor, height in SCREENS:
+            shoot(browser,
+                  FRAME.format(void=VOID, w=1180, h=height, src=page.as_uri(),
+                               anchor="null" if anchor is None else f'"{anchor}"'),
+                  images / name, 1200, height,
+                  extra=["--allow-file-access-from-files"])
+    else:
+        print("\n  (no public/index.html; run build_page.py first for the shots)")
+
+    print("\nCard and icon are referenced from the shell in build_page.py;")
+    print("the screenshots are embedded in README.md.")
     return 0
 
 
