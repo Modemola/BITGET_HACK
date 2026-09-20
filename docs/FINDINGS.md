@@ -38,7 +38,7 @@ venues shut:
 
 Divergence accumulates through a blackout: mean |premium| grows from **0.16% at
 the start of a weekend to 0.91% by its end**, a ~6× expansion over 49 hours.
-Across 28 weekends, the premium moved toward zero at the reopen **85%** of the
+Across 28 weekends, the premium moved toward zero at the reopen **79%** of the
 time, mean 0.26%.
 
 ## What did not hold, and why it matters
@@ -49,7 +49,7 @@ between `tau_futures` and |premium| is **−0.409**: the band is narrowest at th
 start of a weekend and widest at its end. The driver is elapsed time against a
 frozen anchor, not warehousing risk.
 
-That reframing looked like a better strategy. It was not, because an 85%
+That reframing looked like a better strategy. It was not, because a 79%
 convergence rate says nothing about who converged. Decomposing the closure into
 the token leg and the fair-value leg:
 

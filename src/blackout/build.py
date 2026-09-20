@@ -22,7 +22,7 @@ from pathlib import Path
 import pandas as pd
 
 from .analogues import FEATURES, build_feature_table
-from .basis import add_premium, decompose_closure, hourly_frame
+from .basis import add_premium, decompose_closure, converged_share, hourly_frame
 from .calendar_events import historical_overlap, load_events
 from .clock import ClosureClock, Regime
 from .distributions import drift_by_elapsed_hour, summarise, terminal_gap, window_paths
@@ -137,7 +137,8 @@ def build() -> dict:
     calendar_stats = historical_overlap(clock, events)
 
     horizons = {1: "1h", 6: "6h", 12: "12h"}
-    verdict = {"n_weekends": int(paths["window_start"].nunique())}
+    verdict = {"n_weekends": int(paths["window_start"].nunique()),
+               "converged_share": converged_share(d, closes)}
     for hours, label in horizons.items():
         stats = decompose_closure(d, closes, token="x", horizon_h=hours)
         verdict[f"token_share_{label}"] = stats["token_share"]

@@ -37,7 +37,7 @@ harvestable. Across 197 days of hourly data the premium does behave exactly as
 predicted — dispersion widens monotonically from **0.42%** in the cash session
 to **0.51%** overnight to **0.70%** in a blackout, and the AR(1) half-life
 stretches from 0.2h to 1.0h to 6.0h as venues shut. Divergence accumulates ~6×
-across a weekend, and across 28 weekends the gap converged at the reopen **85%**
+across a weekend, and across 28 weekends the gap converged at the reopen **79%**
 of the time.
 
 None of it is tradeable. Decomposing that convergence into its two legs shows
@@ -163,7 +163,7 @@ and the page says so rather than implying live prices. Bitget Agent Hub and
 **Problems hit, and the fixes.** These are worth stating because each one would
 have shipped silently:
 
-- **Our own strategy was falsified by our own test.** The 85% convergence figure
+- **Our own strategy was falsified by our own test.** The 79% convergence figure
   looked like an edge until we decomposed it. We built the test that killed it
   rather than the backtest that would have flattered it.
 - **The payload could have rendered the page entirely blank.** Python writes
@@ -244,7 +244,7 @@ mattered:
 **1. Research partner, including adversarially.** The model wrote the analysis
 that falsified our own strategy. The decisive step — decomposing premium closure
 into the token leg and the fair-value leg — was not in the original plan; it came
-from asking what would have to be true for the 85% convergence figure to be
+from asking what would have to be true for the 79% convergence figure to be
 misleading. It also caught that the τ framing in our spec was backwards
 (correlation −0.409), that the first probe's NO-GO verdict was a false negative
 caused by our own pagination, and that a causality test was passing vacuously

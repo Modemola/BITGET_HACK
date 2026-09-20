@@ -66,6 +66,21 @@ CLAIMS: list[tuple[str, str, str, str, float]] = [
     ("docs/SUBMISSION.md", r"Scheduled rate decisions inside a blackout \| \d+ of (\d+)",
      "calendar_stats.events_considered", "int", 0),
 
+    # The convergence rate went stale silently: measured on 27 weekends, it
+    # stayed at 85% in five sentences after a refresh took the sample to 28 and
+    # the figure to 79%. It is the number the whole finding is built to
+    # overturn, so it is pinned everywhere it is quoted.
+    ("docs/SUBMISSION.md", r"converged at the reopen \*\*(\d+)%\*\*",
+     "verdict.converged_share", "pct0", 1),
+    ("docs/SUBMISSION.md", r"The (\d+)% convergence figure",
+     "verdict.converged_share", "pct0", 1),
+    ("docs/SUBMISSION.md", r"the (\d+)% convergence figure to be",
+     "verdict.converged_share", "pct0", 1),
+    ("docs/FINDINGS.md", r"moved toward zero at the reopen \*\*(\d+)%\*\*",
+     "verdict.converged_share", "pct0", 1),
+    ("docs/FINDINGS.md", r"It was not, because a (\d+)%",
+     "verdict.converged_share", "pct0", 1),
+
     # --- submission prose ---
     ("docs/SUBMISSION.md", r"returns a \*\*([\d.]+)%\*\* hit rate",
      "verdict.hit_rate", "pct", 0.05),

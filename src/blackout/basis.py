@@ -91,6 +91,25 @@ def decompose_closure(df: pd.DataFrame, entries: pd.DatetimeIndex, token: str,
     }
 
 
+def converged_share(df: pd.DataFrame, entries: pd.DatetimeIndex,
+                    horizon_h: int = 1) -> float:
+    """Share of windows whose premium sits closer to zero after the reopen.
+
+    Deliberately not the same thing as decompose_closure's hit_rate. This asks
+    only whether the gap narrowed; it says nothing about which leg narrowed it.
+    It is the encouraging figure that arrives before the decomposition, and it
+    is quoted precisely so the decomposition can take it apart -- so it has to
+    be derived from the data like everything else, not remembered.
+    """
+    later = entries + pd.Timedelta(hours=horizon_h)
+    before = df.loc[entries, "prem"].abs().values
+    after = df["prem"].reindex(later).abs().values
+    keep = ~(np.isnan(before) | np.isnan(after))
+    if not keep.any():
+        return float("nan")
+    return float((after[keep] < before[keep]).mean())
+
+
 def premium_persistence(df: pd.DataFrame) -> pd.DataFrame:
     """AR(1) of the premium by regime, with the implied half-life in hours."""
     out = []
