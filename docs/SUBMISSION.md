@@ -171,9 +171,23 @@ and until then they are targets, not claims.
 Plus: a live demo with a genuine real-time clock, a static-first page that works
 without the LLM, a reproducible research pipeline, and **208 tests**.
 
+**Also built: the desk is an MCP server.** The same seven tools are exposed over
+MCP (`src/blackout/mcp_server.py`, config in `docs/AGENT.md`), so Bitget's Agent
+Hub, Claude Desktop or Cursor can call them. The direction is deliberate. The
+track's guidance is to use `bitget-signal` Skills as a perception layer, and
+most entries will consume that layer; this publishes into it. An agent already
+has macro, sentiment, on-chain, news and technicals — what it does not have is
+anything that can look at a 1% weekend premium and tell it the premium is an
+information lead rather than an edge. `premium_verdict` exists to argue with the
+agent rather than serve it. Read-only: nothing places, sizes or cancels an
+order. Every tool is one `Desk` call, so an agent gets the number the page
+prints by construction, and the test completes a real handshake over a
+subprocess and asserts that equality against the shipped payload.
+
 **Not built.** Live price feeds — analytics are stamped and frozen at build time,
-and the page says so rather than implying live prices. Bitget Agent Hub and
-`bitget-signal` Skills integration is blocked (below). Only one issuer family.
+and the page says so rather than implying live prices. No trading execution, by
+choice: this is a research desk and the human makes the call. Only one issuer
+family.
 
 **Problems hit, and the fixes.** These are worth stating because each one would
 have shipped silently:
@@ -227,6 +241,8 @@ Everything is in the repository linked as **Submission Materials**:
 | Raw data (10 series, committed) | `data/raw/` |
 | Data ingestion, rate-limited and resumable | `scripts/probe_sources.py`, `fetch_reference.py`, `fetch_events.py`, `fetch_bitget.py` |
 | Cross-venue replication on Bitget's own book | `scripts/cross_venue.py` |
+| **Agent integration**: the seven tools over MCP | `src/blackout/mcp_server.py` — `python -m blackout.mcp_server --list` |
+| How to register it with Agent Hub / Claude / Cursor | `docs/AGENT.md` |
 
 ### Part 6 · Our take on AI Trading
 
