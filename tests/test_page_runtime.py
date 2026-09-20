@@ -198,3 +198,28 @@ def test_every_tool_has_a_numbered_section(rendered):
         f"{rendered['tools']} tools in the rail but "
         f"{rendered['sectionNumbers']} numbered sections"
     )
+
+
+def test_the_position_field_fits_the_figure_it_states(rendered):
+    """The heading must not clip the number every panel below it is built on.
+
+    At a fixed 5.2ch the default rendered as "$250,00" -- the page stating a
+    position ten times smaller than the one the exposure, the hedge costs and
+    the language layer were all computed from. Nothing caught it: the value was
+    correct everywhere it was *used*, and only the one place it was *displayed*
+    was wrong, which no assertion about the number could ever see.
+    """
+    field = rendered["position"]
+    assert field, "the editable position field is gone"
+    assert field["value"], "the field renders empty"
+
+    # Width is set from the value's length by initPosition; a stylesheet default
+    # that never gets updated would show up here as a missing or short width.
+    assert field["width"].endswith("ch"), (
+        f"position width is {field['width']!r}; it should be sized in ch from "
+        "the value's length, not left to a fixed rule"
+    )
+    assert field["ch"] >= field["chars"], (
+        f"the field is {field['ch']}ch wide but holds {field['chars']} characters "
+        f"({field['value']!r}) - the figure in the heading is being clipped"
+    )

@@ -5,7 +5,7 @@
 **A closure-window risk desk for traders holding tokenized US stocks.**
 
 [![live demo](https://img.shields.io/badge/demo-live-E8A33D)](https://blackout-desk-eight.vercel.app)
-[![tests](https://img.shields.io/badge/tests-198%20passing-63BE9A)](tests/)
+[![tests](https://img.shields.io/badge/tests-199%20passing-63BE9A)](tests/)
 [![licence](https://img.shields.io/badge/licence-MIT-5D7086)](LICENSE)
 
 **Bitget AI Base Camp Hackathon S2** — 🟧 AI Trading Desk · Decision Stress Testing
@@ -71,7 +71,7 @@ figures in it cannot go stale.
 **Built and verified.** All seven tools, behind one contract (`src/blackout/tools.py`),
 each pinned against the shipped payload. The research pipeline, reproducible from
 raw data. Both deployments from one template. The language layer in the artifact
-build. 198 tests, hermetic — they pass with every socket blocked.
+build. 199 tests, hermetic — they pass with every socket blocked.
 
 **Partial.** The event calendar covers FOMC only, and deliberately: anything added
 has to come from its issuing authority, because the product's argument is that its
@@ -112,7 +112,7 @@ Kept because they are the useful part of the record, and each one now has a test
 
 ```
 src/blackout/     the analytics engine, and the 7-tool contract over it
-tests/            198 tests, including jsdom render and JS/Python parity checks
+tests/            199 tests, including jsdom render and JS/Python parity checks
 scripts/          research, ingestion, build and image generation
 web/              page template; desk.html is GENERATED, never hand-edited
 public/           the Vercel build, the mark, the share card
@@ -135,7 +135,7 @@ docs/             architecture, findings, submission, and the visual spec
 ## Commands
 
 ```bash
-python -m pytest -q                     # 198 tests
+python -m pytest -q                     # 199 tests
 python scripts/analyse_basis.py         # reproduce the research finding
 python scripts/cross_venue.py           # re-run it on Bitget's own book
 python -m blackout.tools                # list the seven tools; add a name to run one

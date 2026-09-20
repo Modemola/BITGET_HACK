@@ -90,6 +90,16 @@ const report = {
       }),
     };
   })(),
+  // The position field states the figure every number below it is computed
+  // from, so it must be wide enough to show the whole of it. A fixed width
+  // clipped the default and the heading read "$250,00" - a position ten times
+  // smaller than the one being reported on.
+  position: (() => {
+    const el = d.getElementById("position");
+    if (!el) return null;
+    const ch = parseFloat(String(el.style.width).replace("ch", ""));
+    return { value: el.value, chars: el.value.length, width: el.style.width, ch };
+  })(),
   sectionNumbers: count(".sec-n"),
   tools: count(".tools a"),
   deadLinks: [...d.querySelectorAll('.tools a[href^="#"]')]
