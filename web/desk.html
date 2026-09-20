@@ -483,8 +483,13 @@ section{margin-top:var(--s7)}
 /* The one sentence worth remembering, so it is set like a thesis rather than
    like a notification. No card, no border: air does the emphasis. */
 .verdict{padding-block:var(--s3) var(--s1)}
+/* 22ch, not 17. The sentence is 39 characters and wants two lines; at 17 it
+   took three, which turns a pull-quote into a stack. `text-wrap:balance` then
+   evens the two rather than leaving a short widow on the second. The measure
+   moved because the type did - this was sized when the quote was 44px, and 46
+   was enough to tip it over. */
 .verdict h3{font-family:var(--display);font-size:var(--d-xl);font-style:italic;
-  font-weight:400;line-height:1.1;letter-spacing:var(--track-xl);max-width:17ch;
+  font-weight:400;line-height:1.1;letter-spacing:var(--track-xl);max-width:22ch;
   margin-bottom:var(--s5);color:var(--ink)}
 .verdict h3 em{font-style:normal;color:var(--lit)}
 .verdict p{margin:0 0 var(--s5);color:var(--muted);max-width:var(--measure);
