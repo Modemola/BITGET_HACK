@@ -231,7 +231,7 @@ Everything is in the repository linked as **Submission Materials**:
 | Deliverable | Where |
 |---|---|
 | **Accessible demo** (required) | https://blackout-desk-eight.vercel.app |
-| Full version, with the natural-language layer | https://claude.ai/artifact/3eKJskZZThj72zRwZjBpK2 |
+| Conversational version (optional, needs a Claude sign-in) | https://claude.ai/artifact/3eKJskZZThj72zRwZjBpK2 — the same desk, plus free-form questions answered from the measurements on the page. Signed out it degrades to exactly the demo above, by design |
 | **Complete research task** (required) | `docs/RESEARCH_TASK.md` — question to actionable insight, end to end |
 | Research finding and every variant tested | `docs/FINDINGS.md` |
 | Reproduce the finding from raw data | `scripts/analyse_basis.py` |
