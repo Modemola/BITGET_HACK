@@ -154,7 +154,7 @@ and until then they are targets, not claims.
 7. `macro_calendar` — scheduled events versus the window, from federalreserve.gov
 
 Plus: a live demo with a genuine real-time clock, a static-first page that works
-without the LLM, a reproducible research pipeline, and **131 tests**.
+without the LLM, a reproducible research pipeline, and **136 tests**.
 
 **Not built.** Live price feeds — analytics are stamped and frozen at build time,
 and the page says so rather than implying live prices. Bitget Agent Hub and
@@ -206,7 +206,7 @@ Everything is in the repository linked as **Submission Materials**:
 | Reproduce the finding from raw data | `scripts/analyse_basis.py` |
 | System design and tool contract | `docs/ARCHITECTURE.md` |
 | Analytics engine | `src/blackout/` |
-| Test suite (131) | `tests/` |
+| Test suite (136) | `tests/` |
 | Raw data (9 series, committed) | `data/raw/` |
 | Data ingestion, rate-limited and resumable | `scripts/probe_sources.py`, `fetch_reference.py`, `fetch_events.py` |
 
@@ -251,7 +251,7 @@ caused by our own pagination, and that a causality test was passing vacuously
 because the corruption it applied cancelled out of the metric it checked.
 
 **2. Engineering.** The analytics engine, the ingestion pipeline, the page, and
-all 131 tests. Notably the tests that guard the things a human reviewer would not
+all 136 tests. Notably the tests that guard the things a human reviewer would not
 think to check: that the payload cannot ship a NaN, that the page's JavaScript
 retrieval returns identical results to the Python it duplicates, that the
 headline figures are derived rather than transcribed.
