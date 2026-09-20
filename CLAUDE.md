@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 196 tests
+python -m pytest -q                     # 198 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -235,6 +235,17 @@ browser.
 was a fixed `5.2ch` and clipped its own default: the heading read "$250,00"
 while every number under it was computed from $250,000. `initPosition` sets the
 width from the value's length.
+
+**A control does one thing.** Each rail card both travels to its section and
+carries a disclosure describing what the tool computes, and those are separate
+controls: the card link navigates, a labelled button beneath it opens the
+detail. Putting both on the card's click would have made one gesture ambiguous.
+The disclosure animates `grid-template-rows` 0fr -> 1fr, which reaches the real
+content height with no measuring and no max-height guess, and the inner wrapper
+carries `visibility:hidden` delayed behind the collapse -- clipping alone hides
+prose from the eye but leaves it in the accessibility tree, where a screen
+reader would announce text the button reports as collapsed. Only one card opens
+at a time; seven open at once is a wall, and the rail's job is to be scannable.
 
 **Navigating to a section is a journey, not a cut.** The tool rail used to
 teleport — no travel, no arrival, nothing to say the page had moved rather than

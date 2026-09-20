@@ -339,6 +339,11 @@ def test_no_payload_figure_is_hand_written_into_the_page():
     watched = {
         "summary.n_windows": payload["summary"]["n_windows"],
         "coverage.bars": payload["coverage"]["bars"],
+        # Added after a tool-card description shipped "across 134 blackouts",
+        # which is calendar_stats.windows transcribed by hand.
+        "calendar_stats.windows": payload["calendar_stats"]["windows"],
+        "calendar_stats.events_considered":
+            payload["calendar_stats"]["events_considered"],
     }
     # A near-miss is the tell: the exact value could be coincidence, but the
     # value the payload held *last* refresh appearing as a literal is a stale
@@ -351,7 +356,9 @@ def test_no_payload_figure_is_hand_written_into_the_page():
             for line_no, line in enumerate(template.splitlines(), 1):
                 if "D." in line or "test" in line.lower():
                     continue  # a line that reads the payload is the correct form
-                if re.search(rf"\b{candidate}\b\s*(weekend|weekends|hourly|bars)", line):
+                if re.search(rf"\b{candidate}\b\s*"
+                             rf"(weekend|weekends|blackout|blackouts|hourly|bars"
+                             rf"|scheduled|rate)", line):
                     offenders.append(f"desk.template.html:{line_no}: {line.strip()[:88]}")
 
     assert not offenders, (
@@ -453,3 +460,49 @@ def test_the_rail_travels_rather_than_teleports(style, page):
     # And the script must not add the cue when the reader has asked for stillness.
     assert "prefers-reduced-motion" in page and "initRail" in page, \
         "the rail script no longer checks the motion preference"
+
+
+def test_every_tool_card_explains_itself(page):
+    """Seven cards, seven descriptions, seven toggles that say what they control.
+
+    The rail's question says what a tool asks. It never said what the tool
+    computes or what the answer is for, which is the thing a reader scanning
+    the rail actually wants and the thing the track scores as feature depth.
+    """
+    cards = page.count('class="tool enter-soft"')
+    assert cards == 7, f"expected 7 tool cards, found {cards}"
+
+    for n in range(1, 8):
+        anchor = f'aria-controls="tool-d0{n}"'
+        assert anchor in page, f"tool {n:02d} has no toggle wired to its detail"
+        assert f'id="tool-d0{n}"' in page, f"tool {n:02d} has no detail region"
+
+    # The class attribute, not the bare name -- the stylesheet mentions it too.
+    assert page.count('class="td-what"') == 7, "a tool is missing its what-it-does line"
+    assert page.count('class="td-why"') == 7, "a tool is missing its what-it-is-for line"
+    assert page.count('aria-expanded="false"') >= 7, \
+        "toggles must start collapsed and say so"
+
+
+def test_the_disclosure_is_a_real_disclosure(style):
+    """Closed must mean closed -- to the eye and to a screen reader.
+
+    Clipping to zero height hides the prose visually while leaving it in the
+    accessibility tree, so a reader using one would be read text the button
+    reports as collapsed. Visibility is what takes it out, and it has to lag the
+    collapse or the words blink away before the row has finished closing.
+    """
+    inner = re.search(r"\.tool-detail-in\{([^}]*)\}", style)
+    assert inner, "the disclosure's inner wrapper is gone"
+    body = inner.group(1).replace(" ", "")
+    assert "visibility:hidden" in body, \
+        "closed detail text is still exposed to screen readers"
+    assert "overflow:hidden" in body, "the collapsing row no longer clips"
+    assert re.search(r"transition:visibility0slinear\.?\d*s", body), \
+        "visibility is not held back until the collapse finishes"
+
+    assert re.search(r"\.tool-detail\{[^}]*grid-template-rows:0fr", style), \
+        "the disclosure no longer animates to its content height"
+    assert re.search(r'\.tool\[data-open="true"\]\s*\.tool-detail\{'
+                     r"[^}]*grid-template-rows:1fr", style), \
+        "nothing opens the disclosure"

@@ -262,8 +262,10 @@ header{padding-block:var(--s7) var(--s6)}
 /* 220px is chosen so four fit the 1080px measure and the remaining three
    stretch across the row beneath: seven is prime, so some row is always short,
    and 4+3 is the split that leaves both rows full and the cards legible. */
-.tools a{flex:1 1 220px;background:var(--surface);padding:var(--s4);
-  text-decoration:none;color:inherit;position:relative;
+.tool{flex:1 1 220px;background:var(--surface);position:relative;
+  display:flex;flex-direction:column}
+.tools a{display:block;padding:var(--s4) var(--s4) var(--s3);
+  text-decoration:none;color:inherit;flex:1 0 auto;
   transition:background .15s ease,transform .12s var(--ease-out)}
 .tools a:hover,.tools a:focus-visible{background:var(--raised);outline:none}
 .tools a:focus-visible{box-shadow:inset 0 0 0 2px var(--lit)}
@@ -272,10 +274,53 @@ header{padding-block:var(--s7) var(--s6)}
 .tools a:active{transform:translateY(1px)}
 /* A rule grows along the top edge on hover: the same amber mark that will greet
    you at the destination, so the two ends of the journey are visibly linked. */
-.tools a::before{content:"";position:absolute;inset:0 auto auto 0;height:2px;
+.tool::before{content:"";position:absolute;inset:0 auto auto 0;height:2px;
   width:100%;background:var(--lit);transform:scaleX(0);transform-origin:left;
-  transition:transform .28s var(--ease-out)}
-.tools a:hover::before,.tools a:focus-visible::before{transform:scaleX(1)}
+  transition:transform .28s var(--ease-out);z-index:1}
+.tool:hover::before,.tool:focus-within::before{transform:scaleX(1)}
+
+/* --- the disclosure ------------------------------------------------------
+   The card's question says what the tool asks; it never said what the tool
+   computes or what you would do with the answer. That sits here, behind its
+   own control, because the card itself already has a job -- travelling to the
+   section -- and one control cannot do two things.
+-------------------------------------------------------------------------- */
+.tool-more{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s2);width:100%;padding:var(--s2) var(--s4) var(--s3);
+  background:transparent;border:0;border-radius:0;cursor:pointer;
+  font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);font-weight:500;
+  transition:color .18s ease}
+.tool-more:hover,.tool-more:focus-visible{color:var(--lit)}
+.tool-more:focus-visible{outline:2px solid var(--lit);outline-offset:-2px}
+.tool-more .chev{width:12px;height:12px;flex:0 0 auto;
+  transition:transform .32s var(--ease-out)}
+.tool-more[aria-expanded="true"]{color:var(--lit)}
+.tool-more[aria-expanded="true"] .chev{transform:rotate(180deg)}
+
+/* 0fr -> 1fr animates to the content's real height with no measuring and no
+   max-height guess. The row is clipped rather than faded, so nothing is
+   hidden by opacity and the closed state is a genuine closed disclosure. */
+.tool-detail{display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .38s var(--ease-out)}
+/* Clipping to zero height hides it from the eye but not from a screen reader,
+   which would then read out prose the button says is collapsed. `visibility`
+   takes it out of the accessibility tree too, and is held back until the
+   closing transition has finished so the text does not vanish mid-collapse. */
+.tool-detail-in{overflow:hidden;min-height:0;visibility:hidden;
+  transition:visibility 0s linear .38s}
+.tool[data-open="true"] .tool-detail{grid-template-rows:1fr}
+.tool[data-open="true"] .tool-detail-in{visibility:visible;transition-delay:0s}
+.tool[data-open="true"] .tool-detail-in{animation:detail-in .42s var(--ease-out) both}
+@keyframes detail-in{
+  from{opacity:0;transform:translateY(-6px)}
+  to{opacity:1;transform:none}
+}
+.tool-detail p{margin:0;padding-inline:var(--s4);font-size:var(--t-small);
+  line-height:1.5}
+.td-what{color:var(--ink);padding-bottom:var(--s2)}
+.td-why{color:var(--muted);padding-bottom:var(--s4)}
+.tool[data-open="true"]{background:var(--raised)}
 .tn{display:block;font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.14em;
   color:var(--lit);margin-bottom:6px}
 .th{display:block;font-weight:600;font-size:var(--t-meta);line-height:1.25;
@@ -691,13 +736,97 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
 </header>
 
 <nav class="tools" aria-label="The seven tools on this desk">
-  <a class="enter-soft" style="--i:0" href="#closure"><span class="tn">01</span><span class="th">Closure window</span><span class="tq">Which venues are open, and for how long?</span></a>
-  <a class="enter-soft" style="--i:1" href="#verdict"><span class="tn">02</span><span class="th">Premium verdict</span><span class="tq">Is the premium in front of me tradeable?</span></a>
-  <a class="enter-soft" style="--i:2" href="#drift"><span class="tn">03</span><span class="th">Drift distribution</span><span class="tq">How far does price typically travel?</span></a>
-  <a class="enter-soft" style="--i:3" href="#analogues"><span class="tn">04</span><span class="th">Historical analogues</span><span class="tq">What happened in weekends like this?</span></a>
-  <a class="enter-soft" style="--i:4" href="#exposure"><span class="tn">05</span><span class="th">Exposure</span><span class="tq">What is my book carrying through it?</span></a>
-  <a class="enter-soft" style="--i:5" href="#calendar"><span class="tn">06</span><span class="th">Scheduled events</span><span class="tq">Is anything scheduled to explain a move?</span></a>
-  <a class="enter-soft" style="--i:6" href="#hedges"><span class="tn">07</span><span class="th">Hedge menu</span><span class="tq">What can I trade, and at what cost?</span></a>
+  <div class="tool enter-soft" style="--i:0">
+    <a class="tool-go" href="#closure"><span class="tn">01</span><span class="th">Closure window</span><span class="tq">Which venues are open, and for how long?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d01">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d01" role="region" aria-label="Closure window — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Classifies every hour into one of four regimes from the NYSE and CME Globex calendars, then counts the hours until each venue reopens.</p>
+        <p class="td-why">Tells you how long your position is quoted by a single venue before you can act on it again — the number the rest of the desk is conditioned on.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tool enter-soft" style="--i:1">
+    <a class="tool-go" href="#verdict"><span class="tn">02</span><span class="th">Premium verdict</span><span class="tq">Is the premium in front of me tradeable?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d02">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d02" role="region" aria-label="Premium verdict — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Splits the closure of the rToken–fair value gap into the leg you can trade and the leg you cannot, then nets the result against costs.</p>
+        <p class="td-why">Almost always answers no, and shows the working. This is the one panel built to argue with you rather than agree.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tool enter-soft" style="--i:2">
+    <a class="tool-go" href="#drift"><span class="tn">03</span><span class="th">Drift distribution</span><span class="tq">How far does price typically travel?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d03">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d03" role="region" aria-label="Drift distribution — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Empirical distribution of divergence by elapsed blackout hour, drawn as quartile and 5–95 bands rather than a single line.</p>
+        <p class="td-why">Lets you size against the spread of outcomes instead of the average, and the band widens visibly as the window runs on.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tool enter-soft" style="--i:3">
+    <a class="tool-go" href="#analogues"><span class="tn">04</span><span class="th">Historical analogues</span><span class="tq">What happened in weekends like this?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d04">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d04" role="region" aria-label="Historical analogues — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Weighted nearest-neighbour retrieval over past windows, matched only on features knowable before the close so nothing leaks from the future.</p>
+        <p class="td-why">Returns a distribution of real outcomes you can read yourself — including the worst point each one reached, not just where it ended.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tool enter-soft" style="--i:4">
+    <a class="tool-go" href="#exposure"><span class="tn">05</span><span class="th">Exposure</span><span class="tq">What is my book carrying through it?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d05">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d05" role="region" aria-label="Exposure — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Breaks your position down by regime across the coming window and prices the typical, 95th-percentile and worst observed move against it.</p>
+        <p class="td-why">Turns the percentages above into your own dollars. Type a real position and every figure below recomputes.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tool enter-soft" style="--i:5">
+    <a class="tool-go" href="#calendar"><span class="tn">06</span><span class="th">Scheduled events</span><span class="tq">Is anything scheduled to explain a move?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d06">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d06" role="region" aria-label="Scheduled events — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Checks FOMC decisions, parsed from the Federal Reserve's own calendar, against the window you are about to hold through.</p>
+        <p class="td-why">Establishes what weekend risk is not: across every blackout in the sample, no scheduled rate decision has ever landed inside one. The panel itself carries the count.</p>
+      </div>
+    </div>
+  </div>
+  <div class="tool enter-soft" style="--i:6">
+    <a class="tool-go" href="#hedges"><span class="tn">07</span><span class="th">Hedge menu</span><span class="tq">What can I trade, and at what cost?</span></a>
+    <button class="tool-more" type="button" aria-expanded="false" aria-controls="tool-d07">
+      <span>What it does</span>
+      <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="tool-detail" id="tool-d07" role="region" aria-label="Hedge menu — detail">
+      <div class="tool-detail-in">
+        <p class="td-what">Prices the instruments still quoting while equities and futures are shut, reporting the rolling range of each correlation beside its mean.</p>
+        <p class="td-why">Shows why the obvious hedges do not hold: every candidate here changes sign somewhere in the sample, and the cost is stated in dollars.</p>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <div class="week" id="closure">
@@ -2013,6 +2142,27 @@ function initRail(){
     window.addEventListener("scroll", quiet, { passive: true });
     quiet();
   }
+
+  /* One open at a time. Seven cards all expanded is a wall of prose, and the
+     rail's job is to be scannable; a disclosure that never closes stops being
+     one. Closing the previous card is what keeps the row heights honest. */
+  var cards = [].slice.call(document.querySelectorAll(".tool"));
+  cards.forEach(function(card){
+    var toggle = card.querySelector(".tool-more");
+    if (!toggle) return;
+    toggle.addEventListener("click", function(){
+      var open = card.getAttribute("data-open") === "true";
+      cards.forEach(function(other){
+        other.removeAttribute("data-open");
+        var t = other.querySelector(".tool-more");
+        if (t) t.setAttribute("aria-expanded", "false");
+      });
+      if (!open){
+        card.setAttribute("data-open", "true");
+        toggle.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
 
   document.querySelectorAll('.tools a[href^="#"]').forEach(function(link){
     link.addEventListener("click", function(evt){
