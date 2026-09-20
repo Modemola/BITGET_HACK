@@ -81,6 +81,29 @@ CLAIMS: list[tuple[str, str, str, str, float]] = [
     ("docs/FINDINGS.md", r"It was not, because a (\d+)%",
      "verdict.converged_share", "pct0", 1),
 
+    # FORM_ANSWER.md is the text pasted into the judges' form verbatim, so it is
+    # the single document where a stale figure is most expensive.
+    ("docs/FORM_ANSWER.md", r"across (\d+)\n?weekends the gap narrowed",
+     "summary.n_windows", "int", 0),
+    ("docs/FORM_ANSWER.md", r"narrowed at the reopen (\d+)% of the time",
+     "verdict.converged_share", "pct0", 1),
+    ("docs/FORM_ANSWER.md", r"wins ([\d.]+)% of the time",
+     "verdict.hit_rate", "pct", 0.05),
+    ("docs/FORM_ANSWER.md", r"loses ([\d.]+)% per weekend",
+     "verdict.net_at_10bp", "negpct", 0.005),
+    ("docs/FORM_ANSWER.md", r"and (\d+)% of\nweekends end with the price",
+     "summary.share_exceeding_1pct", "pct0", 1),
+    ("docs/FORM_ANSWER.md", r"worst in my sample was ([\d.]+)%",
+     "summary.worst_terminal_drift", "pct", 0.01),
+    ("docs/FORM_ANSWER.md", r"([\d.]+)% mean absolute",
+     "summary.mean_abs_terminal_drift", "pct", 0.01),
+    ("docs/FORM_ANSWER.md", r"([\d.]+)% at the 95th percentile",
+     "summary.p95_abs_terminal_drift", "pct", 0.01),
+    ("docs/FORM_ANSWER.md", r"([\d,]+) hourly bars of NVDAx",
+     "coverage.bars", "int_comma", 0),
+    ("docs/FORM_ANSWER.md", r"(\d+) weekend blackouts",
+     "summary.n_windows", "int", 0),
+
     # --- submission prose ---
     ("docs/SUBMISSION.md", r"returns a \*\*([\d.]+)%\*\* hit rate",
      "verdict.hit_rate", "pct", 0.05),
