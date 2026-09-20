@@ -60,6 +60,15 @@ jobs:
         continue-on-error: true
         run: python scripts/fetch_events.py
 
+      # Must refresh alongside the Solana series, not separately. The
+      # cross-venue figures are computed from the overlap between the two, so
+      # extending one book and not the other moves the overlap and breaks
+      # tests/test_cross_venue.py with no way to fix it from inside this job.
+      - name: rToken hourly (Bitget spot)
+        id: bitget
+        continue-on-error: true
+        run: python scripts/fetch_bitget.py
+
       - name: Rebuild payload and page
         run: |
           python -m blackout.build
@@ -97,6 +106,7 @@ jobs:
             echo "| rToken hourly | ${{ steps.rtoken.outcome }} |"
             echo "| reference legs | ${{ steps.reference.outcome }} |"
             echo "| scheduled events | ${{ steps.events.outcome }} |"
+            echo "| rToken hourly (Bitget) | ${{ steps.bitget.outcome }} |"
             echo
             echo "## Tests: ${{ steps.tests.outcome }}"
             echo

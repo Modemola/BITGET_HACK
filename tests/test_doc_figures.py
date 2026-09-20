@@ -94,6 +94,12 @@ HEDGE_CLAIMS = [
      "BTC-USD", "correlation", 0.01),
     ("docs/SUBMISSION.md", r"BTC hedge: correlation / variance removed \| \+[\d.]+ / (\d+)%",
      "BTC-USD", "risk_reduction", 1.0),
+    # The architecture's known-gaps table quotes the same pair and went stale
+    # against it: +0.71 / 29% against a payload saying +0.66 / 25%.
+    ("docs/ARCHITECTURE.md", r"BTC correlates \+([\d.]+) with NVDAx",
+     "BTC-USD", "correlation", 0.01),
+    ("docs/ARCHITECTURE.md", r"removes (\d+)% of variance",
+     "BTC-USD", "risk_reduction", 1.0),
 ]
 
 
@@ -231,3 +237,50 @@ def test_the_advertised_test_count_is_the_real_one():
         assert int(found.group(1)) == collected, (
             f"{doc} claims {found.group(1)} tests but {collected} are collected"
         )
+
+
+def test_the_quoted_data_span_matches_the_payload(data):
+    """"197 days" appears in four documents and is the scale of the whole claim.
+
+    ARCHITECTURE.md said 210 while every other file said 197. Nothing failed,
+    because no guard tied the sentence to the coverage it describes.
+    """
+    import datetime as _dt
+
+    coverage = data["coverage"]
+    days = (_dt.datetime.fromisoformat(coverage["end"])
+            - _dt.datetime.fromisoformat(coverage["start"])).days
+
+    quoted = {}
+    for path in list(ROOT.glob("*.md")) + list((ROOT / "docs").glob("*.md")):
+        if path.name in ("S2_BRIEF.md", "BLACKOUT_BASIS.md"):
+            continue  # Bitget's rules text, and the pre-data strategy spec
+        for match in re.finditer(r"Across (\d+)\s*\n?\s*days of hourly",
+                                 path.read_text(encoding="utf-8")):
+            quoted.setdefault(int(match.group(1)), []).append(path.name)
+
+    assert quoted, "no document states the data span any more"
+    assert set(quoted) == {days}, (
+        f"the payload covers {days} days but the docs say {quoted}"
+    )
+
+
+def test_the_architecture_layout_lists_every_script_and_doc():
+    """The layout block is how a judge finds their way around the repository.
+
+    It had fallen six scripts and four documents behind the tree, including the
+    two that carry the cross-venue work -- so the files backing a claim in the
+    submission were invisible to anyone reading the architecture.
+    """
+    text = (ROOT / "docs" / "ARCHITECTURE.md").read_text(encoding="utf-8")
+
+    missing = []
+    for path in sorted((ROOT / "scripts").glob("*.py")) + \
+            sorted((ROOT / "docs").glob("*.md")):
+        if path.name.startswith("_"):
+            continue
+        if path.name not in text:
+            missing.append(path.name)
+    assert not missing, (
+        "docs/ARCHITECTURE.md section 4 does not mention: " + ", ".join(missing)
+    )

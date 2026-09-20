@@ -682,7 +682,9 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 </section>
 
 <footer>
-  <span>Data: xStocks on Solana, Yahoo reference legs</span>
+  <span>Data: xStocks on Solana and Bitget spot (rToken) · Yahoo (native equity,
+    index futures, crypto) · federalreserve.gov (FOMC)</span>
+  <span id="foot-span"></span>
   <span id="foot-gen"></span>
   <span id="foot-sample"></span>
 </footer>
@@ -1535,10 +1537,16 @@ function drawHedges(){
 }
 
 function drawFooter(){
+  /* The measured span, not the clock above it. The page's regime readout is
+     live; every distribution on it is history, and saying where that history
+     starts and stops is the whole claim that the figures are checkable. */
+  document.getElementById("foot-span").textContent =
+    "Measured " + D.coverage.start.slice(0,10) + " to " + D.coverage.end.slice(0,10);
   document.getElementById("foot-gen").textContent =
     "Analytics generated " + D.generated_at.slice(0,10) + ", not live prices";
   document.getElementById("foot-sample").textContent =
-    D.summary.n_windows + " weekend blackouts · " + D.coverage.bars + " hourly bars";
+    D.summary.n_windows + " weekend blackouts · "
+    + D.coverage.bars.toLocaleString("en-US") + " hourly bars";
 }
 
 /* ---- language layer, when the viewer can run it ----------------------- */

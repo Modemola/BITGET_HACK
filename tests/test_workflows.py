@@ -84,3 +84,24 @@ def test_refresh_opens_a_review_rather_than_pushing_data_blind():
     assert "gh pr create" in body, "refresh does not open a pull request"
     assert doc.get("permissions", {}).get("pull-requests") == "write", \
         "refresh lacks permission to open the pull request it depends on"
+
+
+def test_every_fetcher_is_wired_into_the_refresh_job():
+    """A source that never refreshes silently rots, and can take others with it.
+
+    `fetch_bitget.py` was missing from the job. Because the cross-venue figures
+    are computed from the *overlap* between the Solana and Bitget books,
+    extending one and not the other would have moved the overlap and broken
+    `test_cross_venue.py` in a PR that had no way to fix it -- the data it needed
+    was never pulled.
+    """
+    refresh = (ROOT / ".github" / "workflows" / "refresh.yml").read_text(encoding="utf-8")
+    fetchers = sorted(p.name for p in (ROOT / "scripts").glob("*.py")
+                      if p.name.startswith(("fetch_", "probe_")))
+    assert fetchers, "no fetch scripts found; this guard is aimed at nothing"
+
+    missing = [f for f in fetchers if f not in refresh]
+    assert not missing, (
+        "refresh.yml never runs: " + ", ".join(missing)
+        + " -- add a step, or the series it pulls goes stale while the rest move"
+    )
