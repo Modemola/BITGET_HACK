@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 192 tests
+python -m pytest -q                     # 195 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -209,6 +209,32 @@ Steps 1-7 are built: token layer, masthead, the full-bleed week strip,
 position size. `tests/test_page_style.py` holds the visual invariants;
 `test_js_parity.py` pins the regime stamp to the calendar and the position
 input's clamping.
+
+**Type and spacing come from tokens, never literals.** Five text sizes
+(`--t-micro` … `--t-lead`), five display sizes (`--d-sm` … `--d-2xl`), a 4px
+spacing scale (`--s1`…`--s7`), one `--measure` and one `--rail`. The page had
+grown 22 distinct font sizes, a dozen half a pixel apart — 11/11.5/12/12.5 all
+labelling, 13.5/14/14.5/15/15.5 all body — plus six max-widths and five tracking
+values. Each difference is invisible alone and collectively they are why it
+stopped reading as one system. `test_page_style.py` rejects new literals.
+
+**Instrument Serif ships weight 400 and nothing else.** `.sec-head h2` asked for
+500, so every section heading was synthetically bolded — the browser smearing
+the outline — on the page's most repeated heading. Guarded now: any rule using
+`var(--display)` with a weight other than 400 fails.
+
+**The lattice bleeds wider than the page, so the root must clip.** It is inset
+-30% each side by design; nothing clipped it, so it extended the document to
+1163px behind a 485px viewport and the whole page scrolled sideways with every
+panel cut off. `html{overflow-x:clip}` fixes it — `clip`, not `hidden`, so the
+root does not become a scroll container. Verified in headless Chrome
+(`scrollWidth == clientWidth` at 375/768/1280); pinned in CSS because CI has no
+browser.
+
+**Inputs that carry a figure must size to their content.** The position field
+was a fixed `5.2ch` and clipped its own default: the heading read "$250,00"
+while every number under it was computed from $250,000. `initPosition` sets the
+width from the value's length.
 
 **A signed figure gets a diverging bar.** Distance from centre is the magnitude,
 side of centre is the sign. `test_page_runtime.py` checks both against the number

@@ -74,6 +74,36 @@
   --display:"Instrument Serif",Georgia,"Times New Roman",serif;
   --body:"Archivo",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+
+  /* Type scale. Five text sizes and five display sizes, and nothing between
+     them. The page previously carried 22 distinct sizes, a dozen of them half a
+     pixel apart -- 11/11.5/12/12.5 all labelling things, 13.5/14/14.5/15/15.5
+     all setting body copy. Differences that small are invisible one at a time
+     and, in aggregate, are exactly why a page stops reading as one system. */
+  --t-micro:10.5px;   /* eyebrows, section numbers, table headers, tool index */
+  --t-small:12.5px;   /* captions, legends, notes, secondary labels */
+  --t-meta:13.5px;    /* table body, compact UI */
+  --t-body:15px;      /* prose */
+  --t-lead:17px;      /* the two paragraphs that introduce the page */
+
+  --d-sm:22px;        /* sub-headings inside a panel */
+  --d-md:28px;        /* section headings */
+  --d-lg:40px;        /* evidence figures */
+  --d-xl:46px;        /* the countdown, and the verdict pull-quote */
+  --d-2xl:58px;       /* the product name, the largest thing on the page */
+
+  /* Optical tracking, by size rather than by guess. Display faces need
+     progressively tighter fitting as they grow; body text needs none. */
+  --track-2xl:-.025em; --track-xl:-.02em; --track-md:-.015em;
+
+  /* Spacing, on a 4px grid. */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+
+  /* The rail the section numbers sit in, and the one measure for prose. Six
+     different max-widths (42/64/66/70ch) were doing the work of two. */
+  --rail:34px;
+  --measure:66ch;
+  --measure-tight:42ch;
 }
 
 /* Regime modulates illumination only; it never moves a hue. The lit lane stays
@@ -132,12 +162,20 @@ body,.panel,.week,.verdict{transition:background-color .4s ease,border-color .4s
 :root[data-regime="BLACKOUT"] .lane-lit{animation:beacon-alone 2.6s ease-out infinite}
 
 *{box-sizing:border-box}
+/* The lattice is deliberately wider than the page -- it is inset -30% on each
+   side so the skewed grid bleeds past the masthead rather than sitting in a
+   box. Nothing clipped it, so it extended the document: 1163px of scrollable
+   width behind a 485px viewport, and the whole page scrolled sideways with
+   every panel cut off on the right. `clip` rather than `hidden` because it
+   removes the overflow without turning the root into a scroll container. */
+html{overflow-x:clip}
 body{background:var(--ground);color:var(--ink);font-family:var(--body);
-  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  font-size:var(--t-body);line-height:1.6;-webkit-font-smoothing:antialiased;
+  overflow-x:clip}
 .wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:0 64px}
 h1,h2,h3{text-wrap:balance;margin:0}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+.eyebrow{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.14em;
   text-transform:uppercase;color:var(--faint)}
 
 /* ---------------------------------------------------------------------------
@@ -173,19 +211,20 @@ header{position:relative;isolation:isolate}
 @media (prefers-reduced-motion:reduce){ .lattice-cell{transition:none} }
 @media (max-width:640px){ .lattice{opacity:.5} }
 
-header{padding-block:40px 26px}
+header{padding-block:var(--s7) var(--s6)}
 .masthead{display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-end;
   justify-content:space-between}
-.brand h1{font-family:var(--display);font-size:56px;font-weight:400;
-  letter-spacing:-.02em;line-height:.98}
-.brand p{margin:12px 0 0;color:var(--muted);max-width:42ch;font-size:15.5px}
+.brand h1{font-family:var(--display);font-size:var(--d-2xl);font-weight:400;
+  letter-spacing:var(--track-2xl);line-height:.98}
+.brand p{margin:var(--s3) 0 0;color:var(--muted);max-width:var(--measure-tight);
+  font-size:var(--t-lead);line-height:1.5}
 .status{display:flex;flex-direction:column;align-items:flex-end;gap:10px;
   text-align:right;flex:0 0 auto}
 
 /* The lamp: lit while a reference price exists, dark once it does not. */
 .chip{display:inline-flex;align-items:center;gap:9px;padding:7px 14px;
-  border-radius:999px;font-family:var(--mono);font-size:11.5px;font-weight:500;
-  letter-spacing:.06em;text-transform:uppercase;
+  border-radius:999px;font-family:var(--mono);font-size:var(--t-micro);font-weight:500;
+  letter-spacing:.08em;text-transform:uppercase;
   border:1px solid var(--rule-strong);background:var(--surface);color:var(--muted)}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--open);
   box-shadow:0 0 0 3px color-mix(in srgb,var(--open) 22%,transparent)}
@@ -194,11 +233,16 @@ header{padding-block:40px 26px}
 .chip[data-state="blackout"] .dot{background:var(--lit);
   box-shadow:0 0 10px 1px color-mix(in srgb,var(--lit) 60%,transparent)}
 
-.countdown{font-family:var(--display);font-size:64px;font-weight:400;
-  line-height:.9;letter-spacing:-.03em;font-variant-numeric:tabular-nums;
+/* Smaller than the product name, deliberately. Both were display serif at
+   roughly the same size, so identity and clock competed as two shouts. The
+   countdown does not need size to dominate: during a blackout it is the one
+   element that turns --lit while everything around it recedes, which is the
+   page's whole argument about emphasis applied to its own masthead. */
+.countdown{font-family:var(--display);font-size:var(--d-xl);font-weight:400;
+  line-height:.92;letter-spacing:var(--track-xl);font-variant-numeric:tabular-nums;
   color:var(--ink)}
-.countdown small{font-family:var(--body);font-size:15px;color:var(--faint);
-  font-weight:400;letter-spacing:0;margin-inline:1px 8px}
+.countdown small{font-family:var(--body);font-size:var(--t-meta);color:var(--faint);
+  font-weight:400;letter-spacing:0;margin-inline:1px var(--s2)}
 .countdown small:last-child{margin-right:0}
 :root[data-regime="BLACKOUT"] .countdown{color:var(--lit)}
 
@@ -207,30 +251,46 @@ header{padding-block:40px 26px}
    what they can see; before this the page read as one document with sections.
    Numbered because they genuinely run in this order -- it is the order a trader
    reasons in, and the order scripts/research_task.py executes. */
-.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+/* Flex, not grid, because seven items never divide evenly into an auto-fit
+   track count. As a grid the last row left a dead surface three columns wide
+   next to the two tools that had wrapped -- the page's most prominent element
+   reading as unfinished. Flexed items grow to fill whatever row they land in,
+   so there is no hole at any width, and at desktop all seven sit in one row. */
+.tools{display:flex;flex-wrap:wrap;
   gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:8px;
-  overflow:hidden;margin-block:26px 4px}
-.tools a{display:block;background:var(--surface);padding:13px 15px 14px;
+  overflow:hidden;margin-block:0 var(--s6)}
+/* 220px is chosen so four fit the 1080px measure and the remaining three
+   stretch across the row beneath: seven is prime, so some row is always short,
+   and 4+3 is the split that leaves both rows full and the cards legible. */
+.tools a{flex:1 1 220px;background:var(--surface);padding:var(--s4);
   text-decoration:none;color:inherit;transition:background .15s ease}
 .tools a:hover,.tools a:focus-visible{background:var(--raised);outline:none}
 .tools a:focus-visible{box-shadow:inset 0 0 0 2px var(--lit)}
-.tn{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+.tn{display:block;font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.14em;
   color:var(--lit);margin-bottom:6px}
-.th{display:block;font-weight:600;font-size:13.5px;line-height:1.25;
+.th{display:block;font-weight:600;font-size:var(--t-meta);line-height:1.25;
   margin-bottom:4px}
-.tq{display:block;font-size:12px;color:var(--muted);line-height:1.35}
+.tq{display:block;font-size:var(--t-small);color:var(--muted);line-height:1.35}
 @media (prefers-reduced-motion:reduce){ .tools a{transition:none} }
 
 /* Anchored sections must not land under the top of the viewport. */
 #closure,#verdict,#drift,#analogues,#exposure,#calendar,#hedges{scroll-margin-top:18px}
 
-.week{margin-block:12px 0;border-block:1px solid var(--rule);
-  padding-block:26px 20px;background:transparent}
-.week-head{display:flex;flex-wrap:wrap;gap:10px 24px;align-items:baseline;
-  justify-content:space-between;margin-bottom:20px;position:relative}
-.week-head .sec-n{top:4px}
-.week-head h2{font-family:var(--display);font-size:22px;font-weight:400;
-  letter-spacing:-.01em}
+.week{margin-block:0;border-block:1px solid var(--rule);
+  padding-block:var(--s6) var(--s5);background:transparent}
+/* Same rail as every other section heading, so 01 here and 02 below sit on one
+   vertical line. Grid rather than flex: the number needs to share a baseline
+   with the heading, which space-between could only approximate. */
+/* No column gap: --rail is the entire offset, the same one .sec-head uses, so
+   this heading starts on the same vertical line as every heading below it. A
+   gap here left it 24px to the right of all of them. */
+.week-head{display:grid;grid-template-columns:var(--rail) 1fr auto;
+  align-items:baseline;column-gap:0;row-gap:var(--s2);
+  margin-bottom:var(--s5)}
+@media (max-width:640px){
+  .week-head{grid-template-columns:1fr}
+  .week-head > *{grid-column:1}
+}
 .tl-stage{position:relative}
 .tl-tip{position:absolute;top:-6px;transform:translateX(-50%);z-index:3;
   pointer-events:none;display:flex;flex-direction:column;gap:2px;
@@ -238,34 +298,34 @@ header{padding-block:40px 26px}
   background:var(--surface);border:1px solid var(--rule-strong);
   box-shadow:0 10px 30px -12px rgba(0,0,0,.85)}
 .tl-tip[data-dark="true"]{border-color:var(--lit);background:var(--void)}
-.tip-when{font-family:var(--mono);font-size:11.5px;color:var(--ink);
+.tip-when{font-family:var(--mono);font-size:var(--t-micro);color:var(--ink);
   font-variant-numeric:tabular-nums}
-.tip-what{font-size:12px;font-weight:600;color:var(--muted)}
+.tip-what{font-size:var(--t-small);font-weight:600;color:var(--muted)}
 .tl-tip[data-dark="true"] .tip-what{color:var(--lit)}
 .dr-tip{top:8px}
 .tip-rows{display:grid;grid-template-columns:auto auto;gap:1px 10px;
   align-items:baseline;margin-top:5px}
-.tip-rows b{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--lit);
+.tip-rows b{font-family:var(--mono);font-size:var(--t-small);font-weight:500;color:var(--lit);
   font-variant-numeric:tabular-nums;text-align:right}
-.tip-rows i{font-style:normal;font-size:11px;color:var(--muted)}
+.tip-rows i{font-style:normal;font-size:var(--t-micro);color:var(--muted)}
 
 /* The median draws itself in once, left to right. The dash length is generous
    so any path length is covered without measuring it. */
 @keyframes draw{ from{stroke-dashoffset:4000} to{stroke-dashoffset:0} }
 .drift-line{stroke-dasharray:4000;animation:draw 1.5s var(--ease-out) both;
   animation-delay:.35s}
-.tip-hint{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+.tip-hint{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-top:2px}
 .tl-scroll{overflow-x:auto;overflow-y:hidden}
 .tl-svg{display:block;width:100%;min-width:680px;height:auto}
 /* The scrubber: drag the week past a fixed present. Every frame is real
    computed state, which is why it is a control and not an animation. */
-.scrub-wrap{margin-top:20px}
-.scrub-hint{display:flex;align-items:center;gap:9px;font-size:12.5px;
+.scrub-wrap{margin-top:var(--s5)}
+.scrub-hint{display:flex;align-items:center;gap:9px;font-size:var(--t-small);
   color:var(--muted);margin-bottom:10px;cursor:ew-resize}
 .scrub-hint .grab{display:inline-flex;align-items:center;justify-content:center;
   width:22px;height:22px;border-radius:5px;background:var(--lit-soft);
-  color:var(--lit);font-size:13px;flex:0 0 auto}
+  color:var(--lit);font-size:var(--t-small);flex:0 0 auto}
 .scrub{display:flex;align-items:center;gap:14px}
 /* The track mirrors the week it scrubs, so the control reads as a map of time
    rather than an anonymous slider. */
@@ -289,76 +349,99 @@ header{padding-block:40px 26px}
 .scrub-live{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;
   padding:6px 12px;border-radius:999px;border:1px solid var(--rule-strong);
   background:var(--surface);color:var(--muted);font-family:var(--mono);
-  font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:default}
+  font-size:var(--t-micro);letter-spacing:.08em;text-transform:uppercase;cursor:default}
 .scrub-live .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
 .scrub-live[data-live="false"]{cursor:pointer;color:var(--lit);
   border-color:var(--lit)}
 .scrub-live[data-live="false"] .dot{background:var(--lit)}
-.scrub-read{flex:0 0 auto;font-size:12.5px;color:var(--muted);
+.scrub-read{flex:0 0 auto;font-size:var(--t-small);color:var(--muted);
   min-width:15ch;text-align:right}
 @media (max-width:640px){
   .scrub{flex-wrap:wrap}
   .scrub-range{order:3;flex-basis:100%}
   .scrub-read{text-align:left;min-width:0}
 }
-.legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:16px;
-  font-size:12.5px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);margin-top:var(--s5);
+  font-size:var(--t-small);color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:8px}
 .swatch{width:18px;height:8px;border-radius:1px;display:inline-block}
 .swatch.void{background:var(--void);outline:1px solid var(--rule)}
 
-section{margin-top:52px}
-.sec-head{margin-bottom:18px;position:relative;padding-top:16px;
+/* Section headings.
+
+   The number used to be absolutely positioned at a guessed `top`, which aligned
+   its *box* with the heading's box while their baselines sat far apart -- and
+   needed a hand-nudge in the week strip where the surrounding box differed. A
+   two-column grid with baseline alignment puts the number on the heading's own
+   baseline everywhere, with no nudges and nothing to re-tune when a size
+   changes. */
+section{margin-top:var(--s7)}
+.sec-head{display:grid;grid-template-columns:var(--rail) 1fr;
+  padding-top:var(--s4);margin-bottom:var(--s4);
   border-top:1px solid var(--rule)}
-.sec-n{position:absolute;top:16px;left:0;font-family:var(--mono);font-size:10.5px;
+.sec-head > *{grid-column:2}
+.sec-n{grid-column:1;grid-row:1;align-self:baseline;justify-self:start;
+  font-family:var(--mono);font-size:var(--t-micro);
   letter-spacing:.16em;color:var(--lit);opacity:.85}
-.sec-head h2,.week-head h2{padding-left:34px}
-.sec-head p{padding-left:34px}
+.sec-head h2{grid-row:1;align-self:baseline}
+/* Instrument Serif ships one weight. Asking for 500 made every section heading
+   synthetically bold -- the browser smearing the outline -- on the heading that
+   repeats most often down the page. */
+.sec-head h2,.week-head h2{font-family:var(--display);font-size:var(--d-md);
+  font-weight:400;letter-spacing:var(--track-md);line-height:1.15}
+.sec-head p{grid-row:2;margin:var(--s2) 0 0;color:var(--muted);
+  max-width:var(--measure)}
 @media (max-width:640px){
-  .sec-head h2,.week-head h2,.sec-head p{padding-left:0}
-  .sec-n{position:static;display:block;margin-bottom:6px}
+  .sec-head{grid-template-columns:1fr}
+  .sec-head > *,.sec-n,.sec-head h2,.sec-head p{grid-column:1}
+  .sec-n{grid-row:1;margin-bottom:var(--s1)}
+  .sec-head h2{grid-row:2}
+  .sec-head p{grid-row:3}
 }
-section{margin-top:38px}
-.sec-head{margin-bottom:16px}
-.sec-head h2{font-family:var(--display);font-size:24px;font-weight:500;
-  letter-spacing:-.01em}
-.sec-head p{margin:6px 0 0;color:var(--muted);max-width:66ch}
 
 /* The one sentence worth remembering, so it is set like a thesis rather than
    like a notification. No card, no border: air does the emphasis. */
-.verdict{padding-block:12px 4px}
-.verdict h3{font-family:var(--display);font-size:44px;font-style:italic;
-  font-weight:400;line-height:1.08;letter-spacing:-.02em;max-width:17ch;
-  margin-bottom:22px;color:var(--ink)}
+.verdict{padding-block:var(--s3) var(--s1)}
+.verdict h3{font-family:var(--display);font-size:var(--d-xl);font-style:italic;
+  font-weight:400;line-height:1.1;letter-spacing:var(--track-xl);max-width:17ch;
+  margin-bottom:var(--s5);color:var(--ink)}
 .verdict h3 em{font-style:normal;color:var(--lit)}
-.verdict p{margin:0 0 26px;color:var(--muted);max-width:64ch;font-size:15.5px}
-@media (max-width:640px){ .verdict h3{font-size:32px;max-width:none} }
+.verdict p{margin:0 0 var(--s5);color:var(--muted);max-width:var(--measure);
+  font-size:var(--t-lead);line-height:1.55}
+@media (max-width:640px){ .verdict h3{font-size:var(--d-md);max-width:none} }
 .evidence{display:grid;grid-template-columns:repeat(auto-fit,minmax(156px,1fr));
   gap:0;border-top:1px solid var(--rule);background:transparent}
-.evidence div{position:relative;padding:20px 22px 20px 0;
+/* Padding on both sides, not just the right. With a divider between cells and
+   no left padding, the text in every cell after the first sat hard against the
+   rule of the one before it. The first cell drops its left padding so the
+   column still starts flush with the page. */
+.evidence div{position:relative;padding:var(--s5) var(--s5);
   border-right:1px solid var(--rule)}
-.evidence div:last-child{border-right:none}
+.evidence div:first-child{padding-left:0}
+.evidence div:last-child{border-right:none;padding-right:0}
 .evidence div::before{content:"";position:absolute;top:-1px;left:0;width:26px;height:2px;
   background:var(--lit);opacity:0;transition:opacity var(--t-mid) var(--ease-out),
   width var(--t-mid) var(--ease-out)}
 .evidence div:first-child::before{opacity:1}
 .evidence div:hover::before{opacity:1;width:44px}
-.evidence dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--faint);margin-bottom:5px}
-.evidence dd{margin:0;font-family:var(--display);font-size:38px;font-weight:400;
-  font-variant-numeric:tabular-nums;line-height:.98;letter-spacing:-.025em;
-  color:var(--ink)}
+.evidence dt{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:var(--s2);
+  line-height:1.3}
+.evidence dd{margin:0;font-family:var(--display);font-size:var(--d-lg);
+  font-weight:400;font-variant-numeric:tabular-nums;line-height:1;
+  letter-spacing:var(--track-2xl);color:var(--ink)}
 .evidence div:first-child dd{color:var(--lit)}
-.evidence dd.ev-note{font-family:var(--body);font-size:11.5px;color:var(--faint);
-  letter-spacing:0;line-height:1.35;margin-top:7px;max-width:20ch}
+.evidence dd.ev-note{font-family:var(--body);font-size:var(--t-small);
+  color:var(--faint);letter-spacing:0;line-height:1.4;margin-top:var(--s2);
+  max-width:20ch}
 
 .panel{background:var(--surface);border:1px solid var(--rule);border-radius:8px;
-  padding:22px 24px;box-shadow:var(--shadow)}
+  padding:var(--s5);box-shadow:var(--shadow)}
 .chart-scroll{overflow-x:auto}
 .chart{display:block;width:100%;min-width:520px;height:auto}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
+table{width:100%;border-collapse:collapse;font-size:var(--t-meta)}
 .table-scroll{overflow-x:auto}
-th{text-align:left;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+th{text-align:left;font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);font-weight:500;
   padding:0 12px 9px 0;border-bottom:1px solid var(--rule);white-space:nowrap}
 td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule);
@@ -366,58 +449,70 @@ td{padding:11px 12px 11px 0;border-bottom:1px solid var(--rule);
 tbody tr:last-child td{border-bottom:none}
 td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   white-space:nowrap}
-.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
+.pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:var(--t-micro);
   font-family:var(--mono);font-weight:500;white-space:nowrap}
 .pill.bad{background:var(--risk-soft);color:var(--risk)}
 .pill.good{background:var(--ok-soft);color:var(--ok)}
 @keyframes flash{ 0%{background:var(--lit-soft)} 100%{background:transparent} }
 .flash{animation:flash .9s var(--ease-out)}
-.note{font-size:12.5px;color:var(--faint);margin-top:14px;max-width:70ch}
+.note{font-size:var(--t-small);color:var(--faint);margin-top:var(--s4);
+  max-width:var(--measure);line-height:1.5}
 
 /* An editable figure that reads as part of the sentence, not as a form. */
 .money{display:inline-flex;align-items:baseline;gap:1px;position:relative;
   border-bottom:2px solid var(--lit);padding-inline:4px;border-radius:3px 3px 0 0;
   background:var(--lit-soft);cursor:text}
 .money::after{content:"edit";position:absolute;right:0;bottom:calc(100% + 3px);
-  font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--lit);opacity:.75}
+  font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.12em;
+  text-transform:uppercase;color:var(--lit);opacity:.75;line-height:1}
 .money .sym{font-family:var(--display);color:var(--lit)}
+/* Width is set from the value's length in JS, because a fixed one clips.
+   At 5.2ch the default $250,000 rendered as "$250,00" -- the heading stated a
+   position ten times smaller than the one every figure below it was computed
+   from. The ch fallback here only applies before the first sizing pass. */
 .money input{font:inherit;font-family:var(--display);color:var(--lit);
-  background:transparent;border:0;padding:0;width:5.2ch;min-width:0;
+  background:transparent;border:0;padding:0;width:8ch;min-width:0;
   font-variant-numeric:tabular-nums}
 .money input:focus{outline:none}
 .money:focus-within{background:var(--lit-soft)}
 .expo{display:flex;height:38px;border-radius:6px;overflow:hidden;
   border:1px solid var(--rule)}
 .expo div{display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:11px;font-weight:500;
+  font-family:var(--mono);font-size:var(--t-micro);font-weight:500;
   min-width:0;overflow:hidden}
-.expo-key{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;font-size:12.5px;
+.expo-key{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);margin-top:var(--s3);font-size:var(--t-small);
   color:var(--muted)}
 .expo-key span{display:inline-flex;align-items:center;gap:7px}
 
-.cal-head{position:relative;margin-bottom:16px}
-.cal-head h3{font-family:var(--display);font-size:19px;font-weight:400;
-  padding-left:34px}
-.cal-head .sec-n{top:3px}
-@media (max-width:640px){ .cal-head h3{padding-left:0} }
-.cal-strip{margin-top:20px;padding-top:18px;border-top:1px solid var(--rule)}
-#cal-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}
-.cal-item dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+/* Section 06 lives inside the exposure panel, so it kept its own positioning
+   and its own nudge. Same rail, same baseline alignment as the rest. */
+.cal-head{display:grid;grid-template-columns:var(--rail) 1fr;
+  align-items:baseline;margin-bottom:var(--s4)}
+.cal-head h3{font-family:var(--display);font-size:var(--d-sm);font-weight:400;
+  letter-spacing:var(--track-md)}
+@media (max-width:640px){
+  .cal-head{grid-template-columns:1fr}
+  .cal-head > *{grid-column:1}
+  .cal-head .sec-n{margin-bottom:var(--s1)}
+}
+.cal-strip{margin-top:var(--s5);padding-top:var(--s5);border-top:1px solid var(--rule)}
+#cal-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:var(--s5)}
+.cal-item dt{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:6px}
-.cal-item dd{margin:0;font-size:14px;line-height:1.5}
+.cal-item dd{margin:0;font-size:var(--t-meta);line-height:1.5}
 .cal-item dd strong{font-weight:600}
-.cal-item .when{font-family:var(--mono);font-size:12.5px;color:var(--muted);
+.cal-item .when{font-family:var(--mono);font-size:var(--t-small);color:var(--muted);
   display:block;margin-top:3px}
 .cal-none{color:var(--muted)}
 
 .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:20px 28px;padding-bottom:20px;margin-bottom:20px;
+  gap:var(--s5) var(--s6);padding-bottom:var(--s5);margin-bottom:var(--s5);
   border-bottom:1px solid var(--rule)}
 .ctrl label{display:flex;justify-content:space-between;align-items:baseline;
-  gap:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  gap:10px;font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:9px}
-.ctrl label .num{font-size:14px;letter-spacing:0;text-transform:none;
+.ctrl label .num{font-size:var(--t-meta);letter-spacing:0;text-transform:none;
   color:var(--ink);font-weight:500}
 .ctrl input[type=range]{width:100%;-webkit-appearance:none;appearance:none;
   background:transparent;height:20px;margin:0;cursor:ew-resize}
@@ -433,18 +528,18 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
   background:var(--lit);border:3px solid var(--surface);cursor:grab;
   box-shadow:0 0 0 1px var(--lit),0 1px 5px rgba(0,0,0,.3)}
 .ctrl input[type=range]:focus-visible{outline:2px solid var(--lit);outline-offset:3px}
-.ctrl-note{font-family:var(--body);font-size:11px;letter-spacing:0;
+.ctrl-note{font-family:var(--body);font-size:var(--t-micro);letter-spacing:0;
   text-transform:none;color:var(--faint)}
-.ctrl.static .static-val{font-size:14px;font-weight:500;color:var(--ink);
+.ctrl.static .static-val{font-size:var(--t-meta);font-weight:500;color:var(--ink);
   padding-top:2px}
 .analogue-summary{display:grid;
   grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
   background:var(--rule);border:1px solid var(--rule);border-radius:6px;
-  overflow:hidden;margin-bottom:22px}
+  overflow:hidden;margin-bottom:var(--s5)}
 .analogue-summary div{background:var(--surface);padding:13px 15px}
-.analogue-summary dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+.analogue-summary dt{font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint);margin-bottom:5px}
-.analogue-summary dd{margin:0;font-family:var(--mono);font-size:19px;
+.analogue-summary dd{margin:0;font-family:var(--mono);font-size:var(--t-lead);
   font-weight:500;font-variant-numeric:tabular-nums}
 /* Magnitude read at a glance. A diverging bar for anything signed, because the
    distance from zero is the claim and the side is only its direction; a plain
@@ -468,24 +563,24 @@ td .val{display:block}
 .ask-box{display:flex;gap:10px;flex-wrap:wrap}
 .ask-box input{flex:1 1 260px;min-width:0;padding:11px 14px;border-radius:6px;
   border:1px solid var(--rule-strong);background:var(--ground);color:var(--ink);
-  font-family:var(--body);font-size:14px}
+  font-family:var(--body);font-size:var(--t-meta)}
 .ask-box input:focus-visible,button:focus-visible{outline:2px solid var(--lit);
   outline-offset:2px}
 button{padding:11px 20px;border-radius:6px;border:1px solid transparent;
   background:var(--lit);color:var(--ground);font-family:var(--body);
-  font-size:14px;font-weight:500;cursor:pointer}
+  font-size:var(--t-meta);font-weight:500;cursor:pointer}
 button:hover{filter:brightness(1.08)}
 button:disabled{opacity:.55;cursor:default}
 .suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .suggest button{background:transparent;color:var(--muted);
-  border-color:var(--rule-strong);font-size:12.5px;padding:6px 12px}
+  border-color:var(--rule-strong);font-size:var(--t-small);padding:6px 12px}
 .qa{border-top:1px solid var(--rule);margin-bottom:20px}
 .qa details{border-bottom:1px solid var(--rule)}
-.qa summary{cursor:pointer;padding:15px 30px 15px 0;font-size:15px;font-weight:500;
+.qa summary{cursor:pointer;padding:15px 30px 15px 0;font-size:var(--t-body);font-weight:500;
   list-style:none;position:relative}
 .qa summary::-webkit-details-marker{display:none}
 .qa summary::after{content:"+";position:absolute;right:4px;top:50%;
-  transform:translateY(-50%);font-family:var(--mono);color:var(--lit);font-size:17px}
+  transform:translateY(-50%);font-family:var(--mono);color:var(--lit);font-size:var(--t-lead)}
 /* A real minus, not a CSS escape. An escaped 2212 was eaten in transit
    once and left a U+0091 control character followed by a literal "2", so
    every open accordion showed a stray digit where the toggle should be. */
@@ -493,17 +588,23 @@ button:disabled{opacity:.55;cursor:default}
 .qa summary:hover{color:var(--lit)}
 .qa summary:focus-visible{outline:2px solid var(--lit);outline-offset:2px}
 .qa-a{padding:0 0 6px;color:var(--muted);line-height:1.65;
-  max-width:66ch;font-size:14.5px}
+  max-width:var(--measure);font-size:var(--t-body)}
 .qa-a p{margin:0 0 13px}
-.ask-elsewhere{margin:0;color:var(--muted);max-width:64ch}
+.ask-elsewhere{margin:0;color:var(--muted);max-width:var(--measure)}
 .ask-elsewhere a{color:var(--lit);text-decoration:underline;
   text-underline-offset:3px}
 .answer{margin-top:18px;padding-top:18px;border-top:1px solid var(--rule);
   white-space:pre-wrap;line-height:1.65}
 .answer:empty{display:none}
 
-footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
-  color:var(--faint);font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px 28px}
+/* Two rows, not one wrapping line. The sources sentence is much longer than the
+   three figures beside it, so as peers in a flex row it pushed them onto a
+   ragged second line at most widths. Sources on top, provenance beneath. */
+footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rule);
+  color:var(--faint);font-size:var(--t-small);line-height:1.5;
+  display:grid;gap:var(--s2)}
+.foot-meta{display:flex;flex-wrap:wrap;gap:var(--s1) var(--s5)}
+.foot-sources{max-width:var(--measure)}
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
   /* keyframes cancelled mid-flight would leave `both` fill applied, so restore
@@ -513,9 +614,15 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
   .drift-line{stroke-dasharray:none!important;stroke-dashoffset:0!important}
 }
 @media (max-width:640px){
-  .brand h1{font-size:30px}
-  .masthead{flex-direction:column;align-items:flex-start}
+  /* The countdown used to keep its full desktop size here while the product
+     name dropped to 30px, so on the viewport most people actually use, the
+     clock was more than twice the size of the thing it belongs to. Both step
+     down together, and the masthead stacks, so they read as one block. */
+  .brand h1{font-size:34px}
+  .countdown{font-size:34px}
+  .masthead{flex-direction:column;align-items:flex-start;gap:var(--s5)}
   .status{align-items:flex-start;text-align:left}
+  .wrap{padding-inline:var(--s4)}
 }
 </style>
 </head>
@@ -703,11 +810,13 @@ footer{margin-top:52px;padding-top:22px;border-top:1px solid var(--rule);
 </section>
 
 <footer>
-  <span>Data: xStocks on Solana and Bitget spot (rToken) · Yahoo (native equity,
-    index futures, crypto) · federalreserve.gov (FOMC)</span>
-  <span id="foot-span"></span>
-  <span id="foot-gen"></span>
-  <span id="foot-sample"></span>
+  <span class="foot-sources">Data: xStocks on Solana and Bitget spot (rToken) ·
+    Yahoo (native equity, index futures, crypto) · federalreserve.gov (FOMC)</span>
+  <span class="foot-meta">
+    <span id="foot-span"></span>
+    <span id="foot-gen"></span>
+    <span id="foot-sample"></span>
+  </span>
 </footer>
 </div>
 
@@ -1373,7 +1482,7 @@ function drawAnalogues(){
           '<span class="mbar"><i style="width:' +
           (Math.min((m.max_abs_drift || 0) / span, 1) * 100).toFixed(1) + '%"></i></span></td>' +
         '<td><span class="match-bar" style="width:' + strength + 'px"></span>' +
-          '<span class="num" style="color:var(--faint);font-size:11.5px;margin-left:8px">' +
+          '<span class="num" style="color:var(--faint);font-size:var(--t-micro);margin-left:8px">' +
           fix(m.distance, 2) + '</span></td>' +
         '</tr>';
     }).join("");
@@ -1552,7 +1661,7 @@ function drawHedges(){
       '<td class="n">' + usd(cost) + '</td>' +
       '<td><span class="pill ' + (h.stable ? "good" : "bad") + '">' +
         (h.stable ? "usable" : "unstable") + '</span>' +
-        '<div style="margin-top:5px;color:var(--muted);font-size:12.5px">' + h.verdict + '</div>' +
+        '<div style="margin-top:5px;color:var(--muted);font-size:var(--t-small)">' + h.verdict + '</div>' +
       '</td></tr>';
   }).join("");
 }
@@ -1795,7 +1904,17 @@ function initScrub(){
 function initPosition(){
   var el = document.getElementById("position");
   if (!el) return;
+
+  /* Grow the field to whatever is typed in it. A fixed width clipped the
+     default value -- the heading read "$250,00" while every figure under it was
+     computed from $250,000 -- and any figure a trader enters is longer or
+     shorter again. The extra .6ch keeps the caret off the underline. */
+  function fit(){
+    el.style.width = Math.max(4, el.value.length + 0.6) + "ch";
+  }
+
   function refresh(){
+    fit();
     drawExposure();
     drawHedges();
     // The static answers quote the position, so they move with it too.
@@ -1811,6 +1930,7 @@ function initPosition(){
   });
   el.addEventListener("keydown", function(e){ if (e.key === "Enter") el.blur(); });
   el.value = Math.round(D.demo.exposure_usd).toLocaleString("en-US");
+  fit();
 }
 
 buildLattice();

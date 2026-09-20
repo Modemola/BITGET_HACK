@@ -358,3 +358,67 @@ def test_no_payload_figure_is_hand_written_into_the_page():
         "a figure is hand-written into the page instead of read from the payload "
         "(see CLAUDE.md):\n  " + "\n  ".join(offenders)
     )
+
+
+def test_type_sizes_come_from_the_scale(style):
+    """Sizes are tokens, not literals.
+
+    The page carried 22 distinct font sizes, a dozen of them half a pixel apart:
+    11/11.5/12/12.5 all labelling things and 13.5/14/14.5/15/15.5 all setting
+    body copy. None of those differences is visible on its own, and together
+    they are why the page stopped reading as one system. Literals are allowed
+    only where a token is being defined or a breakpoint deliberately overrides
+    one.
+    """
+    tokens = style[style.index(":root{"):style.index("}", style.index(":root{"))]
+    literals = []
+    for line_no, line in enumerate(style.splitlines(), 1):
+        if "--t-" in line or "--d-" in line:
+            continue                      # the scale's own definitions
+        for match in re.finditer(r"font-size:([\d.]+)px", line):
+            literals.append(f"line {line_no}: {match.group(0)} in {line.strip()[:70]}")
+    # The two masthead sizes at phone width are a deliberate override: both drop
+    # to the same value so the clock cannot outsize the product name.
+    allowed = 2
+    assert len(literals) <= allowed, (
+        f"{len(literals)} literal font sizes; use a --t-* or --d-* token:\n  "
+        + "\n  ".join(literals)
+    )
+
+
+def test_the_display_face_is_never_asked_for_a_weight_it_lacks(style):
+    """Instrument Serif ships one weight, and synthesising the rest looks it.
+
+    `.sec-head h2` asked for 500, so every section heading down the page was
+    algorithmically smeared by the browser rather than set. Nothing failed --
+    synthetic bold renders, it is just ugly -- and it was on the page's most
+    repeated heading.
+    """
+    offenders = []
+    for selector, body in re.findall(r"([^{}]+)\{([^}]*)\}", style):
+        if "var(--display)" not in body:
+            continue
+        weight = re.search(r"font-weight:(\d+)", body)
+        if weight and weight.group(1) != "400":
+            offenders.append(f"{selector.strip()[:60]} -> font-weight:{weight.group(1)}")
+    assert not offenders, (
+        "the display face has only weight 400; these would be synthesised:\n  "
+        + "\n  ".join(offenders)
+    )
+
+
+def test_the_page_cannot_scroll_sideways(style):
+    """The lattice is wider than the page on purpose, and nothing clipped it.
+
+    Inset -30% on each side so the skewed grid bleeds past the masthead, it
+    extended the document instead: 1163px of scrollable width behind a 485px
+    viewport, so every panel sat cut off to the right and the whole page slid
+    horizontally. Measured with a real browser at the time; pinned here as the
+    rule that fixed it, because CI has no browser.
+    """
+    root = re.search(r"html\{([^}]*)\}", style)
+    assert root, "no html rule; the horizontal overflow clip is gone"
+    assert re.search(r"overflow-x:\s*(clip|hidden)", root.group(1)), (
+        "html no longer clips horizontal overflow, so the lattice's bleed will "
+        "make the whole page scroll sideways again"
+    )
