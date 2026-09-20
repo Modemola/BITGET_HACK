@@ -169,7 +169,7 @@ and until then they are targets, not claims.
 7. `macro_calendar` — scheduled events versus the window, from federalreserve.gov
 
 Plus: a live demo with a genuine real-time clock, a static-first page that works
-without the LLM, a reproducible research pipeline, and **74 tests**.
+without the LLM, a reproducible research pipeline, and **185 tests**.
 
 **Not built.** Live price feeds — analytics are stamped and frozen at build time,
 and the page says so rather than implying live prices. Bitget Agent Hub and
@@ -203,10 +203,12 @@ efficiency finding survives at finer resolution. More issuers, to test whether
 it is a property of xStocks or of tokenized equity generally.
 
 **Stack.** Python 3.11+ (pandas, numpy, `exchange_calendars`), no framework.
-Data: GeckoTerminal (Solana on-chain OHLCV), Yahoo Finance (native equity,
+Data: GeckoTerminal (Solana on-chain OHLCV), Bitget spot (the same rTokens on
+the host's own book, for cross-venue replication), Yahoo Finance (native equity,
 index futures, crypto), federalreserve.gov (FOMC). Front end: hand-written
-HTML/CSS/JS, no build step, no dependencies. Hosting: Claude Artifacts, using
-the `sample` runtime capability for the language layer.
+HTML/CSS/JS, no build step, no dependencies. Hosting: Vercel for the public
+demo, and a Claude Artifact for the build carrying the language layer, which
+uses the `sample` runtime capability.
 
 ### Part 5 · Deliverables
 
@@ -221,9 +223,10 @@ Everything is in the repository linked as **Submission Materials**:
 | Reproduce the finding from raw data | `scripts/analyse_basis.py` |
 | System design and tool contract | `docs/ARCHITECTURE.md` |
 | Analytics engine | `src/blackout/` |
-| Test suite (74) | `tests/` |
-| Raw data (9 series, committed) | `data/raw/` |
-| Data ingestion, rate-limited and resumable | `scripts/probe_sources.py`, `fetch_reference.py`, `fetch_events.py` |
+| Test suite (185) | `tests/` |
+| Raw data (10 series, committed) | `data/raw/` |
+| Data ingestion, rate-limited and resumable | `scripts/probe_sources.py`, `fetch_reference.py`, `fetch_events.py`, `fetch_bitget.py` |
+| Cross-venue replication on Bitget's own book | `scripts/cross_venue.py` |
 
 ### Part 6 · Our take on AI Trading
 
@@ -266,7 +269,7 @@ caused by our own pagination, and that a causality test was passing vacuously
 because the corruption it applied cancelled out of the metric it checked.
 
 **2. Engineering.** The analytics engine, the ingestion pipeline, the page, and
-all 74 tests. Notably the tests that guard the things a human reviewer would not
+all 185 tests. Notably the tests that guard the things a human reviewer would not
 think to check: that the payload cannot ship a NaN, that the page's JavaScript
 retrieval returns identical results to the Python it duplicates, that the
 headline figures are derived rather than transcribed.

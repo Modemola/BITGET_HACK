@@ -199,3 +199,35 @@ def test_documented_hedge_figure_matches_the_data(data, doc, pattern, instrument
     assert documented == pytest.approx(expected, abs=tol), (
         f"{doc} says {match.group(0)!r} but {instrument}.{field} is now {expected:.4g}"
     )
+
+
+def test_the_advertised_test_count_is_the_real_one():
+    """The submission tells judges how many tests there are.
+
+    It has gone stale twice -- 74 in three places while the suite had grown past
+    180 -- and a reviewer who runs `pytest` and sees a different number has been
+    given a reason to doubt every other figure in the document. So the count is
+    collected rather than remembered.
+    """
+    import subprocess
+
+    out = subprocess.run(
+        [sys.executable, "-m", "pytest", "--collect-only", "-q",
+         "--no-header", "-p", "no:cacheprovider", str(ROOT / "tests")],
+        capture_output=True, text=True, encoding="utf-8", cwd=ROOT,
+    ).stdout
+    match = re.search(r"(\d+) tests? collected", out)
+    assert match, f"could not read a collected count from pytest:\n{out[-400:]}"
+    collected = int(match.group(1))
+
+    for doc, pattern in (("docs/SUBMISSION.md", r"\*\*(\d+) tests\*\*"),
+                         ("docs/SUBMISSION.md", r"\| Test suite \((\d+)\) \|"),
+                         ("docs/SUBMISSION.md", r"all (\d+) tests\."),
+                         ("CLAUDE.md", r"python -m pytest -q\s+# (\d+) tests"),
+                         ("README.md", r"python -m pytest -q\s+# (\d+) tests")):
+        text = (ROOT / doc).read_text(encoding="utf-8")
+        found = re.search(pattern, text)
+        assert found, f"{doc} no longer states a test count matching /{pattern}/"
+        assert int(found.group(1)) == collected, (
+            f"{doc} claims {found.group(1)} tests but {collected} are collected"
+        )
