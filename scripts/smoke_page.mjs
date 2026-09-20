@@ -100,6 +100,22 @@ const report = {
     const ch = parseFloat(String(el.style.width).replace("ch", ""));
     return { value: el.value, chars: el.value.length, width: el.style.width, ch };
   })(),
+  // What a reader actually sees. Two tells were in the copy: em dashes used as
+  // prose punctuation, and a file path offered as provenance to someone who has
+  // no checkout to open it in.
+  copy: (() => {
+    // textContent on <body> includes the page's own <script> source, which is
+    // full of the em dash the formatters return for a null. Read only what is
+    // actually shown.
+    const visible = d.body.cloneNode(true);
+    visible.querySelectorAll("script, style").forEach((n) => n.remove());
+    const text = visible.textContent.replace(/\s+/g, " ");
+    return {
+      emDashes: [...text.matchAll(/.{0,44}—.{0,44}/g)].map((m) => m[0].trim()),
+      filePaths: [...text.matchAll(/[\w./-]*\w+\.(?:md|py|json|mjs|html|toml)/g)]
+        .map((m) => m[0]),
+    };
+  })(),
   sectionNumbers: count(".sec-n"),
   tools: count(".tools a"),
   deadLinks: [...d.querySelectorAll('.tools a[href^="#"]')]

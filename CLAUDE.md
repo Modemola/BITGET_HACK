@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 208 tests
+python -m pytest -q                     # 209 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/make_images.py           # public/icon.svg -> og.png + icon-180.png
@@ -261,6 +261,16 @@ number flares once. Two things to know if you touch it. `scrollIntoView`'s
 going quiet (a 110ms debounce), not on `scrollend` — that event is still absent
 from Safari and did not fire for every scroll in testing, which left the cue to
 a timeout guessing at the arrival.
+
+**The copy has to sound like a person.** Two tells were in it. Em dashes used
+as prose punctuation, which read as machine-written at a glance; a comma, a
+colon or a full stop is almost always the better mark anyway. And a file path
+(`docs/FINDINGS.md`) offered to a reader as provenance when they have no
+checkout to open it in - that one links to the research itself now. The em dash
+keeps exactly one job: the placeholder a formatter returns for a value that
+could not be computed. `test_page_runtime.py` reads the rendered text with
+`<script>` and `<style>` stripped - body `textContent` otherwise includes the
+page's own source, which is full of that placeholder - and fails on either tell.
 
 **A signed figure gets a diverging bar.** Distance from centre is the magnitude,
 side of centre is the sign. `test_page_runtime.py` checks both against the number

@@ -541,6 +541,11 @@ td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;
 .pill.good{background:var(--ok-soft);color:var(--ok)}
 @keyframes flash{ 0%{background:var(--lit-soft)} 100%{background:transparent} }
 .flash{animation:flash .9s var(--ease-out)}
+/* Provenance link. The note used to name a file path, which is a thing a
+   reader of the page cannot open; this points at the research itself. */
+.prov{color:var(--lit);text-decoration:underline;text-underline-offset:3px;
+  text-decoration-thickness:1px}
+.prov:hover{text-decoration-thickness:2px}
 .note{font-size:var(--t-small);color:var(--faint);margin-top:var(--s4);
   max-width:var(--measure);line-height:1.5}
 
@@ -798,10 +803,10 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d01" role="region" aria-label="Closure window — detail">
+    <div class="tool-detail" id="tool-d01" role="region" aria-label="Closure window detail">
       <div class="tool-detail-in">
         <p class="td-what">Classifies every hour into one of four regimes from the NYSE and CME Globex calendars, then counts the hours until each venue reopens.</p>
-        <p class="td-why">Tells you how long your position is quoted by a single venue before you can act on it again — the number the rest of the desk is conditioned on.</p>
+        <p class="td-why">Tells you how long your position is quoted by a single venue before you can act on it again. Every other number here is conditioned on it.</p>
       </div>
     </div>
   </div>
@@ -811,7 +816,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d02" role="region" aria-label="Premium verdict — detail">
+    <div class="tool-detail" id="tool-d02" role="region" aria-label="Premium verdict detail">
       <div class="tool-detail-in">
         <p class="td-what">Splits the closure of the rToken–fair value gap into the leg you can trade and the leg you cannot, then nets the result against costs.</p>
         <p class="td-why">Almost always answers no, and shows the working. This is the one panel built to argue with you rather than agree.</p>
@@ -824,7 +829,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d03" role="region" aria-label="Drift distribution — detail">
+    <div class="tool-detail" id="tool-d03" role="region" aria-label="Drift distribution detail">
       <div class="tool-detail-in">
         <p class="td-what">Empirical distribution of divergence by elapsed blackout hour, drawn as quartile and 5–95 bands rather than a single line.</p>
         <p class="td-why">Lets you size against the spread of outcomes instead of the average, and the band widens visibly as the window runs on.</p>
@@ -837,10 +842,10 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d04" role="region" aria-label="Historical analogues — detail">
+    <div class="tool-detail" id="tool-d04" role="region" aria-label="Historical analogues detail">
       <div class="tool-detail-in">
         <p class="td-what">Weighted nearest-neighbour retrieval over past windows, matched only on features knowable before the close so nothing leaks from the future.</p>
-        <p class="td-why">Returns a distribution of real outcomes you can read yourself — including the worst point each one reached, not just where it ended.</p>
+        <p class="td-why">Returns a distribution of real outcomes you can read yourself, including the worst point each one reached, not just where it ended.</p>
       </div>
     </div>
   </div>
@@ -850,7 +855,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d05" role="region" aria-label="Exposure — detail">
+    <div class="tool-detail" id="tool-d05" role="region" aria-label="Exposure detail">
       <div class="tool-detail-in">
         <p class="td-what">Breaks your position down by regime across the coming window and prices the typical, 95th-percentile and worst observed move against it.</p>
         <p class="td-why">Turns the percentages above into your own dollars. Type a real position and every figure below recomputes.</p>
@@ -863,7 +868,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d06" role="region" aria-label="Scheduled events — detail">
+    <div class="tool-detail" id="tool-d06" role="region" aria-label="Scheduled events detail">
       <div class="tool-detail-in">
         <p class="td-what">Checks FOMC decisions, parsed from the Federal Reserve's own calendar, against the window you are about to hold through.</p>
         <p class="td-why">Establishes what weekend risk is not: across every blackout in the sample, no scheduled rate decision has ever landed inside one. The panel itself carries the count.</p>
@@ -876,7 +881,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
       <span>What it does</span>
       <svg class="chev" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
-    <div class="tool-detail" id="tool-d07" role="region" aria-label="Hedge menu — detail">
+    <div class="tool-detail" id="tool-d07" role="region" aria-label="Hedge menu detail">
       <div class="tool-detail-in">
         <p class="td-what">Prices the instruments still quoting while equities and futures are shut, reporting the rolling range of each correlation beside its mean.</p>
         <p class="td-why">Shows why the obvious hedges do not hold: every candidate here changes sign somewhere in the sample, and the cost is stated in dollars.</p>
@@ -898,7 +903,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
   <div class="scrub-wrap">
     <label class="scrub-hint" for="scrub">
       <span class="grab">&#8596;</span>
-      Drag to move through the week &mdash; every panel below recomputes for that moment
+      Drag to move through the week. Every panel below recomputes for that moment
     </label>
     <div class="scrub">
       <button type="button" id="scrub-live" class="scrub-live" data-live="true">
@@ -914,9 +919,9 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
   </div>
   <div class="legend">
     <span><i class="swatch" style="background:var(--open)"></i>NYSE cash session</span>
-    <span><i class="swatch" style="background:var(--half)"></i>Globex only &mdash; a futures reference exists</span>
-    <span><i class="swatch void"></i>Blackout &mdash; no reference price anywhere</span>
-    <span><i class="swatch" style="background:var(--lit)"></i>rToken &mdash; quoting throughout</span>
+    <span><i class="swatch" style="background:var(--half)"></i>Globex only: a futures reference exists</span>
+    <span><i class="swatch void"></i>Blackout: no reference price anywhere</span>
+    <span><i class="swatch" style="background:var(--lit)"></i>rToken: quoting throughout</span>
   </div>
 </div>
 
@@ -928,12 +933,14 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
     <h3 class="enter-soft">That weekend premium is <em>not</em> free money.</h3>
     <p>Across <span class="num" id="v-weekends">&mdash;</span> weekend blackouts, the gap between
        rToken and fair value closed almost entirely because the <em>reference</em> caught up
-       once futures reopened &mdash; not because the token corrected. The token leg, the only
+       once futures reopened, not because the token corrected. The token leg, the only
        one you can actually trade, contributes almost nothing. Fading it is a coin flip that
        loses to fees.</p>
     <dl class="evidence" id="evidence"></dl>
     <p class="note">Measured on NVDAx hourly bars, <span id="cov-range"></span>.
-       Method and every variant tested in <code>docs/FINDINGS.md</code>.</p>
+       Method, and every variant we tested, is in
+       <a class="prov" href="https://github.com/Modemola/BITGET_HACK/blob/main/docs/FINDINGS.md">the
+       full research</a>.</p>
   </div>
 </section>
 
@@ -959,7 +966,7 @@ footer{margin-top:var(--s7);padding-top:var(--s5);border-top:1px solid var(--rul
     <span class="sec-n">04</span><h2>Weekends that looked like this one</h2>
     <p>Set the conditions you are walking into. The desk retrieves the closest
        matches from <span class="num" id="an-total">&mdash;</span> past blackouts and shows
-       how each resolved &mdash; not a forecast, a distribution you can read yourself.</p>
+       how each resolved. Not a forecast, a distribution you can read yourself.</p>
   </div>
   <div class="panel">
     <div class="controls">
@@ -1614,7 +1621,7 @@ function drawDrift(){
   document.getElementById("drift-note").textContent =
     "By hour " + last.elapsed_h_from + ", half of weekends sat between " + sgn(last.q25) +
     " and " + sgn(last.q75) + ", and one in twenty beyond " + sgn(last.q95) +
-    ". Based on " + last.n_windows + " weekends — a thin sample, and the width of the band reflects it.";
+    ". Based on " + last.n_windows + " weekends. A thin sample, and the width of the band reflects it.";
 }
 
 /* ---- analogue retrieval ----------------------------------------------- */
@@ -1739,7 +1746,7 @@ function drawAnalogues(){
     document.getElementById("an-note").textContent =
       "Matched on realised volatility, premium at the close, and a " + hours +
       "-hour window. The worst point reached is larger than where these weekends " +
-      "ended — the drawdown you sit through is not the number you wake up to. " +
+      "ended. The drawdown you sit through is not the number you wake up to. " +
       "Five matches from " + rows.length + " windows is a small set; read the range, not the middle.";
   }
 
@@ -1782,7 +1789,7 @@ function drawExposure(){
     // --open and --half are both light; only the void needs light text on it.
     seg.style.color = isBlackout(k) ? "var(--ink)" : "var(--void)";
     seg.textContent = share > 0.09 ? hours + "h" : "";
-    seg.title = (NAME[k] || k) + " — " + hours + "h";
+    seg.title = (NAME[k] || k) + ", " + hours + "h";
     bar.appendChild(seg);
 
     var item = document.createElement("span");
@@ -1954,7 +1961,7 @@ function cannedAnswers(){
     "comes from the token moving; " + pct(1 - v.token_share_6h, 0) + " is fair value " +
     "catching up once the reference reopens. The reference was stale, not the token.",
 
-    "Fading it hit " + pct(v.hit_rate, 1) + " — a coin flip — and returns " +
+    "Fading it hit " + pct(v.hit_rate, 1) + ", a coin flip, and returns " +
     sgn(v.net_at_10bp, 3) + " per weekend after 10bp of round-trip costs. " +
     "Measured over " + s.n_windows + " weekend blackouts."
   ];
@@ -2006,8 +2013,8 @@ function showAskElsewhere(){
     '<p class="ask-elsewhere">Those answers are computed directly from the ' +
     'measurements on this page, which is why they move when you change the ' +
     'position size above. Free-form questions need the model, and that runtime ' +
-    'exists only inside the artifact — ' +
-    '<a href="' + ARTIFACT_URL + '">open the conversational version</a>.</p>';
+    'exists only inside the artifact. ' +
+    '<a href="' + ARTIFACT_URL + '">Open the conversational version</a>.</p>';
 
   /* Independent toggles. These are answers, not navigation: a reader holding
      two of them side by side to compare should not have the first shut on
@@ -2079,7 +2086,7 @@ function initAsk(){
         out.textContent = res.text;
       })["catch"](function(err){
         out.textContent = (err && err.code === "rate_limited")
-          ? "Rate limited — wait a moment and ask again."
+          ? "Rate limited. Wait a moment and ask again."
           : "Could not reach the model. Every measurement above still stands.";
       }).then(function(){
         send.disabled = false;

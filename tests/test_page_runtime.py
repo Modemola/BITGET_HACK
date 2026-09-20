@@ -223,3 +223,25 @@ def test_the_position_field_fits_the_figure_it_states(rendered):
         f"the field is {field['ch']}ch wide but holds {field['chars']} characters "
         f"({field['value']!r}) - the figure in the heading is being clipped"
     )
+
+def test_the_copy_reads_like_a_person_wrote_it(rendered):
+    """Two tells, checked against the rendered text rather than the source.
+
+    Em dashes strewn through prose, and a file path handed to a reader as
+    provenance when they have no checkout to open it in. The dash also has a
+    legitimate job here - it is what a formatter returns for a value that could
+    not be computed - so a hit is either prose to rewrite or a null in the
+    payload, and both are worth knowing about.
+    """
+    dashes = rendered["copy"]["emDashes"]
+    assert not dashes, (
+        "em dashes in the rendered copy. If a hit is prose, rewrite it; if it "
+        "is a lone placeholder, the payload carries a null that should not be "
+        "there. Hits: " + " | ".join(dashes)
+    )
+
+    paths = rendered["copy"]["filePaths"]
+    assert not paths, (
+        "file paths shown to a reader who has no checkout to open them in; "
+        f"link to the thing itself instead. Hits: {paths}"
+    )
