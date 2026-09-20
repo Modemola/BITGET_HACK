@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-09-15T14:17:05+00:00",
+ "generated_at": "2026-09-20T08:42:17+00:00",
  "coverage": {
   "symbol": "NVDAx",
   "start": "2026-03-01T00:00:00+00:00",
@@ -1024,51 +1024,17 @@
    "end": 1823810400,
    "hours": 49.0,
    "regime": "WEEKEND_BLACKOUT"
+  },
+  {
+   "start": 1824238800,
+   "end": 1824415200,
+   "hours": 49.0,
+   "regime": "WEEKEND_BLACKOUT"
   }
  ],
  "regime_runs": [
   {
-   "start": 1789480800,
-   "end": 1789502400,
-   "regime": "US_CASH"
-  },
-  {
-   "start": 1789502400,
-   "end": 1789567200,
-   "regime": "WEEKNIGHT"
-  },
-  {
-   "start": 1789567200,
-   "end": 1789588800,
-   "regime": "US_CASH"
-  },
-  {
-   "start": 1789588800,
-   "end": 1789653600,
-   "regime": "WEEKNIGHT"
-  },
-  {
-   "start": 1789653600,
-   "end": 1789675200,
-   "regime": "US_CASH"
-  },
-  {
-   "start": 1789675200,
-   "end": 1789740000,
-   "regime": "WEEKNIGHT"
-  },
-  {
-   "start": 1789740000,
-   "end": 1789761600,
-   "regime": "US_CASH"
-  },
-  {
-   "start": 1789761600,
-   "end": 1789765200,
-   "regime": "WEEKNIGHT"
-  },
-  {
-   "start": 1789765200,
+   "start": 1789891200,
    "end": 1789941600,
    "regime": "WEEKEND_BLACKOUT"
   },
@@ -1206,14 +1172,54 @@
    "start": 1791230400,
    "end": 1791295200,
    "regime": "WEEKNIGHT"
+  },
+  {
+   "start": 1791295200,
+   "end": 1791316800,
+   "regime": "US_CASH"
+  },
+  {
+   "start": 1791316800,
+   "end": 1791381600,
+   "regime": "WEEKNIGHT"
+  },
+  {
+   "start": 1791381600,
+   "end": 1791403200,
+   "regime": "US_CASH"
+  },
+  {
+   "start": 1791403200,
+   "end": 1791468000,
+   "regime": "WEEKNIGHT"
+  },
+  {
+   "start": 1791468000,
+   "end": 1791489600,
+   "regime": "US_CASH"
+  },
+  {
+   "start": 1791489600,
+   "end": 1791554400,
+   "regime": "WEEKNIGHT"
+  },
+  {
+   "start": 1791554400,
+   "end": 1791576000,
+   "regime": "US_CASH"
+  },
+  {
+   "start": 1791576000,
+   "end": 1791579600,
+   "regime": "WEEKNIGHT"
+  },
+  {
+   "start": 1791579600,
+   "end": 1791705600,
+   "regime": "WEEKEND_BLACKOUT"
   }
  ],
  "events": [
-  {
-   "ts": 1789581600,
-   "label": "FOMC rate decision",
-   "importance": "high"
-  },
   {
    "ts": 1793210400,
    "label": "FOMC rate decision",
