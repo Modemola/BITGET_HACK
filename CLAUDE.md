@@ -41,7 +41,7 @@ prevent.
 
 ```bash
 pip install -e ".[dev]"                 # editable install; no sys.path hacks needed
-python -m pytest -q                     # 195 tests
+python -m pytest -q                     # 196 tests
 python -m blackout.build                # analytics -> web/data/desk.json
 python scripts/build_page.py            # desk.json + template -> web/desk.html
 python scripts/analyse_basis.py         # reproduce the research finding
@@ -235,6 +235,18 @@ browser.
 was a fixed `5.2ch` and clipped its own default: the heading read "$250,00"
 while every number under it was computed from $250,000. `initPosition` sets the
 width from the value's length.
+
+**Navigating to a section is a journey, not a cut.** The tool rail used to
+teleport — no travel, no arrival, nothing to say the page had moved rather than
+been replaced. Native `scroll-behavior:smooth` does the travel, because it stays
+interruptible by the reader's own wheel where a hand-rolled rAF scroll does not.
+The destination then marks itself: an amber rule sweeps its top edge and its
+number flares once. Two things to know if you touch it. `scrollIntoView`'s
+`behavior:"auto"` defers to the CSS value, so the reduced-motion path must say
+`"instant"` explicitly or it animates anyway. And the cue fires on the scroll
+going quiet (a 110ms debounce), not on `scrollend` — that event is still absent
+from Safari and did not fire for every scroll in testing, which left the cue to
+a timeout guessing at the arrival.
 
 **A signed figure gets a diverging bar.** Distance from centre is the magnitude,
 side of centre is the sign. `test_page_runtime.py` checks both against the number

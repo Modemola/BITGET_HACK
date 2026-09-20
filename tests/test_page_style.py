@@ -422,3 +422,34 @@ def test_the_page_cannot_scroll_sideways(style):
         "html no longer clips horizontal overflow, so the lattice's bleed will "
         "make the whole page scroll sideways again"
     )
+
+
+def test_the_rail_travels_rather_than_teleports(style, page):
+    """Clicking a tool used to jump with no travel and no arrival.
+
+    Three parts have to stay together or the effect is worse than none: the
+    scroll has to animate, the destination has to mark itself so the eye knows
+    where it landed, and both have to disappear for a reader who has asked for
+    less motion.
+    """
+    assert re.search(r"html\{[^}]*scroll-behavior:\s*smooth", style), \
+        "the rail teleports again; html no longer scrolls smoothly"
+
+    assert "@keyframes arrive-sweep" in style, "the arrival sweep is gone"
+    assert "@keyframes arrive-mark" in style, "the arrival mark is gone"
+    assert ".arrived::before" in style, "nothing draws the arrival"
+
+    # The cue must not be able to rest as a solid bar across a section.
+    rest = re.search(r"\.arrived::before\{([^}]*)\}", style)
+    assert rest and "transform:scaleX(0)" in rest.group(1).replace(" ", ""), \
+        "the arrival bar has no hidden resting state; with animations off it " \
+        "would sit permanently across the section"
+
+    reduced = re.findall(r"@media\s*\(prefers-reduced-motion:reduce\)\s*\{(.*?)\n\}",
+                         style, re.S)
+    assert any("scroll-behavior:auto" in block for block in reduced), \
+        "smooth scrolling is not switched off for reduced motion"
+
+    # And the script must not add the cue when the reader has asked for stillness.
+    assert "prefers-reduced-motion" in page and "initRail" in page, \
+        "the rail script no longer checks the motion preference"

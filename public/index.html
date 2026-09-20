@@ -263,9 +263,19 @@ header{padding-block:var(--s7) var(--s6)}
    stretch across the row beneath: seven is prime, so some row is always short,
    and 4+3 is the split that leaves both rows full and the cards legible. */
 .tools a{flex:1 1 220px;background:var(--surface);padding:var(--s4);
-  text-decoration:none;color:inherit;transition:background .15s ease}
+  text-decoration:none;color:inherit;position:relative;
+  transition:background .15s ease,transform .12s var(--ease-out)}
 .tools a:hover,.tools a:focus-visible{background:var(--raised);outline:none}
 .tools a:focus-visible{box-shadow:inset 0 0 0 2px var(--lit)}
+/* The card acknowledges the press before the page starts moving, so the travel
+   reads as a consequence of the click rather than an unexplained jump. */
+.tools a:active{transform:translateY(1px)}
+/* A rule grows along the top edge on hover: the same amber mark that will greet
+   you at the destination, so the two ends of the journey are visibly linked. */
+.tools a::before{content:"";position:absolute;inset:0 auto auto 0;height:2px;
+  width:100%;background:var(--lit);transform:scaleX(0);transform-origin:left;
+  transition:transform .28s var(--ease-out)}
+.tools a:hover::before,.tools a:focus-visible::before{transform:scaleX(1)}
 .tn{display:block;font-family:var(--mono);font-size:var(--t-micro);letter-spacing:.14em;
   color:var(--lit);margin-bottom:6px}
 .th{display:block;font-weight:600;font-size:var(--t-meta);line-height:1.25;
@@ -273,8 +283,43 @@ header{padding-block:var(--s7) var(--s6)}
 .tq{display:block;font-size:var(--t-small);color:var(--muted);line-height:1.35}
 @media (prefers-reduced-motion:reduce){ .tools a{transition:none} }
 
+/* --- travelling to a section ---------------------------------------------
+   Clicking the rail used to teleport: no travel, no arrival, nothing to tell
+   you the page had moved rather than been replaced. Native smooth scrolling
+   does the travel -- it is interruptible by the reader's own wheel, which a
+   hand-rolled rAF scroll usually is not -- and the destination then marks
+   itself so the eye knows where it landed.
+-------------------------------------------------------------------------- */
+html{scroll-behavior:smooth}
 /* Anchored sections must not land under the top of the viewport. */
-#closure,#verdict,#drift,#analogues,#exposure,#calendar,#hedges{scroll-margin-top:18px}
+#closure,#verdict,#drift,#analogues,#exposure,#calendar,#hedges{scroll-margin-top:var(--s5)}
+
+/* The arrival. A rule sweeps the width of the section that was asked for and
+   fades out, and its number flares once. Both are pure decoration on the
+   accent -- no content moves, and nothing is hidden if the animation never
+   runs. `.arrived` is added on scroll-end and removed when the run finishes. */
+.arrived{position:relative}
+/* scaleX(0) at rest so that if the animation is ever suppressed -- reduced
+   motion cancels it with `animation:none` -- the bar is absent rather than a
+   permanent amber rule across the section. Safe to hide: it is a ::before
+   carrying no content. */
+.arrived::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;
+  background:var(--lit);transform:scaleX(0);transform-origin:left;
+  pointer-events:none;z-index:2;
+  animation:arrive-sweep .8s var(--ease-out) both}
+@keyframes arrive-sweep{
+  0%{transform:scaleX(0);opacity:1}
+  50%{transform:scaleX(1);opacity:1}
+  100%{transform:scaleX(1);opacity:0}
+}
+.arrived .sec-n{animation:arrive-mark .8s var(--ease-out) both}
+@keyframes arrive-mark{
+  0%{opacity:.85}
+  25%{opacity:1;text-shadow:0 0 12px color-mix(in srgb,var(--lit) 75%,transparent)}
+  100%{opacity:.85;text-shadow:none}
+}
+
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
 
 .week{margin-block:0;border-block:1px solid var(--rule);
   padding-block:var(--s6) var(--s5);background:transparent}
@@ -1933,6 +1978,67 @@ function initPosition(){
   fit();
 }
 
+/* ---- travelling to a section ------------------------------------------- */
+/* The CSS does the scrolling. This only marks the arrival, and the whole
+   difficulty is knowing when the scroll has finished: `scrollend` is not in
+   Safari yet, so fall back to watching for the scroll going quiet. */
+function initRail(){
+  var still = window.matchMedia
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function mark(target){
+    if (still) return;                       // no cue where there is no travel
+    target.classList.remove("arrived");
+    void target.offsetWidth;                 // restart the run on a repeat click
+    target.classList.add("arrived");
+    window.setTimeout(function(){ target.classList.remove("arrived"); }, 900);
+  }
+
+  /* Fires once the page has stopped moving. Watching the scroll go quiet
+     rather than listening for `scrollend`: that event is still missing from
+     Safari, and where it does exist it did not fire for every scroll in
+     testing, which left the cue to a timeout that guessed at the arrival
+     instead of observing it. Each scroll event pushes the deadline out, so
+     this lands ~110ms after the real last frame -- and a click that moves the
+     page nowhere still resolves, because the timer is armed immediately. */
+  function whenSettled(run){
+    var timer = null;
+    function quiet(){
+      window.clearTimeout(timer);
+      timer = window.setTimeout(function(){
+        window.removeEventListener("scroll", quiet);
+        run();
+      }, 110);
+    }
+    window.addEventListener("scroll", quiet, { passive: true });
+    quiet();
+  }
+
+  document.querySelectorAll('.tools a[href^="#"]').forEach(function(link){
+    link.addEventListener("click", function(evt){
+      var target = document.getElementById(link.getAttribute("href").slice(1));
+      if (!target) return;                   // let the browser handle it
+      evt.preventDefault();
+
+      var fired = false;
+      whenSettled(function(){
+        if (fired) return;
+        fired = true;
+        mark(target);
+      });
+
+      // "instant", not "auto": per spec `auto` defers to the CSS
+      // scroll-behavior, which is smooth, so it would animate anyway.
+      target.scrollIntoView({ behavior: still ? "instant" : "smooth",
+                              block: "start" });
+      // Keep the address bar honest without triggering a second jump.
+      if (window.history && history.replaceState){
+        history.replaceState(null, "", link.getAttribute("href"));
+      }
+    });
+  });
+}
+
 buildLattice();
 drawTimeline();
 drawEvidence();
@@ -1945,6 +2051,7 @@ drawFooter();
 tick();
 initScrub();
 initPosition();
+initRail();
 setInterval(tick, 30000);
 initAsk();
 })();
