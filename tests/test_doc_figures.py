@@ -83,8 +83,6 @@ CLAIMS: list[tuple[str, str, str, str, float]] = [
 
     # FORM_ANSWER.md is the text pasted into the judges' form verbatim, so it is
     # the single document where a stale figure is most expensive. Patterns use
-    # \s+ across likely line breaks, because re-wrapping a paragraph is editing
-    # prose, not changing a number, and should not read as a stale figure.
     ("docs/FORM_ANSWER.md", r"Across (\d+) weekends the gap narrowed",
      "summary.n_windows", "int", 0),
     ("docs/FORM_ANSWER.md", r"narrowed at the reopen\s+(\d+)% of the time",
@@ -158,7 +156,11 @@ def _parse(kind: str, text: str) -> float:
 @pytest.mark.parametrize("doc,pattern,path,kind,tol", CLAIMS,
                          ids=[f"{d.split('/')[-1]}:{p[:38]}" for d, p, _, _, _ in CLAIMS])
 def test_documented_figure_matches_the_data(data, doc, pattern, path, kind, tol):
-    text = (ROOT / doc).read_text(encoding="utf-8")
+    # Collapse whitespace before matching. A pinned sentence re-wrapping across
+    # a line break is prose editing, not a changed number, and half these
+    # guards broke that way before the patterns stopped caring where the
+    # newlines fall.
+    text = re.sub(r"\s+", " ", (ROOT / doc).read_text(encoding="utf-8"))
     match = re.search(pattern, text)
     assert match, (
         f"{doc} no longer contains the sentence this guard anchors on "
